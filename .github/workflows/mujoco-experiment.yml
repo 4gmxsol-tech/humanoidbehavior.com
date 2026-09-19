@@ -19,8 +19,29 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r simulation/requirements.txt
-      - run: echo '{"seeds":"${{ inputs.seeds }}","seconds":${{ inputs.seconds}}}' | python simulation/experiment_manager.py | tee mujoco-experiment.json
+      - name: Run and validate experiment
+        env:
+          EXPERIMENT_SEEDS: ${{ inputs.seeds }}
+          EXPERIMENT_SECONDS: ${{ inputs.seconds }}
+        run: |
+          echo "Commit: $(git rev-parse HEAD)"
+          echo "Seeds: $EXPERIMENT_SEEDS"
+          echo "Seconds: $EXPERIMENT_SECONDS"
+          printf '{"seeds":"%s","seconds":%s}\n' "$EXPERIMENT_SEEDS" "$EXPERIMENT_SECONDS" | python simulation/experiment_manager.py | tee mujoco-experiment.json
+          python - <<'PY'
+          import json
+          with open("mujoco-experiment.json", encoding="utf-8") as f:
+              report = json.load(f)
+          expected = len(report["seeds"]) * len(report["policies"])
+          actual = len(report["rawResults"])
+          assert report["measured"] is True, "Expected measured=true"
+          assert report["engine"] == "MuJoCo", "Expected MuJoCo engine"
+          assert report["validation"]["passed"] is True, "Experiment validation failed"
+          assert actual == expected, f"Expected {expected} raw results, got {actual}"
+          print(f"Validated experiment: {actual}/{expected} runs")
+          PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: mujoco-experiment-${{ github.run_number }}
           path: |
