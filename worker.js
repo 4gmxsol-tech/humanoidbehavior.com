@@ -45,8 +45,8 @@ async function executeG1BehaviorComparison(job){
  const versions=p.versions||[],seeds=(p.seeds||["42","1337"]).map(String),policies=(p.policies||["A","B"]).map(String),rows=[];
  if(versions.length!==2)throw new Error("G1 comparison requires two versions");
  for(const version of versions)for(const seed of seeds)for(const policy of policies){
-  const rr=await runProcess({seconds:p.seconds,seed,policy,behaviorVersion:version},"simulation/robot_behavior_worker.py");
-  rr.behaviorVersion=version;rr.seed=String(seed);rr.policy=policy;rr.robotId="unitree_g1";rr.behaviorId="pick-place";rr.engine="MuJoCo";rr.measured=true;rows.push(rr);await progress(job,rows.length,seeds.length*policies.length);await progress(job,rows.length,seeds.length*policies.length*2);
+  const rr=await runProcess({seconds:p.seconds,seed,policy,behaviorVersion:version,objectMassKg:p.objectMassKg,objectSizeM:p.objectSizeM,targetDistanceM:p.targetDistanceM},"simulation/robot_behavior_worker.py");
+  rr.behaviorVersion=version;rr.seed=String(seed);rr.policy=policy;rr.robotId="unitree_g1";rr.behaviorId="pick-place";rr.engine="MuJoCo";rr.measured=true;rows.push(rr);await progress(job,rows.length,seeds.length*policies.length*2);
  }
  const pairs=[];for(const seed of seeds)for(const policy of policies){const a=rows.find(r=>r.behaviorVersion===versions[0]&&r.seed===seed&&r.policy===policy),b=rows.find(r=>r.behaviorVersion===versions[1]&&r.seed===seed&&r.policy===policy);if(a&&b)pairs.push({seed,policy,taskSuccessDelta:Number(b.taskSuccess)-Number(a.taskSuccess),completionTimeDelta:Number(b.completionTime||0)-Number(a.completionTime||0),controlCostDelta:Number(b.controlCost||0)-Number(a.controlCost||0),collisionCountDelta:Number(b.collisionCount||0)-Number(a.collisionCount||0),maxTiltRadDelta:Number(b.maxTiltRad||0)-Number(a.maxTiltRad||0)})}
  const stats=k=>{const v=pairs.map(x=>x[k]),n=v.length,m=n?v.reduce((a,b)=>a+b,0)/n:0,sd=n>1?Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1)):0,half=n?1.96*sd/Math.sqrt(n):0;return{n,mean:m,stddev:sd,ci95:{low:m-half,high:m+half}}};
