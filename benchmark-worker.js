@@ -1,0 +1,2 @@
+const fs=require("fs"),sim=require("./simulation-benchmark");
+let body="";process.stdin.on("data",d=>body+=d);process.stdin.on("end",()=>{try{const job=JSON.parse(body||"{}");process.stdout.write(JSON.stringify(sim.run(job)))}catch(e){process.stderr.write(e.message);process.exit(1)}});
