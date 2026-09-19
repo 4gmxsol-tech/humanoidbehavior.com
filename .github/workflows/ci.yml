@@ -20,6 +20,8 @@ jobs:
       - run: node --check db.js
       - run: node --check worker.js
       - run: node api.test.js
+      - run: node --check worker.js
+      - run: node evaluation.test.js
       - run: node -e "const d=require('./data/behaviors.json'); if(!Array.isArray(d)||d.length<4) process.exit(1); for(const b of d){if(!b.id||!Array.isArray(b.steps)||!b.metrics) process.exit(1)}"
       - name: Start API and smoke test
         run: |
