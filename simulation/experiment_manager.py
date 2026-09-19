@@ -1,5 +1,5 @@
 import json, math, os, statistics, sys
-from compare_mujoco import run
+from mujoco_worker import run
 
 POLICIES = [
     {"name": "policy-a-stabilizer", "kp": 38.0, "kd": 8.0},
