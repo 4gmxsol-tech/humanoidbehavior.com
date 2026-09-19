@@ -1,0 +1,5 @@
+{
+  "version":"humanoidbehavior.simulation.v1",
+  "job":{"behaviorId":"pick-place","model":"baseline-policy","environment":"humanoid-lab-v1","seed":"demo-1"},
+  "result":{"engine":"string","simulation":true,"measured":true,"metrics":{"successRate":"number","completionTimeSec":"number","collisions":"number"}}
+}
