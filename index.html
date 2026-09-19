@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="HumanoidBehavior — build, test and benchmark behaviors for humanoid robots.">
+  <title>HumanoidBehavior — Robot Behavior Infrastructure</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="/">Humanoid<span>Behavior</span></a>
+  <nav>
+    <a href="#behaviors">Behaviors</a>
+    <a href="#benchmark">Benchmark</a>
+    <a href="#developers">Developers</a>
+  </nav>
+  <a class="nav-cta" href="#early-access">Get early access</a>
+</header>
+
+<main>
+<section class="hero">
+  <div class="eyebrow">ROBOT BEHAVIOR INFRASTRUCTURE</div>
+  <h1>Build behaviors.<br><span>Measure what robots can do.</span></h1>
+  <p class="hero-copy">HumanoidBehavior is an engineering platform for designing, testing and benchmarking behaviors for humanoid robots — from simple manipulation to long-horizon tasks.</p>
+  <div class="actions">
+    <a class="button primary" href="#behaviors">Explore behaviors</a>
+    <a class="button secondary" href="#benchmark">View benchmark</a>
+  </div>
+  <div class="hero-note"><span class="pulse"></span> Built for robotics engineers, researchers and AI teams.</div>
+</section>
+
+<section id="behaviors" class="section">
+  <div class="section-head">
+    <div><div class="eyebrow">BEHAVIOR LIBRARY</div><h2>A shared language for robot tasks.</h2></div>
+    <p>Start from reusable task specifications and make behavior development measurable.</p>
+  </div>
+  <div class="grid">
+    <article class="card"><div class="icon">↗</div><h3>Pick &amp; Place</h3><p>Locate, grasp and place an object at a target position.</p><div class="tags"><span>Manipulation</span><span>Core</span></div></article>
+    <article class="card"><div class="icon">⇥</div><h3>Open a Door</h3><p>Approach, interact with a handle and pass through safely.</p><div class="tags"><span>Whole-body</span><span>Interaction</span></div></article>
+    <article class="card"><div class="icon">◎</div><h3>Follow a Person</h3><p>Track a moving human while maintaining distance and avoiding obstacles.</p><div class="tags"><span>Navigation</span><span>Social</span></div></article>
+  </div>
+</section>
+
+<section id="benchmark" class="section dark">
+  <div class="section-head">
+    <div><div class="eyebrow">BENCHMARK</div><h2>Turn behavior into measurable results.</h2></div>
+    <p>Evaluate a behavior with repeatable metrics before deploying it to hardware.</p>
+  </div>
+  <div class="metrics">
+    <div><strong>94%</strong><span>Success rate</span></div>
+    <div><strong>8.2s</strong><span>Completion time</span></div>
+    <div><strong>1.4%</strong><span>Collision rate</span></div>
+    <div><strong>87%</strong><span>Recovery rate</span></div>
+  </div>
+  <div class="benchmark-card">
+    <div class="terminal-top"><span></span><span></span><span></span><b>behavior-run / pick-and-place</b></div>
+    <pre><code>$ hb benchmark run pick-and-place --model my-policy
+
+Initializing environment...
+Object detected       ✓
+Grasp                 ✓
+Transport             ✓
+Placement             ✓
+Verification          ✓
+
+RESULT  success=1  time=8.2s  collisions=0</code></pre>
+  </div>
+</section>
+
+<section id="developers" class="section">
+  <div class="section-head">
+    <div><div class="eyebrow">FOR DEVELOPERS</div><h2>Designed to fit the robotics stack.</h2></div>
+    <p>Begin with task specifications and benchmarks. Add simulation, APIs and hardware adapters as the platform grows.</p>
+  </div>
+  <div class="steps">
+    <div><b>01</b><h3>Define</h3><p>Describe the task, environment and success criteria.</p></div>
+    <div><b>02</b><h3>Run</h3><p>Execute the behavior in a controlled evaluation environment.</p></div>
+    <div><b>03</b><h3>Measure</h3><p>Track success, time, collisions and recovery.</p></div>
+    <div><b>04</b><h3>Improve</h3><p>Compare iterations and move validated behaviors toward hardware.</p></div>
+  </div>
+</section>
+
+<section id="early-access" class="cta">
+  <div class="eyebrow">EARLY ACCESS</div>
+  <h2>Help shape the behavior layer for humanoid robots.</h2>
+  <p>We are building the first version around real developer workflows.</p>
+  <a class="button primary" href="mailto:hello@humanoidbehavior.com?subject=HumanoidBehavior%20Early%20Access">Request early access</a>
+</section>
+</main>
+
+<footer><span>© 2026 HumanoidBehavior</span><span>Behavior • Benchmark • Robotics</span></footer>
+</body>
+</html>
