@@ -69,7 +69,10 @@ def manipulation(behavior,seed,seconds,policy):
     rng=seed01(seed); data.qpos[2]=1.08; data.qpos[3]=1.0
     data.qpos[4]=(rng-.5)*.02; data.qpos[5]=((rng*1.7)%1-.5)*.02
     obj=model.body("object").id; target=model.body("target").id
-    data.xpos[obj]=cfg["object"]; data.xpos[target]=cfg["target"]; mujoco.mj_forward(model,data)
+    obj_q=model.joint("object_free").qposadr[0]
+    data.qpos[obj_q:obj_q+3]=cfg["object"]
+    model.body_pos[target]=cfg["target"]
+    mujoco.mj_forward(model,data)
     qshould=model.joint("shoulder").qposadr[0]; qelbow=model.joint("elbow").qposadr[0]
     vshould=model.joint("shoulder").dofadr[0]; velbow=model.joint("elbow").dofadr[0]
     grabbed=False; released=False; success=False; complete=None; cost=0; max_tilt=0; min_h=99; collision=0
