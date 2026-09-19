@@ -16,4 +16,11 @@ GET /api/readiness</pre><p>Use readiness checks in production deployment monitor
 Isaac Lab
 Gazebo
 ROS 2
-HTTP robot gateway</pre><p>Workers connect these execution contracts to real simulation or hardware environments.</p></article></div></main></body></html>
+HTTP robot gateway</pre><p>Workers connect these execution contracts to real simulation or hardware environments.</p></article></div><section class="page"><div class="eyebrow">QUICKSTART</div><h2>Run your first benchmark</h2><p class="lead">Create an API key in Workspace, then call the benchmark endpoint.</p><pre class="code-block">curl -X POST https://your-domain.example/api/benchmark \
+  -H "Authorization: Bearer hb_live_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"behaviorId":"pick-place","completedSteps":["Perceive target object","Navigate to workspace","Reach and grasp","Transport object","Release at target","Verify placement"],"model":"my-policy"}'</pre><h2>Response</h2><pre class="code-block">{
+  "status": "passed",
+  "behaviorId": "pick-place",
+  "adapter": "spec-validator"
+}</pre></section></main></body></html>
