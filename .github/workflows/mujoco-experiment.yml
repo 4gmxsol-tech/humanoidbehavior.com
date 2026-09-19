@@ -1,0 +1,28 @@
+name: MuJoCo Experiment
+on:
+  workflow_dispatch:
+    inputs:
+      seeds:
+        description: Comma-separated reproducible seeds
+        required: true
+        default: "42,1337,2026,7,99"
+      seconds:
+        description: Simulation duration per run
+        required: true
+        default: "5"
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r simulation/requirements.txt
+      - run: echo '{"seeds":"${{ inputs.seeds }}","seconds":${{ inputs.seconds}}}' | python simulation/experiment_manager.py | tee mujoco-experiment.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mujoco-experiment-${{ github.run_number }}
+          path: |
+            mujoco-experiment.json
+            mujoco-experiment.md
