@@ -4,8 +4,10 @@ function ensure(){fs.mkdirSync(path.dirname(DATA),{recursive:true});if(!fs.exist
 function read(){ensure();return JSON.parse(fs.readFileSync(DATA,"utf8"))}
 function write(v){ensure();fs.writeFileSync(DATA,JSON.stringify(v,null,2))}
 async function init(){
+ if(db.mode()==="json"){const a=read();if(!a.length){const seed=require("./data/behaviors.json").map(p=>({...p,userId:"system",status:"published",visibility:"public",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),package:{...p,status:"published",visibility:"public"}}));write(seed)}}
  await db.query(`CREATE TABLE IF NOT EXISTS behaviors(id TEXT NOT NULL,version TEXT NOT NULL,user_id TEXT NOT NULL,name TEXT NOT NULL,description TEXT NOT NULL,visibility TEXT NOT NULL DEFAULT 'private',status TEXT NOT NULL DEFAULT 'draft',package JSONB NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),PRIMARY KEY(id,version));`);
  await db.query(`CREATE INDEX IF NOT EXISTS behaviors_visibility_idx ON behaviors(visibility,status);`);
+ if(db.mode()==="postgresql"){const n=await db.query("SELECT COUNT(*)::int AS count FROM behaviors");if(n.rows[0].count===0){const seed=require("./data/behaviors.json");for(const p of seed)await db.query("INSERT INTO behaviors(id,version,user_id,name,description,visibility,status,package) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING",[p.id,p.version,"system",p.name,p.description,"public","published",JSON.stringify({...p,status:"published",visibility:"public"})])}}
 }
 function normalize(x){return {...x,userId:x.userId||x.user_id,createdAt:x.createdAt||x.created_at,updatedAt:x.updatedAt||x.updated_at}}
 async function list({userId,publicOnly=false,q="",category=""}={}){
