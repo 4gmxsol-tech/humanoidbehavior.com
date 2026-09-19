@@ -1,6 +1,166 @@
 [
-{"id":"pick-place","name":"Pick & Place","category":"Manipulation","level":"Core","description":"Pick a specified object and place it at a target location.","steps":["Perceive target object","Navigate to workspace","Reach and grasp","Transport object","Release at target","Verify placement"],"metrics":{"success":94,"time":8.2,"collision":1.4,"recovery":87}},
-{"id":"open-door","name":"Open a Door","category":"Whole-body","level":"Interaction","description":"Approach a door, operate its handle and pass through safely.","steps":["Detect door and handle","Align body","Grasp handle","Apply force","Rotate/pull","Pass through and verify"],"metrics":{"success":89,"time":12.7,"collision":2.1,"recovery":81}},
-{"id":"follow-person","name":"Follow a Person","category":"Navigation","level":"Social","description":"Track a moving person while maintaining a safe distance.","steps":["Detect person","Estimate motion","Set following distance","Plan collision-free path","Track and adapt","Recover if target is lost"],"metrics":{"success":91,"time":18.4,"collision":0.8,"recovery":93}},
-{"id":"handover","name":"Hand Object to Person","category":"Interaction","level":"Bimanual","description":"Move an object into a human's reachable handover zone.","steps":["Detect object","Grasp securely","Detect recipient","Predict handover pose","Transfer object","Confirm release"],"metrics":{"success":86,"time":10.1,"collision":1.1,"recovery":79}}
+  {
+    "id": "pick-place",
+    "name": "Pick & Place",
+    "category": "Manipulation",
+    "level": "Core",
+    "description": "Pick a specified object and place it at a target location.",
+    "steps": [
+      "Perceive target object",
+      "Navigate to workspace",
+      "Reach and grasp",
+      "Transport object",
+      "Release at target",
+      "Verify placement"
+    ],
+    "metrics": {
+      "success": 94,
+      "time": 8.2,
+      "collision": 1.4,
+      "recovery": 87
+    },
+    "schemaVersion": "1.0",
+    "version": "1.0.0",
+    "status": "public",
+    "visibility": "public",
+    "metricsStatus": "illustrative-baseline",
+    "compatibleEngines": [
+      "simulation-harness",
+      "MuJoCo"
+    ],
+    "compatibleRobots": [
+      "generic-humanoid"
+    ],
+    "provenance": {
+      "source": "HumanoidBehavior behavior specification",
+      "revision": "1.0.0"
+    },
+    "tags": [
+      "manipulation",
+      "core"
+    ]
+  },
+  {
+    "id": "open-door",
+    "name": "Open a Door",
+    "category": "Whole-body",
+    "level": "Interaction",
+    "description": "Approach a door, operate its handle and pass through safely.",
+    "steps": [
+      "Detect door and handle",
+      "Align body",
+      "Grasp handle",
+      "Apply force",
+      "Rotate/pull",
+      "Pass through and verify"
+    ],
+    "metrics": {
+      "success": 89,
+      "time": 12.7,
+      "collision": 2.1,
+      "recovery": 81
+    },
+    "schemaVersion": "1.0",
+    "version": "1.0.0",
+    "status": "public",
+    "visibility": "public",
+    "metricsStatus": "illustrative-baseline",
+    "compatibleEngines": [
+      "simulation-harness",
+      "MuJoCo"
+    ],
+    "compatibleRobots": [
+      "generic-humanoid"
+    ],
+    "provenance": {
+      "source": "HumanoidBehavior behavior specification",
+      "revision": "1.0.0"
+    },
+    "tags": [
+      "whole-body",
+      "interaction"
+    ]
+  },
+  {
+    "id": "follow-person",
+    "name": "Follow a Person",
+    "category": "Navigation",
+    "level": "Social",
+    "description": "Track a moving person while maintaining a safe distance.",
+    "steps": [
+      "Detect person",
+      "Estimate motion",
+      "Set following distance",
+      "Plan collision-free path",
+      "Track and adapt",
+      "Recover if target is lost"
+    ],
+    "metrics": {
+      "success": 91,
+      "time": 18.4,
+      "collision": 0.8,
+      "recovery": 93
+    },
+    "schemaVersion": "1.0",
+    "version": "1.0.0",
+    "status": "public",
+    "visibility": "public",
+    "metricsStatus": "illustrative-baseline",
+    "compatibleEngines": [
+      "simulation-harness",
+      "MuJoCo"
+    ],
+    "compatibleRobots": [
+      "generic-humanoid"
+    ],
+    "provenance": {
+      "source": "HumanoidBehavior behavior specification",
+      "revision": "1.0.0"
+    },
+    "tags": [
+      "navigation",
+      "social"
+    ]
+  },
+  {
+    "id": "handover",
+    "name": "Hand Object to Person",
+    "category": "Interaction",
+    "level": "Bimanual",
+    "description": "Move an object into a human's reachable handover zone.",
+    "steps": [
+      "Detect object",
+      "Grasp securely",
+      "Detect recipient",
+      "Predict handover pose",
+      "Transfer object",
+      "Confirm release"
+    ],
+    "metrics": {
+      "success": 86,
+      "time": 10.1,
+      "collision": 1.1,
+      "recovery": 79
+    },
+    "schemaVersion": "1.0",
+    "version": "1.0.0",
+    "status": "public",
+    "visibility": "public",
+    "metricsStatus": "illustrative-baseline",
+    "compatibleEngines": [
+      "simulation-harness",
+      "MuJoCo"
+    ],
+    "compatibleRobots": [
+      "generic-humanoid"
+    ],
+    "provenance": {
+      "source": "HumanoidBehavior behavior specification",
+      "revision": "1.0.0"
+    },
+    "tags": [
+      "interaction",
+      "bimanual"
+    ]
+  }
 ]
