@@ -46,7 +46,7 @@ def summarize(rows, seconds):
     ]
     out = {"runs": len(rows), "fallRate": mean([1.0 if r["metrics"].get("fell",False) else 0.0 for r in rows]), "taskSuccessRate": mean([1.0 if r["metrics"].get("taskSuccess",False) else 0.0 for r in rows])}
     for source, name in metrics:
-        values = [float(r["metrics"][source]) for r in rows]
+        values = [float(r["metrics"].get(source, 0.0) or 0.0) for r in rows]
         out[name] = {
             "mean": round(mean(values), 6),
             "median": round(median(values), 6),
@@ -104,7 +104,7 @@ def build_experiment(seeds, seconds, provenance=None, behavior_id="humanoid-stan
 
     return {
         "schemaVersion": "1.0",
-        "benchmark": "humanoid-stand-v1",
+        "benchmark": behavior_id,
         "environment": "hb-humanoid-v1",
         "engine": "MuJoCo",
         "measured": True,
