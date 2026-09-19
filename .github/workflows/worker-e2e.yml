@@ -31,6 +31,23 @@ jobs:
           node --check db.js
           node --check worker.js
           python -m py_compile simulation/mujoco_worker.py simulation/behavior_task_worker.py simulation/experiment_manager.py
+      - name: Verify behavior version diff
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const registry=require("./behavior-registry");
+          (async()=>{
+            await registry.init();
+            const a=await registry.get("pick-place","1.0.0");
+            const b=await registry.get("pick-place","1.1.0");
+            if(!a||!b) throw new Error("Canonical behavior versions missing");
+            if(a.id!==b.id) throw new Error("Version identity mismatch");
+            if(a.version===b.version) throw new Error("Versions are not distinct");
+            if(!(b.package.steps||[]).includes("Verify object settled")) throw new Error("1.1.0 change missing");
+            console.log("behavior version diff passed");
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
       - name: Smoke test executable behavior tasks
         env:
           MUJOCO_PYTHON: python3
