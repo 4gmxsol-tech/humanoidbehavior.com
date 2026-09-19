@@ -2,6 +2,7 @@ const db=require("./db"),{spawn,spawnSync}=require("child_process");
 const gitSha=process.env.GIT_SHA||(()=>{try{return spawnSync("git",["rev-parse","HEAD"],{cwd:__dirname,encoding:"utf8"}).stdout.trim()}catch(e){return null}})();
 const POLICIES={"policy-a-stabilizer":{name:"policy-a-stabilizer",kp:38,kd:8},"policy-b-stabilizer":{name:"policy-b-stabilizer",kp:24,kd:5},"policy-a":{name:"policy-a-stabilizer",kp:38,kd:8},"policy-b":{name:"policy-b-stabilizer",kp:24,kd:5}};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function progress(job,completed,total){const percentage=total?Math.round(completed/total*100):0;await db.updateJob(job.id,{progress:{completed,total,percentage}});const exp=await db.getExperiment(job.experimentId,job.userId);if(exp){exp.status="running";exp.result={...(exp.result||{}),status:"running",runCount:completed,expectedRunCount:total,validation:{passed:false,message:`Evaluation running: ${completed}/${total} runs completed.`}};await db.saveExperiment(exp)}}
 function rowSummary(rows){const out={};const mean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;const median=a=>{const x=[...a].sort((a,b)=>a-b),m=Math.floor(x.length/2);return x.length?(x.length%2?x[m]:(x[m-1]+x[m])/2):0};const stddev=a=>{if(a.length<2)return 0;const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1))};const ci95=a=>{const m=mean(a),s=stddev(a),half=1.96*s/Math.sqrt(a.length||1);return{low:m-half,high:m+half}};for(const p of [...new Set(rows.map(r=>r.policy))]){const x=rows.filter(r=>r.policy===p),v=k=>x.map(r=>Number(r.metrics?.[k]??0)),survival=v("survivalRate"),seconds=v("simulatedSeconds"),cost=v("controlCost"),tilt=v("maxTiltRad");out[p]={runs:x.length,fallRate:mean(x.map(r=>r.metrics?.fell?1:0)),taskSuccessRate:mean(x.map(r=>r.metrics?.taskSuccess?1:0)),survivalRate:{mean:mean(survival),median:median(survival),stddev:stddev(survival),ci95:ci95(survival)},simulatedSeconds:{mean:mean(seconds),median:median(seconds),stddev:stddev(seconds),ci95:ci95(seconds)},controlCost:{mean:mean(cost),median:median(cost),stddev:stddev(cost),ci95:ci95(cost)},maxTiltRad:{mean:mean(tilt),median:median(tilt),stddev:stddev(tilt),ci95:ci95(tilt)}}}return out}
 function runProcess(input,script="simulation/mujoco_worker.py"){return new Promise((resolve,reject)=>{const child=spawn(process.env.MUJOCO_PYTHON||"python3",[script],{cwd:__dirname,env:process.env});let out="",err="";const timer=setTimeout(()=>{child.kill("SIGKILL");reject(new Error("MuJoCo worker timeout"))},Math.max(10000,Number(input.seconds||5)*5000));child.stdout.on("data",d=>out+=d);child.stderr.on("data",d=>err+=d);child.on("close",code=>{clearTimeout(timer);if(code!==0)return reject(new Error(err||"MuJoCo worker failed"));try{resolve(JSON.parse(out.trim().split("\n").pop()))}catch(e){reject(new Error("Invalid MuJoCo worker JSON: "+e.message))}});child.stdin.end(JSON.stringify(input))})}
 async function executeVersionComparison(job){
@@ -10,7 +11,7 @@ async function executeVersionComparison(job){
  for(const version of versions) for(const seed of p.seeds||[]) for(const policyName of p.policies||[]){
   const policy=POLICIES[policyName]||POLICIES["policy-a"];
   const rr=await runProcess({behaviorId:p.behaviorId,behaviorVersion:version,policy:policy.name.includes("a")?"A":"B",seed,seconds:p.seconds},"simulation/behavior_task_worker.py");
-  rr.seed=String(seed); rr.policy=policy.name; rr.behaviorId=p.behaviorId; rr.behaviorVersion=version; rr.engine="MuJoCo"; rr.measured=true; rows.push(rr);
+  rr.seed=String(seed); rr.policy=policy.name; rr.behaviorId=p.behaviorId; await progress(job,rows.length+1,(p.seeds||[]).length*(p.policies||[]).length*2); rr.behaviorVersion=version; rr.engine="MuJoCo"; rr.measured=true; rows.push(rr); await progress(job,rows.length,(versions.length*(p.seeds||[]).length*(p.policies||[]).length));
  }
  const exp=await db.getExperiment(job.experimentId,job.userId); if(!exp) throw new Error("Experiment not found");
  const summary={}; for(const version of versions) summary[version]=rowSummary(rows.filter(r=>r.behaviorVersion===version));
@@ -45,7 +46,7 @@ async function executeG1BehaviorComparison(job){
  if(versions.length!==2)throw new Error("G1 comparison requires two versions");
  for(const version of versions)for(const seed of seeds)for(const policy of policies){
   const rr=await runProcess({seconds:p.seconds,seed,policy,behaviorVersion:version},"simulation/robot_behavior_worker.py");
-  rr.behaviorVersion=version;rr.seed=String(seed);rr.policy=policy;rr.robotId="unitree_g1";rr.behaviorId="pick-place";rr.engine="MuJoCo";rr.measured=true;rows.push(rr);
+  rr.behaviorVersion=version;rr.seed=String(seed);rr.policy=policy;rr.robotId="unitree_g1";rr.behaviorId="pick-place";rr.engine="MuJoCo";rr.measured=true;rows.push(rr);await progress(job,rows.length,seeds.length*policies.length);await progress(job,rows.length,seeds.length*policies.length*2);
  }
  const pairs=[];for(const seed of seeds)for(const policy of policies){const a=rows.find(r=>r.behaviorVersion===versions[0]&&r.seed===seed&&r.policy===policy),b=rows.find(r=>r.behaviorVersion===versions[1]&&r.seed===seed&&r.policy===policy);if(a&&b)pairs.push({seed,policy,taskSuccessDelta:Number(b.taskSuccess)-Number(a.taskSuccess),completionTimeDelta:Number(b.completionTime||0)-Number(a.completionTime||0),controlCostDelta:Number(b.controlCost||0)-Number(a.controlCost||0),collisionCountDelta:Number(b.collisionCount||0)-Number(a.collisionCount||0),maxTiltRadDelta:Number(b.maxTiltRad||0)-Number(a.maxTiltRad||0)})}
  const stats=k=>{const v=pairs.map(x=>x[k]),n=v.length,m=n?v.reduce((a,b)=>a+b,0)/n:0,sd=n>1?Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1)):0,half=n?1.96*sd/Math.sqrt(n):0;return{n,mean:m,stddev:sd,ci95:{low:m-half,high:m+half}}};
@@ -70,7 +71,7 @@ async function executeRobotEvaluation(job){
  const seconds=Math.max(0.1,Math.min(Number(p.seconds||2),30)),seeds=(p.seeds||["42"]).map(String),rows=[];
  for(const seed of seeds){
   const rr=await runProcess({robot:p.robotId||"unitree_g1",seconds,seed},"simulation/robot_menagerie_worker.py");
-  rr.robotId=p.robotId||"unitree_g1";rr.seed=String(seed);rr.engine="MuJoCo";rr.measured=true;rows.push(rr);
+  rr.robotId=p.robotId||"unitree_g1";rr.seed=String(seed);rr.engine="MuJoCo";rr.measured=true;rows.push(rr);await progress(job,rows.length,seeds.length);
  }
  const successes=rows.filter(r=>r.success).length;
  const mean=k=>rows.length?rows.reduce((a,r)=>a+Number(r[k]||0),0)/rows.length:0;
