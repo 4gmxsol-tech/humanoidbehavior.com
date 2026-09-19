@@ -11,7 +11,7 @@ import mujoco_menagerie as mm
 import numpy as np
 
 
-def build():
+def build(object_mass=0.22, object_size=0.032, target_distance=0.22):
     # Use the official Menagerie G1 model with Dex3-style articulated hands.
     # This turns the task from a release proxy into a contact-rich manipulation
     # benchmark with independently actuated thumb/index/middle joints.
@@ -29,10 +29,10 @@ def build():
     obj.add_joint(name="task_object_free", type=mujoco.mjtJoint.mjJNT_FREE)
     obj.add_geom(
         name="task_object_geom", type=mujoco.mjtGeom.mjGEOM_BOX,
-        size=[0.032, 0.032, 0.045], mass=0.22, friction=[1.2, 1.0, 0.02],
+        size=[object_size, object_size, object_size*1.4], mass=object_mass, friction=[1.2, 1.0, 0.02],
         rgba=[0.18, 0.45, 0.95, 1.0]
     )
-    target = spec.worldbody.add_body(name="task_target", pos=[1.0, 0.0, 0.845])
+    target = spec.worldbody.add_body(name="task_target", pos=[0.0, 0.0, 0.845])
     target.add_geom(
         name="task_target_geom", type=mujoco.mjtGeom.mjGEOM_CYLINDER,
         size=[0.07, 0.008], contype=0, conaffinity=0,
@@ -87,8 +87,11 @@ def actuators(model, names):
     return [model.actuator(name).id for name in names if model.actuator(name).id >= 0]
 
 
-def evaluate(seconds=8.0, seed="42", policy="A", behavior_version="1.0.0"):
-    model = build()
+def evaluate(seconds=8.0, seed="42", policy="A", behavior_version="1.0.0", object_mass=0.22, object_size=0.032, target_distance=0.22):
+    object_mass=float(np.clip(object_mass,0.08,0.50))
+    object_size=float(np.clip(object_size,0.02,0.05))
+    target_distance=float(np.clip(target_distance,0.12,0.35))
+    model = build(object_mass, object_size, target_distance)
     data = mujoco.MjData(model)
     model_key = next(
         (i for i in range(model.nkey)
@@ -124,7 +127,7 @@ def evaluate(seconds=8.0, seed="42", policy="A", behavior_version="1.0.0"):
     # Place the object inside the G1 hand envelope. The object is not welded:
     # it must be captured by finger/palm contacts and transported dynamically.
     object_pos = start + np.array([0.105, 0.0, 0.0])
-    target_pos = object_pos + np.array([0.22, 0.0, 0.0])
+    target_pos = object_pos + np.array([target_distance, 0.0, 0.0])
     data.qpos[obj_q:obj_q+3] = object_pos
     data.qvel[model.joint("task_object_free").dofadr[0]:
                model.joint("task_object_free").dofadr[0]+6] = 0
@@ -272,7 +275,8 @@ def evaluate(seconds=8.0, seed="42", policy="A", behavior_version="1.0.0"):
         "provenance":{
             "source":"mujoco-menagerie","model":"unitree_g1","modelEntry":"g1_with_hands",
             "modelSource":"MuJoCo Menagerie","taskScene":"procedural-mjspec",
-            "contactModel":"dynamic free-body object + articulated G1 hand"
+            "contactModel":"dynamic free-body object + articulated G1 hand",
+            "taskConfig":{"objectMassKg":object_mass,"objectSizeM":object_size,"targetDistanceM":target_distance}
         },
         "notes":"Measured G1 contact manipulation benchmark using articulated thumb/index/middle joints. No object teleportation or welded grasp is used."
     }
@@ -295,7 +299,7 @@ def main():
         seed=str(payload.get("seed",a.seed))
         policy=str(payload.get("policy",a.policy))
         behavior_version=str(payload.get("behaviorVersion",payload.get("behavior_version",a.behavior_version)))
-        print(json.dumps(evaluate(max(.5,min(seconds,30)),seed,policy,behavior_version),separators=(",",":")))
+        print(json.dumps(evaluate(max(.5,min(seconds,30)),seed,policy,behavior_version,object_mass,object_size,target_distance),separators=(",",":")))
     except Exception as e:
         print(json.dumps({"error":str(e)}),file=sys.stderr); raise
 
