@@ -1,5 +1,5 @@
 const http=require("http"),fs=require("fs"),path=require("path"),url=require("url"),crypto=require("crypto");
-const root=__dirname,port=process.env.PORT||3000,DATA=path.join(root,"data","behaviors.json");
+const root=__dirname,port=process.env.PORT||3000,DATA=path.join(root,"data","behaviors.json"),runner=require("./benchmark-runner");
 const load=()=>JSON.parse(fs.readFileSync(DATA,"utf8"));
 const send=(res,status,data,headers={})=>{res.writeHead(status,{"Content-Type":"application/json","Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,OPTIONS","Access-Control-Allow-Headers":"Content-Type,Authorization",...headers});res.end(JSON.stringify(data))};
 const mime={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8",".svg":"image/svg+xml",".ico":"image/x-icon"};
@@ -19,8 +19,7 @@ http.createServer(async(req,res)=>{
   if(u.pathname==="/api/benchmark"&&req.method==="POST"){
    const user=auth(req);if(!user)return send(res,401,{error:"Authentication required"});
    const x=JSON.parse(await readBody(req)||"{}"),b=load().find(v=>v.id===x.behaviorId);if(!b)return send(res,404,{error:"Behavior not found"});
-   const completed=Array.isArray(x.completedSteps),stepsOk=completed&&completed.length===b.steps.length;
-   return send(res,200,{runId:"run_"+Date.now(),userId:user.id,behaviorId:b.id,status:stepsOk?"passed":"incomplete",metrics:b.metrics,checks:{steps:stepsOk,model:Boolean(x.model||x.policy)},createdAt:new Date().toISOString()});
+   const result=runner.evaluate(x); result.userId=user.id; result.checks.model=Boolean(x.model||x.policy); return send(res,200,result);
   }
   if(u.pathname==="/api/usage"){const user=auth(req);if(!user)return send(res,401,{error:"Authentication required"});return send(res,200,{plan:user.plan,limits:{benchmarksPerMonth:25,privateBehaviors:5},usage:{benchmarksThisMonth:0,privateBehaviors:0}})}
   return serve(req,res,u);
