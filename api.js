@@ -10,7 +10,8 @@ function hashKey(k){return crypto.createHash("sha256").update(k).digest("hex")}
 function serve(res,u){let p=decodeURIComponent(u.pathname);if(p==="/")p="/index.html";if(p.includes(".."))return send(res,400,{error:"Invalid path"});const f=path.join(root,p);if(!fs.existsSync(f)||!fs.statSync(f).isFile())return send(res,404,{error:"Not found"});res.writeHead(200,{"Content-Type":mime[path.extname(f)]||"application/octet-stream","Cache-Control":"public,max-age=300"});fs.createReadStream(f).pipe(res)}
 async function main(){
  const dbState=await db.init();http.createServer(async(req,res)=>{const u=url.parse(req.url,true);if(req.method==="OPTIONS"){res.writeHead(204);return res.end()}if(limited(req))return send(res,429,{error:"Rate limit exceeded"});
- try{\n  res.setHeader("X-Request-ID",crypto.randomUUID());
+ try{
+  res.setHeader("X-Request-ID",crypto.randomUUID());
   if(u.pathname==="/api/health")return send(res,200,{ok:true,service:"humanoidbehavior",version:"1.0.0",storage:dbState.mode,capabilities:["simulation","benchmark","real-benchmarking-contract","postgresql","authentication","api-keys","billing","robot-adapters","model-adapters"]}); if(u.pathname==="/api/readiness"){const databaseRequired=!!process.env.DATABASE_URL;const checks={storage:dbState.mode,databaseConfigured:!!process.env.DATABASE_URL,stripeConfigured:!!process.env.STRIPE_SECRET_KEY,simulationHarness:true,mujocoWorkflow:true};const ready=!databaseRequired||dbState.mode==="postgresql";return send(res,ready?200:503,{ok:ready,ready,checks});}
   if(u.pathname==="/api/behaviors"){let d=load(BEHAVIORS);if(u.query.q){const q=u.query.q.toLowerCase();d=d.filter(x=>(x.name+" "+x.description+" "+x.category).toLowerCase().includes(q))}return send(res,200,{data:d,count:d.length})}
   if(u.pathname.startsWith("/api/behaviors/")){const b=load(BEHAVIORS).find(x=>x.id===u.pathname.split("/").pop());return b?send(res,200,b):send(res,404,{error:"Behavior not found"})}
