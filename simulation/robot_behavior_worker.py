@@ -137,7 +137,7 @@ def evaluate(seconds=8.0, seed="42", policy="A", behavior_version="1.0.0"):
         "completionTime":phase_times.get("release"),"controlCost":float(cost),
         "maxPositionErrorM":max_err,"maxTiltRad":max_tilt,"minBaseHeight":min_h,
         "collisionCount":collisions,"phaseTimes":phase_times,
-        "provenance":{"source":"mujoco-menagerie","model":"unitree_g1","taskScene":"procedural-mjspec"},
+        "provenance":{"source":"mujoco-menagerie","model":"unitree_g1","modelSource":"MuJoCo Menagerie","taskScene":"procedural-mjspec"},
         "notes":"Measured G1 embodiment task with Jacobian arm control and controlled grasp/release proxy."
     }
 
