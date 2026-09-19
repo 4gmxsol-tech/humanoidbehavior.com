@@ -142,6 +142,7 @@ def main():
     p.add_argument("--seconds",type=float,default=8)
     p.add_argument("--seed",default="42")
     p.add_argument("--policy",default="A")
+    p.add_argument("--behavior-version",default="1.0.0")
     a=p.parse_args()
     try: print(json.dumps(evaluate(max(.5,min(a.seconds,30)),a.seed,a.policy,a.behavior_version),separators=(",",":")))
     except Exception as e:
