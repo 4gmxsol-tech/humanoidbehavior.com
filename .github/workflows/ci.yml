@@ -21,4 +21,23 @@ jobs:
       - run: node --check worker.js
       - run: node api.test.js
       - run: node -e "const d=require('./data/behaviors.json'); if(!Array.isArray(d)||d.length<4) process.exit(1); for(const b of d){if(!b.id||!Array.isArray(b.steps)||!b.metrics) process.exit(1)}"
-      - run: npm start > /tmp/hb.log 2>&1 & sleep 1; curl -fsS http://127.0.0.1:3000/api/health; curl -fsS http://127.0.0.1:3000/api/behaviors > /dev/null
+      - name: Start API and smoke test
+        run: |
+          set -euo pipefail
+          rm -f /tmp/hb.log
+          node api.js > /tmp/hb.log 2>&1 &
+          PID=$!
+          trap 'kill $PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:3000/api/health > /tmp/health.json; then break; fi
+            if ! kill -0 $PID 2>/dev/null; then
+              cat /tmp/hb.log
+              exit 1
+            fi
+            sleep 0.25
+          done
+          cat /tmp/health.json
+          curl -fsS http://127.0.0.1:3000/api/behaviors > /tmp/behaviors.json
+          node -e "const d=require('./data/behaviors.json'); const r=require('/tmp/behaviors.json'); if(!r.count || r.count<4) throw new Error('Registry smoke test failed'); console.log('registry smoke test passed',r.count)"
+          echo "--- API log ---"
+          cat /tmp/hb.log
