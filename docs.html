@@ -16,7 +16,10 @@ GET /api/readiness</pre><p>Use readiness checks in production deployment monitor
 Isaac Lab
 Gazebo
 ROS 2
-HTTP robot gateway</pre><p>Workers connect these execution contracts to real simulation or hardware environments.</p></article></div><section class="page"><div class="eyebrow">QUICKSTART</div><h2>Run your first benchmark</h2><p class="lead">Create an API key in Workspace, then call the benchmark endpoint.</p><pre class="code-block">curl -X POST https://your-domain.example/api/benchmark \
+HTTP robot gateway</pre><p>Workers connect these execution contracts to real simulation or hardware environments.</p></article><article><h2>Robot models</h2><pre>GET /api/robots
+GET /api/robots/:id</pre><p>Discover registered humanoid embodiments and their simulator compatibility.</p></article><article><h2>Version comparison</h2><pre>POST /api/behaviors/compare/benchmark
+
+{"behaviorId":"pick-place","versions":["1.0.0","1.1.0"],"seeds":[42,1337],"policies":["policy-a","policy-b"],"seconds":10}</pre><p>Runs both published versions on the same paired matrix and returns reproducible deltas with descriptive 95% intervals.</p></article></div><section class="page"><div class="eyebrow">QUICKSTART</div><h2>Run your first benchmark</h2><p class="lead">Create an API key in Workspace, then call the benchmark endpoint.</p><pre class="code-block">curl -X POST https://your-domain.example/api/benchmark \
   -H "Authorization: Bearer hb_live_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{"behaviorId":"pick-place","completedSteps":["Perceive target object","Navigate to workspace","Reach and grasp","Transport object","Release at target","Verify placement"],"model":"my-policy"}'</pre><h2>Response</h2><pre class="code-block">{
