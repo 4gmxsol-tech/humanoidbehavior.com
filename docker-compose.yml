@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    ports: ["3000:3000"]
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://humanoid:humanoid@postgres:5432/humanoidbehavior
+      DATABASE_SSL: "false"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_PRO: ${STRIPE_PRICE_PRO:-}
+      STRIPE_PRICE_TEAM: ${STRIPE_PRICE_TEAM:-}
+      SIM_WORKER_COMMAND: ${SIM_WORKER_COMMAND:-}
+    depends_on: [postgres]
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: humanoidbehavior
+      POSTGRES_USER: humanoid
+      POSTGRES_PASSWORD: humanoid
+    ports: ["5432:5432"]
+    volumes: [hb_pg:/var/lib/postgresql/data]
+volumes:
+  hb_pg:
