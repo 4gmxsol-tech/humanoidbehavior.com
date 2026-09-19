@@ -46,7 +46,9 @@ The included Dockerfile runs the Node API and serves the complete frontend on po
 - MuJoCo adapter
 - Isaac Lab adapter
 - Gazebo adapter
-- Containerized benchmark workers
+- Durable asynchronous benchmark queue + containerized workers
+- MuJoCo worker execution from queued experiments
+- Persisted experiment artifacts and job status APIs
 - Robot/model adapters
 
 ### SaaS
@@ -67,7 +69,7 @@ The included Dockerfile runs the Node API and serves the complete frontend on po
 
 ## Current launch status
 
-The platform now supports authenticated workspaces, persisted experiments, multi-seed experiment execution, experiment comparison, measured MuJoCo workflows through GitHub Actions, API keys, usage metering, billing integration foundations, and simulation/robot adapter contracts. The browser experiment lab currently executes the deterministic simulation harness; measured MuJoCo execution remains explicitly separated and provenance-tracked.
+The platform now supports authenticated workspaces, persisted experiments, multi-seed experiment execution, durable asynchronous jobs, persisted artifacts, experiment comparison, measured MuJoCo workflows through GitHub Actions and the dedicated worker runtime, API keys, usage metering, billing integration foundations, and simulation/robot adapter contracts. The browser experiment lab queues work instead of executing long jobs inside the API process; the worker selects the deterministic harness or MuJoCo engine and records the resulting artifact. Physical-robot execution remains explicitly separated and provenance-tracked.
 
 ## Production status
 
@@ -86,7 +88,9 @@ The repository now contains the integration foundation for:
 - **Robot adapters** for generic HTTP and ROS 2 command contracts.
 - **Simulation adapters** for MuJoCo, Isaac Lab and Gazebo through an external worker command.
 - **Model/policy benchmarking** through the benchmark request's `model` / `policy` fields and persisted run metadata.
-- **Docker Compose** with PostgreSQL for an end-to-end local infrastructure environment.
+- **Docker Compose** with PostgreSQL, API and a dedicated benchmark worker.
+- **Job queue** persisted in PostgreSQL/JSON fallback with bounded worker retries.
+- **Artifacts** persisted per experiment for reproducible report retrieval.
 
 ### Important execution boundary
 
