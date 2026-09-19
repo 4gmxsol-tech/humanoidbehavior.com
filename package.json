@@ -1,1 +1,1 @@
-{"name":"humanoidbehavior","version":"0.2.0","private":true,"description":"Behavior library and benchmark platform for humanoid robots","scripts":{"start":"node api.js"},"engines":{"node":">=18"}}
+{"name":"humanoidbehavior","version":"0.6.0","private":true,"description":"Humanoid robot behavior and benchmarking platform","scripts":{"start":"node api.js","test":"node api.test.js"},"engines":{"node":">=18"}}
