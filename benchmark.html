@@ -8,7 +8,8 @@ function renderExperiment(x){
  document.getElementById("raw").textContent=JSON.stringify(x,null,2);
 }
 async function loadLatest(){const s=document.getElementById("status");s.textContent="LOADING…";try{const r=await fetch("data/latest-mujoco-experiment.json");if(!r.ok)throw Error("Latest experiment not found");renderExperiment(await r.json())}catch(e){s.textContent=e.message}}
+async function saveLatest(){const token=localStorage.getItem("hb_token");if(!token)return;try{const x=await (await fetch("data/latest-mujoco-experiment.json")).json();const r=await fetch("/api/experiments",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({benchmark:x.benchmark,engine:x.engine,status:"completed",result:x})});if(r.ok){const e=await r.json();document.getElementById("status").innerHTML='SAVED · <a href="experiment.html?id='+encodeURIComponent(e.id)+'">Open experiment</a>'}}catch(e){}} 
 document.getElementById("load-latest").onclick=loadLatest;
 document.getElementById("run").onclick=async()=>{const out=document.getElementById("raw"),summary=document.getElementById("summary");out.textContent="Running…";summary.innerHTML="";const token=localStorage.getItem("hb_token");try{const r=await fetch("/api/simulation/compare",{method:"POST",headers:{"Content-Type":"application/json",...(token?{Authorization:"Bearer "+token}:{})},body:JSON.stringify({seed:document.getElementById("seed").value,seconds:Number(document.getElementById("seconds").value)})});const x=await r.json();if(!r.ok)throw Error(x.error||"Benchmark failed");out.textContent=JSON.stringify(x,null,2);summary.innerHTML=(x.results||[]).map(v=>`<div><strong>${v.metrics.survivalRate}</strong><span>${v.policy} survival</span></div><div><strong>${v.metrics.controlCost}</strong><span>control cost</span></div>`).join("")}catch(e){out.textContent=e.message}};
-loadLatest();
+loadLatest();saveLatest();
 </script></body></html>
