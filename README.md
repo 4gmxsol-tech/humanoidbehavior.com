@@ -65,6 +65,10 @@ The included Dockerfile runs the Node API and serves the complete frontend on po
 - Paid behavior packages
 
 
+## Current launch status
+
+The platform now supports authenticated workspaces, persisted experiments, multi-seed experiment execution, experiment comparison, measured MuJoCo workflows through GitHub Actions, API keys, usage metering, billing integration foundations, and simulation/robot adapter contracts. The browser experiment lab currently executes the deterministic simulation harness; measured MuJoCo execution remains explicitly separated and provenance-tracked.
+
 ## Production status
 
 The repository now contains a working web application and API foundation. For a real public production launch, configure a Node-capable host, persistent PostgreSQL storage, managed authentication, HTTPS, secrets, backups, monitoring and a real payment processor. GitHub Pages alone cannot run the Node API.
