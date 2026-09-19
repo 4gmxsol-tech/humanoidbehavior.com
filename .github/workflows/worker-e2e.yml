@@ -200,6 +200,23 @@ jobs:
           echo "--- version comparison worker log ---"
           cat /tmp/hb-version-compare.log
 
+      - name: Run measured Unitree G1 Menagerie smoke evaluation
+        run: |
+          set -euo pipefail
+          OUT=$(python simulation/robot_menagerie_worker.py --robot unitree_g1 --seconds 1 --seed ci-g1)
+          echo "$OUT"
+          OUT="$OUT" python - <<'PY'
+          import json, os
+          x=json.loads(os.environ["OUT"])
+          assert x["robotId"]=="unitree_g1"
+          assert x["engine"]=="MuJoCo"
+          assert x["measured"] is True
+          assert x["task"]=="stand-stability"
+          assert x["modelNq"]>0 and x["modelNu"]>0
+          assert "maxTiltRad" in x and "controlCost" in x
+          print("G1 Menagerie measured smoke passed")
+          PY
+
       - name: Verify version-aware MuJoCo evaluation
         run: |
           set -euo pipefail
