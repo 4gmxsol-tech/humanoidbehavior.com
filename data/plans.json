@@ -1,0 +1,5 @@
+[
+{"id":"free","name":"Free","price":0,"currency":"USD","limits":{"benchmarksPerMonth":25,"privateBehaviors":5,"apiKeys":0}},
+{"id":"pro","name":"Pro","price":49,"currency":"USD","limits":{"benchmarksPerMonth":500,"privateBehaviors":-1,"apiKeys":3}},
+{"id":"team","name":"Team","price":299,"currency":"USD","limits":{"benchmarksPerMonth":5000,"privateBehaviors":-1,"apiKeys":20}}
+]
