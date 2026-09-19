@@ -2,7 +2,12 @@
 GET /api/behaviors/:id</pre><p>Discover reusable task specifications.</p></article><article><h2>Experiment API</h2><pre>POST /api/experiments/run
 GET /api/experiments
 GET /api/experiments/:id
-GET /api/experiments/compare?ids=...</pre><p>Run and inspect reproducible multi-seed experiments.</p></article><article><h2>Authentication</h2><pre>Authorization: Bearer hb_live_...</pre><p>Use account sessions or API keys for authenticated endpoints.</p></article><article><h2>Execution boundary</h2><pre>simulation-harness
+GET /api/experiments/compare?ids=...</pre><p>Run and inspect reproducible multi-seed experiments.</p></article><article><h2>Authentication</h2><pre>Authorization: Bearer hb_live_...</pre><p>Use account sessions or API keys for authenticated endpoints. Create and revoke keys from Workspace.</p></article><article><h2>Benchmark request</h2><pre>POST /api/benchmark
+Authorization: Bearer hb_live_...
+Content-Type: application/json
+
+{"behaviorId":"pick-place","completedSteps":[...]}</pre><p>Returns a reproducible behavior evaluation and persists the run to the workspace.</p></article><article><h2>Usage</h2><pre>GET /api/usage
+GET /api/keys</pre><p>Inspect plan limits, monthly benchmark usage and active API keys.</p></article><article><h2>Execution boundary</h2><pre>simulation-harness
 measured=false
 
 MuJoCo
