@@ -149,7 +149,17 @@ def main():
     p.add_argument("--policy",default="A")
     p.add_argument("--behavior-version",default="1.0.0")
     a=p.parse_args()
-    try: print(json.dumps(evaluate(max(.5,min(a.seconds,30)),a.seed,a.policy,a.behavior_version),separators=(",",":")))
+    try:
+        payload={}
+        if not sys.stdin.isatty():
+            raw=sys.stdin.read().strip()
+            if raw:
+                payload=json.loads(raw)
+        seconds=float(payload.get("seconds",a.seconds))
+        seed=str(payload.get("seed",a.seed))
+        policy=str(payload.get("policy",a.policy))
+        behavior_version=str(payload.get("behaviorVersion",payload.get("behavior_version",a.behavior_version)))
+        print(json.dumps(evaluate(max(.5,min(seconds,30)),seed,policy,behavior_version),separators=(",",":")))
     except Exception as e:
         print(json.dumps({"error":str(e)}),file=sys.stderr); raise
 
