@@ -1,4 +1,4 @@
-const assert=require("assert"),{evaluate}=require("./benchmark-runner"),{runAdapter}=require("./benchmark-adapters");
+const assert=require("assert"),{evaluate}=require("./benchmark-runner"),{runAdapter}=require("./benchmark-adapters"),{validateBehaviorPackage}=require("./behavior-schema");
 const b=require("./data/behaviors.json")[0];
 (async()=>{const good=evaluate({behaviorId:b.id,completedSteps:b.steps});assert.equal(good.status,"passed");const bad=evaluate({behaviorId:b.id,completedSteps:b.steps.slice(0,2)});assert.equal(bad.status,"incomplete");const a=await runAdapter("spec-validator",{behavior:b,input:{completedSteps:b.steps}});assert.equal(a.status,"passed");console.log("benchmark and adapter tests passed")})().catch(e=>{console.error(e);process.exit(1)});
 const sim=require("./simulation-benchmark");
@@ -13,3 +13,5 @@ assert.ok(typeof db.saveExperiment==="function");
 assert.ok(typeof db.listExperiments==="function");
 assert.ok(typeof db.getExperiment==="function");
 console.log("experiment persistence API passed");
+
+const validPackage={id:"pick-place",name:"Pick & Place",version:"1.0.0",description:"test",steps:["one","two"]};assert.strictEqual(validateBehaviorPackage(validPackage).valid,true);assert.strictEqual(validateBehaviorPackage({...validPackage,id:"Bad ID"}).valid,false);console.log("behavior package schema passed");
