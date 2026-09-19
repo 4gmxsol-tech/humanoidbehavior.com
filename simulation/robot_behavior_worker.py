@@ -113,8 +113,13 @@ def evaluate(seconds=8.0, seed="42", policy="A", behavior_version="1.0.0"):
             data.qpos[obj_q:obj_q+3]=target_pos
             data.qvel[model.joint("task_object_free").dofadr[0]:model.joint("task_object_free").dofadr[0]+6]=0
             mujoco.mj_forward(model,data)
-            released=True; success=True; phase_times["release"]=float(data.time)
-            break
+            released=True; phase_times["release"]=float(data.time)
+            if behavior_version=="1.1.0":
+                if settled_since is None: settled_since=float(data.time)
+                if float(data.time)-settled_since>=0.15:
+                    success=True; phase_times["settled"]=float(data.time); break
+            else:
+                success=True; break
 
         if model.nq>=7:
             tilt=math.acos(max(-1.0,min(1.0,float(1-2*(data.qpos[4]**2+data.qpos[5]**2)))))
