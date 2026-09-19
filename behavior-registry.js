@@ -33,7 +33,7 @@ async function save(pkg,userId){
  const a=read();if(a.some(v=>v.id===x.id&&v.version===x.version))throw new Error("Behavior version already exists");a.push(x);write(a);return x
 }
 async function publish(id,version,userId){
- if(db.mode()==="postgresql"){const r=await db.query("UPDATE behaviors SET visibility='public',status='published',updated_at=NOW(),package=jsonb_set(jsonb_set(package,'{visibility}','"public"'::jsonb) ,'{status}','"published"'::jsonb) WHERE id=$1 AND version=$2 AND user_id=$3 RETURNING *",[id,version,userId]);return r.rows[0]?normalize({...r.rows[0],package:r.rows[0].package}):null}
+ if(db.mode()==="postgresql"){const r=await db.query("UPDATE behaviors SET visibility='public',status='published',updated_at=NOW(),package=jsonb_set(jsonb_set(package,'{visibility}',to_jsonb('public'::text)),'{status}',to_jsonb('published'::text)) WHERE id=$1 AND version=$2 AND user_id=$3 RETURNING *",[id,version,userId]);return r.rows[0]?normalize({...r.rows[0],package:r.rows[0].package}):null}
  const a=read(),x=a.find(v=>v.id===id&&v.version===version&&v.userId===userId);if(!x)return null;x.visibility="public";x.status="published";x.package.visibility="public";x.package.status="published";x.updatedAt=new Date().toISOString();write(a);return x
 }
 module.exports={init,list,get,versions,save,publish};
