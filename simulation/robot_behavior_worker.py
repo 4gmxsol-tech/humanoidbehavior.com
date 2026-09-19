@@ -36,7 +36,7 @@ def actuators(model, names):
     return [model.actuator(name).id for name in names if model.actuator(name).id >= 0]
 
 
-def evaluate(seconds=8.0, seed="42", policy="A"):
+def evaluate(seconds=8.0, seed="42", policy="A", behavior_version="1.0.0"):
     model = build()
     data = mujoco.MjData(model)
     model_key = next((i for i in range(model.nkey)
@@ -125,7 +125,7 @@ def evaluate(seconds=8.0, seed="42", policy="A"):
 
     return {
         "schemaVersion":"1.0","robotId":"unitree_g1","robotModel":"MuJoCo Menagerie",
-        "behaviorId":"pick-place","behaviorVersion":"1.0.0","engine":"MuJoCo","measured":True,
+        "behaviorId":"pick-place","behaviorVersion":behavior_version,"engine":"MuJoCo","measured":True,
         "simulation":True,"seed":str(seed),"policy":policy,"task":"pick-place",
         "taskSuccess":bool(success),"success":bool(success),"grasped":grasped,
         "released":released,"simulatedSeconds":float(data.time),
@@ -143,7 +143,7 @@ def main():
     p.add_argument("--seed",default="42")
     p.add_argument("--policy",default="A")
     a=p.parse_args()
-    try: print(json.dumps(evaluate(max(.5,min(a.seconds,30)),a.seed,a.policy),separators=(",",":")))
+    try: print(json.dumps(evaluate(max(.5,min(a.seconds,30)),a.seed,a.policy,a.behavior_version),separators=(",",":")))
     except Exception as e:
         print(json.dumps({"error":str(e)}),file=sys.stderr); raise
 
