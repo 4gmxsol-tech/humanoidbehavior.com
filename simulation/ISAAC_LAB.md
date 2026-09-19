@@ -1,0 +1,1 @@
+# Isaac Lab adapter contract\n\nThis adapter uses the same benchmark job schema as MuJoCo: behaviorId, model/policy, environment, and seed. Set SIM_WORKER_COMMAND to an Isaac Lab launcher. The launcher must read JSON from stdin and return JSON with engine=IsaacLab, measured=true, seed, policy, metrics, and reproducibility metadata.\n
