@@ -22,3 +22,13 @@ services:
     volumes: [hb_pg:/var/lib/postgresql/data]
 volumes:
   hb_pg:
+
+  worker:
+    build: .
+    command: ["node","worker.js"]
+    environment:
+      DATABASE_URL: postgresql://humanoid:humanoid@postgres:5432/humanoidbehavior
+      DATABASE_SSL: "false"
+      WORKER_POLL_MS: 1000
+      MUJOCO_PYTHON: python3
+    depends_on: [postgres]
