@@ -1,0 +1,22 @@
+name: MuJoCo Benchmark
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: Reproducible seed
+        required: true
+        default: "42"
+jobs:
+  mujoco:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r simulation/requirements.txt
+      - run: echo '{"seed":"${{ inputs.seed }}","seconds":5}' | python simulation/compare_mujoco.py | tee mujoco-result.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mujoco-benchmark-${{ inputs.seed }}
+          path: mujoco-result.json
