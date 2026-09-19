@@ -13,7 +13,9 @@ services:
       SIM_WORKER_COMMAND: ${SIM_WORKER_COMMAND:-}
     depends_on: [postgres]
   worker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
     command: ["node","worker.js"]
     environment:
       DATABASE_URL: postgresql://humanoid:humanoid@postgres:5432/humanoidbehavior
