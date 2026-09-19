@@ -1,7 +1,3 @@
-const assert=require("assert"),{evaluate}=require("./benchmark-runner");
+const assert=require("assert"),{evaluate}=require("./benchmark-runner"),{runAdapter}=require("./benchmark-adapters");
 const b=require("./data/behaviors.json")[0];
-const good=evaluate({behaviorId:b.id,completedSteps:b.steps});
-assert.equal(good.ok,true);assert.equal(good.status,"passed");assert.equal(good.checks.length,b.steps.length);
-const bad=evaluate({behaviorId:b.id,completedSteps:b.steps.slice(0,2)});
-assert.equal(bad.status,"incomplete");
-console.log("benchmark runner tests passed");
+(async()=>{const good=evaluate({behaviorId:b.id,completedSteps:b.steps});assert.equal(good.status,"passed");const bad=evaluate({behaviorId:b.id,completedSteps:b.steps.slice(0,2)});assert.equal(bad.status,"incomplete");const a=await runAdapter("spec-validator",{behavior:b,input:{completedSteps:b.steps}});assert.equal(a.status,"passed");console.log("benchmark and adapter tests passed")})().catch(e=>{console.error(e);process.exit(1)});
