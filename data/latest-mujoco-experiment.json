@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "benchmark": "humanoid-stand-v1",
+  "environment": "hb-humanoid-v1",
+  "engine": "MuJoCo",
+  "measured": true,
+  "simulation": true,
+  "targetSeconds": 5.0,
+  "runCount": 10,
+  "expectedRunCount": 10,
+  "validation": {
+    "passed": true,
+    "message": "Every requested seed was evaluated against every policy."
+  },
+  "provenance": {
+    "gitSha": "1a82f15df8e68af712f378f3eb39f9f00dcd8fd9",
+    "workflow": "MuJoCo Experiment",
+    "runId": "35433718562",
+    "runNumber": "3"
+  },
+  "seeds": ["42", "1337", "2026", "7", "99"],
+  "policies": ["policy-a-stabilizer", "policy-b-stabilizer"],
+  "summary": {
+    "policy-a-stabilizer": {
+      "runs": 5, "fallRate": 1.0,
+      "survival_rate": {"mean": 0.3264, "median": 0.3156, "stddev": 0.037132, "min": 0.2904, "max": 0.3888, "ci95": {"low": 0.280302, "high": 0.372498}},
+      "simulated_seconds": {"mean": 1.632, "median": 1.578, "stddev": 0.185661, "min": 1.452, "max": 1.944, "ci95": {"low": 1.401508, "high": 1.862492}},
+      "min_torso_height_m": {"mean": 0.61782, "median": 0.6182, "stddev": 0.001242, "min": 0.6162, "max": 0.6194, "ci95": {"low": 0.616278, "high": 0.619362}},
+      "max_tilt_rad": {"mean": 0.52094, "median": 0.4974, "stddev": 0.051923, "min": 0.4968, "max": 0.6138, "ci95": {"low": 0.456479, "high": 0.585401}},
+      "control_cost": {"mean": 0.163122, "median": 0.12585, "stddev": 0.080686, "min": 0.11435, "max": 0.30584, "ci95": {"low": 0.062953, "high": 0.263291}},
+      "targetSeconds": 5.0
+    },
+    "policy-b-stabilizer": {
+      "runs": 5, "fallRate": 1.0,
+      "survival_rate": {"mean": 0.3304, "median": 0.3216, "stddev": 0.041379, "min": 0.2952, "max": 0.3996, "ci95": {"low": 0.279029, "high": 0.381771}},
+      "simulated_seconds": {"mean": 1.652, "median": 1.608, "stddev": 0.206896, "min": 1.476, "max": 1.998, "ci95": {"low": 1.395146, "high": 1.908854}},
+      "min_torso_height_m": {"mean": 0.6188, "median": 0.619, "stddev": 0.001214, "min": 0.6168, "max": 0.6199, "ci95": {"low": 0.617292, "high": 0.620308}},
+      "max_tilt_rad": {"mean": 0.55918, "median": 0.5388, "stddev": 0.047479, "min": 0.537, "max": 0.6441, "ci95": {"low": 0.500236, "high": 0.618124}},
+      "control_cost": {"mean": 0.147768, "median": 0.12271, "stddev": 0.05422, "min": 0.11062, "max": 0.24219, "ci95": {"low": 0.080455, "high": 0.215081}},
+      "targetSeconds": 5.0
+    }
+  },
+  "policyBMinusPolicyA": {
+    "survivalRateMean": 0.004,
+    "simulatedSecondsMean": 0.02,
+    "controlCostMean": -0.015354,
+    "maxTiltMean": 0.03824
+  }
+}
