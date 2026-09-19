@@ -64,7 +64,7 @@ def collisions(model,data,allowed=("floor","object_geom","target_geom")):
             count+=1
     return count
 
-def manipulation(behavior,seed,seconds,policy):
+def manipulation(behavior,seed,seconds,policy,behavior_version="1.0.0"):
     cfg=TASKS[behavior]; model=mujoco.MjModel.from_xml_string(ARM_XML); data=mujoco.MjData(model)
     rng=seed01(seed); data.qpos[2]=1.08; data.qpos[3]=1.0
     data.qpos[4]=(rng-.5)*.02; data.qpos[5]=((rng*1.7)%1-.5)*.02
@@ -75,7 +75,7 @@ def manipulation(behavior,seed,seconds,policy):
     mujoco.mj_forward(model,data)
     qshould=model.joint("shoulder").qposadr[0]; qelbow=model.joint("elbow").qposadr[0]
     vshould=model.joint("shoulder").dofadr[0]; velbow=model.joint("elbow").dofadr[0]
-    grabbed=False; released=False; success=False; complete=None; cost=0; max_tilt=0; min_h=99; collision=0
+    grabbed=False; released=False; success=False; complete=None; cost=0; max_tilt=0; min_h=99; collision=0; settled_since=None
     steps=int(seconds/model.opt.timestep)
     for _ in range(steps):
         ob=data.xpos[obj].copy(); tg=data.xpos[target].copy()
@@ -91,15 +91,23 @@ def manipulation(behavior,seed,seconds,policy):
         if not grabbed and dist<.09:
             model.eq_active[0]=1; grabbed=True
         if grabbed and math.dist(ob,tg)<.10:
-            model.eq_active[0]=0; released=True; success=True; complete=float(data.time); break
+            model.eq_active[0]=0; released=True
+            if behavior_version=="1.1.0":
+                if settled_since is None: settled_since=float(data.time)
+                if float(data.time)-settled_since>=0.15:
+                    success=True; complete=float(data.time); break
+            else:
+                success=True; complete=float(data.time); break
+        elif grabbed:
+            settled_since=None
         min_h=min(min_h,float(data.xpos[model.body("torso").id,2]))
         max_tilt=max(max_tilt,math.sqrt(float(data.qpos[4])**2+float(data.qpos[5])**2))
         cost+=float((data.ctrl**2).sum())*model.opt.timestep; collision+=collisions(model,data)
     return result(behavior,seed,policy,seconds,data,success,complete,cost,min_h,max_tilt,collision,grabbed,released)
 
-def result(behavior,seed,policy,seconds,data,success,complete,cost,min_h,max_tilt,collision,grabbed,released):
+def result(behavior,seed,policy,seconds,data,success,complete,cost,min_h,max_tilt,collision,grabbed,released,behavior_version="1.0.0"):
     return {"behaviorId":behavior,"seed":str(seed),"policy":policy,"engine":"MuJoCo","measured":True,"simulation":True,
-            "benchmark":TASKS.get(behavior,{}).get("benchmark","humanoid-task-v1"),"environment":"hb-"+behavior+"-v1",
+            "benchmark":TASKS.get(behavior,{}).get("benchmark","humanoid-task-v1"),"environment":"hb-"+behavior+"-v1","behaviorVersion":behavior_version,
             "metrics":{"taskSuccess":bool(success),"completionTime":complete,"simulatedSeconds":float(data.time),
                        "survivalRate":1.0 if min_h>.62 else float(data.time/seconds),"minTorsoHeightM":round(min_h,4),
                        "maxTiltRad":round(max_tilt,4),"controlCost":round(cost,5),"collisionCount":collision,
@@ -128,15 +136,15 @@ def follow(seed,seconds,policy):
     mae=sum(errors)/len(errors); success=mae<.22
     return {"behaviorId":"follow-person","seed":str(seed),"policy":policy,"engine":"MuJoCo","measured":True,"simulation":True,"benchmark":"humanoid-follow-person-v1","environment":"hb-follow-person-v1","metrics":{"taskSuccess":success,"completionTime":seconds if success else None,"simulatedSeconds":seconds,"trackingMAE":round(mae,4),"survivalRate":1.0,"controlCost":round(cost,5),"collisionCount":0}}
 
-def run_behavior(behavior, seed, seconds, policy):
-    if behavior in ("pick-place","handover"): return manipulation(behavior,seed,seconds,policy)
+def run_behavior(behavior, seed, seconds, policy, behavior_version="1.0.0"):
+    if behavior in ("pick-place","handover"): return manipulation(behavior,seed,seconds,policy,behavior_version)
     if behavior=="open-door": return door(seed,seconds,policy)
     if behavior=="follow-person": return follow(seed,seconds,policy)
     raise ValueError("Unsupported behavior task: "+behavior)
 
 def main():
     job=json.load(sys.stdin); behavior=job.get("behaviorId","pick-place"); seed=job.get("seed","0"); seconds=float(job.get("seconds",5)); policy=job.get("policy","A")
-    out=run_behavior(behavior,seed,seconds,policy)
+    out=run_behavior(behavior,seed,seconds,policy,job.get("behaviorVersion","1.0.0"))
     print(json.dumps(out))
 
 if __name__=="__main__": main()
