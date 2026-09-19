@@ -149,6 +149,57 @@ jobs:
           echo "--- worker log ---"
           cat /tmp/hb-worker.log
 
+      - name: Run behavior version comparison end-to-end
+        env:
+          MUJOCO_PYTHON: python3
+          WORKER_POLL_MS: "100"
+        run: |
+          set -euo pipefail
+          rm -f data/jobs.json data/experiments.json data/artifacts.json
+          EXP_ID=$(node - <<'NODE'
+          const db=require("./db");
+          (async()=>{
+            await db.init();
+            const id=db.id(), userId="ci-version-compare";
+            await db.saveExperiment({id,userId,behaviorId:"pick-place",behaviorVersion:"1.0.0 vs 1.1.0",benchmark:"version-vs-version-pick-place",engine:"MuJoCo",status:"queued",createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-version-vs-version",behaviorId:"pick-place",versions:["1.0.0","1.1.0"],engine:"MuJoCo",measured:false,reproducible:true,targetSeconds:1,seeds:["ci-v1","ci-v2"],policies:["policy-a","policy-b"],runCount:0,expectedRunCount:8,validation:{passed:false,message:"queued"},rawResults:[],summary:{}}});
+            await db.enqueueJob({id:db.id(),experimentId:id,userId,type:"behavior-version-compare",status:"queued",payload:{behaviorId:"pick-place",versions:["1.0.0","1.1.0"],seeds:["ci-v1","ci-v2"],policies:["policy-a","policy-b"],seconds:1,engine:"MuJoCo"}});
+            process.stdout.write(id);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          )
+          node worker.js > /tmp/hb-version-compare.log 2>&1 &
+          WORKER_PID=$!
+          trap 'kill $WORKER_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 120); do
+            STATUS=$(EXP_ID="$EXP_ID" node - <<'NODE'
+          const db=require("./db");
+          (async()=>{await db.init();const e=await db.getExperiment(process.env.EXP_ID,"ci-version-compare");console.log(e?.status||"missing")})().catch(()=>console.log("error"));
+          NODE
+            )
+            echo "[$i] comparison status: $STATUS"
+            if [ "$STATUS" = "completed" ]; then break; fi
+            if [ "$STATUS" = "failed" ]; then cat /tmp/hb-version-compare.log; exit 1; fi
+            sleep 2
+          done
+          EXP_ID="$EXP_ID" node - <<'NODE'
+          const db=require("./db");
+          (async()=>{
+            await db.init();
+            const e=await db.getExperiment(process.env.EXP_ID,"ci-version-compare");
+            const a=await db.listArtifacts(process.env.EXP_ID,"ci-version-compare");
+            if(!e || e.status!=="completed") throw new Error("Version comparison did not complete");
+            if(e.result?.measured!==true) throw new Error("Comparison not measured");
+            if(e.result?.runCount!==8) throw new Error("Expected 8 comparison runs");
+            if(e.result?.validation?.passed!==true) throw new Error("Comparison validation failed");
+            if(!Array.isArray(e.result?.pairedDeltas) || e.result.pairedDeltas.length!==4) throw new Error("Expected 4 paired deltas");
+            for(const k of ["taskSuccessDelta","controlCostDelta","completionTimeDelta","simulatedSecondsDelta","survivalRateDelta","maxTiltRadDelta","collisionCountDelta"]){const d=e.result?.deltaSummary?.[k];if(!d||d.n!==4||!d.ci95||typeof d.mean!=="number") throw new Error("Missing delta statistics: "+k)}
+            if(!a.some(x=>x.name==="version-comparison.json")) throw new Error("Missing version comparison artifact");
+            console.log(JSON.stringify({status:e.status,runCount:e.result.runCount,paired:e.result.pairedDeltas.length,artifactCount:a.length}));
+          })().catch(e=>{console.error(e.message);process.exit(1)});
+          NODE
+          echo "--- version comparison worker log ---"
+          cat /tmp/hb-version-compare.log
+
       - name: Verify version-aware MuJoCo evaluation
         run: |
           set -euo pipefail
