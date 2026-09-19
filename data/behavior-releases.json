@@ -1,0 +1,45 @@
+[
+  {
+    "id": "pick-place",
+    "name": "Pick & Place",
+    "category": "Manipulation",
+    "level": "Core",
+    "description": "Pick a specified object and place it at a target location with explicit post-placement verification.",
+    "steps": [
+      "Perceive target object",
+      "Navigate to workspace",
+      "Reach and grasp",
+      "Transport object",
+      "Release at target",
+      "Verify placement",
+      "Verify object settled"
+    ],
+    "metrics": {
+      "success": 94,
+      "time": 8.2,
+      "collision": 1.4,
+      "recovery": 87
+    },
+    "schemaVersion": "1.0",
+    "version": "1.1.0",
+    "status": "public",
+    "visibility": "public",
+    "metricsStatus": "illustrative-baseline",
+    "compatibleEngines": [
+      "simulation-harness",
+      "MuJoCo"
+    ],
+    "compatibleRobots": [
+      "generic-humanoid"
+    ],
+    "provenance": {
+      "source": "HumanoidBehavior behavior specification",
+      "revision": "1.1.0"
+    },
+    "tags": [
+      "manipulation",
+      "core",
+      "verification"
+    ]
+  }
+]
