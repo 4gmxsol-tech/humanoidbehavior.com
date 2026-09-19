@@ -14,6 +14,7 @@ jobs:
           node-version: 20
       - run: node --check api.js
       - run: node --check app.js
-      - run: node -e "const d=require('./data/behaviors.json'); if(!Array.isArray(d)||d.length<1) process.exit(1); for(const b of d){if(!b.id||!Array.isArray(b.steps)||!b.metrics) process.exit(1)}"
-      - run: npm install --ignore-scripts --no-audit --no-fund
-      - run: node api.js & sleep 1; curl -fsS http://127.0.0.1:3000/api/health; curl -fsS http://127.0.0.1:3000/api/behaviors > /dev/null
+      - run: node --check benchmark-runner.js
+      - run: node api.test.js
+      - run: node -e "const d=require('./data/behaviors.json'); if(!Array.isArray(d)||d.length<4) process.exit(1); for(const b of d){if(!b.id||!Array.isArray(b.steps)||!b.metrics) process.exit(1)}"
+      - run: npm start > /tmp/hb.log 2>&1 & sleep 1; curl -fsS http://127.0.0.1:3000/api/health; curl -fsS http://127.0.0.1:3000/api/behaviors > /dev/null
