@@ -66,6 +66,7 @@ def run(policy, seed, seconds=5.0):
     data.qpos[4]=(rng-.5)*0.06
     data.qpos[5]=((rng*1.7)%1-.5)*0.06
     mujoco.mj_forward(model,data)
+    pelvis_id=model.body("pelvis").id
     target=[0,0,0,0,0.0,0.0,0.0]
     qids=[model.joint(i).qposadr[0] for i in range(model.njnt) if model.jnt_type[i]==mujoco.mjtJoint.mjJNT_HINGE]
     vels=[model.joint(i).dofadr[0] for i in range(model.njnt) if model.jnt_type[i]==mujoco.mjtJoint.mjJNT_HINGE]
@@ -78,7 +79,7 @@ def run(policy, seed, seconds=5.0):
             u=kp*err-kd*data.qvel[vi]
             data.ctrl[a]=max(-1.0,min(1.0,u/50.0))
         mujoco.mj_step(model,data)
-        h=float(data.xpos[0,2]); min_height=min(min_height,h)
+        h=float(data.xpos[pelvis_id,2]); min_height=min(min_height,h)
         tilt=math.sqrt(float(data.qpos[4])**2+float(data.qpos[5])**2)
         max_tilt=max(max_tilt,tilt); total_cost+=float((data.ctrl**2).sum())*model.opt.timestep
         if h<0.62:
