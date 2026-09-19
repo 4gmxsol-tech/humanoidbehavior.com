@@ -103,7 +103,7 @@ def manipulation(behavior,seed,seconds,policy,behavior_version="1.0.0"):
         min_h=min(min_h,float(data.xpos[model.body("torso").id,2]))
         max_tilt=max(max_tilt,math.sqrt(float(data.qpos[4])**2+float(data.qpos[5])**2))
         cost+=float((data.ctrl**2).sum())*model.opt.timestep; collision+=collisions(model,data)
-    return result(behavior,seed,policy,seconds,data,success,complete,cost,min_h,max_tilt,collision,grabbed,released)
+    return result(behavior,seed,policy,seconds,data,success,complete,cost,min_h,max_tilt,collision,grabbed,released,behavior_version)
 
 def result(behavior,seed,policy,seconds,data,success,complete,cost,min_h,max_tilt,collision,grabbed,released,behavior_version="1.0.0"):
     return {"behaviorId":behavior,"seed":str(seed),"policy":policy,"engine":"MuJoCo","measured":True,"simulation":True,
