@@ -128,12 +128,15 @@ def follow(seed,seconds,policy):
     mae=sum(errors)/len(errors); success=mae<.22
     return {"behaviorId":"follow-person","seed":str(seed),"policy":policy,"engine":"MuJoCo","measured":True,"simulation":True,"benchmark":"humanoid-follow-person-v1","environment":"hb-follow-person-v1","metrics":{"taskSuccess":success,"completionTime":seconds if success else None,"simulatedSeconds":seconds,"trackingMAE":round(mae,4),"survivalRate":1.0,"controlCost":round(cost,5),"collisionCount":0}}
 
+def run_behavior(behavior, seed, seconds, policy):
+    if behavior in ("pick-place","handover"): return manipulation(behavior,seed,seconds,policy)
+    if behavior=="open-door": return door(seed,seconds,policy)
+    if behavior=="follow-person": return follow(seed,seconds,policy)
+    raise ValueError("Unsupported behavior task: "+behavior)
+
 def main():
     job=json.load(sys.stdin); behavior=job.get("behaviorId","pick-place"); seed=job.get("seed","0"); seconds=float(job.get("seconds",5)); policy=job.get("policy","A")
-    if behavior in ("pick-place","handover"): out=manipulation(behavior,seed,seconds,policy)
-    elif behavior=="open-door": out=door(seed,seconds,policy)
-    elif behavior=="follow-person": out=follow(seed,seconds,policy)
-    else: raise ValueError("Unsupported behavior task: "+behavior)
+    out=run_behavior(behavior,seed,seconds,policy)
     print(json.dumps(out))
 
 if __name__=="__main__": main()
