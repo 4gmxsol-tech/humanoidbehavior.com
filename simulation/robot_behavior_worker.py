@@ -299,6 +299,9 @@ def main():
         seed=str(payload.get("seed",a.seed))
         policy=str(payload.get("policy",a.policy))
         behavior_version=str(payload.get("behaviorVersion",payload.get("behavior_version",a.behavior_version)))
+        object_mass=float(payload.get("objectMassKg",0.22))
+        object_size=float(payload.get("objectSizeM",0.032))
+        target_distance=float(payload.get("targetDistanceM",0.22))
         print(json.dumps(evaluate(max(.5,min(seconds,30)),seed,policy,behavior_version,object_mass,object_size,target_distance),separators=(",",":")))
     except Exception as e:
         print(json.dumps({"error":str(e)}),file=sys.stderr); raise
