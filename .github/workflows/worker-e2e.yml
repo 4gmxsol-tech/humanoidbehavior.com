@@ -1,0 +1,110 @@
+name: Worker E2E
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker.js"
+      - "db.js"
+      - "package.json"
+      - "simulation/**"
+      - ".github/workflows/worker-e2e.yml"
+  workflow_dispatch:
+jobs:
+  worker-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Node dependencies
+        run: npm install
+      - name: Install MuJoCo
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r simulation/requirements.txt
+      - name: Validate runtime syntax
+        run: |
+          node --check db.js
+          node --check worker.js
+          python -m py_compile simulation/mujoco_worker.py
+      - name: Run durable MuJoCo worker end-to-end test
+        env:
+          MUJOCO_PYTHON: python3
+          WORKER_POLL_MS: "100"
+        run: |
+          set -euo pipefail
+          rm -f data/jobs.json data/experiments.json data/artifacts.json
+          EXP_ID=$(node - <<'NODE'
+          const db=require("./db");
+          (async()=>{
+            await db.init();
+            const id=db.id();
+            const userId="ci-worker-e2e";
+            await db.saveExperiment({
+              id,userId,benchmark:"humanoid-stand-v1",engine:"MuJoCo",status:"queued",
+              createdAt:new Date().toISOString(),
+              result:{
+                schemaVersion:"1.0",benchmark:"humanoid-stand-v1",environment:"hb-humanoid-v1",
+                engine:"MuJoCo",measured:false,simulation:true,targetSeconds:0.2,runCount:0,
+                expectedRunCount:2,validation:{passed:false,message:"queued"},
+                seeds:["ci-e2e"],policies:["policy-a","policy-b"],rawResults:[],summary:{}
+              }
+            });
+            await db.enqueueJob({
+              id:db.id(),experimentId:id,userId,type:"experiment",status:"queued",
+              payload:{
+                behaviorId:"pick-place",environment:"hb-humanoid-v1",seconds:0.2,
+                seeds:["ci-e2e"],policies:["policy-a","policy-b"],engine:"MuJoCo"
+              }
+            });
+            process.stdout.write(id);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          )
+          echo "Experiment: $EXP_ID"
+          node worker.js > /tmp/hb-worker.log 2>&1 &
+          WORKER_PID=$!
+          trap 'kill $WORKER_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 90); do
+            STATUS=$(EXP_ID="$EXP_ID" node - <<'NODE'
+          const db=require("./db");
+          (async()=>{
+            await db.init();
+            const e=await db.getExperiment(process.env.EXP_ID,"ci-worker-e2e");
+            console.log(e?.status||"missing");
+          })().catch(()=>console.log("error"));
+          NODE
+            )
+            echo "[$i] experiment status: $STATUS"
+            if [ "$STATUS" = "completed" ]; then break; fi
+            if [ "$STATUS" = "failed" ]; then
+              cat /tmp/hb-worker.log
+              exit 1
+            fi
+            sleep 2
+          done
+          FINAL=$(EXP_ID="$EXP_ID" node - <<'NODE'
+          const db=require("./db");
+          (async()=>{
+            await db.init();
+            const e=await db.getExperiment(process.env.EXP_ID,"ci-worker-e2e");
+            const a=await db.listArtifacts(process.env.EXP_ID,"ci-worker-e2e");
+            if(!e) throw new Error("Experiment missing");
+            if(e.status!=="completed") throw new Error("Experiment did not complete");
+            if(e.engine!=="MuJoCo") throw new Error("Unexpected engine");
+            if(e.result?.measured!==true) throw new Error("Expected measured=true");
+            if(e.result?.runCount!==2) throw new Error("Expected 2 runs");
+            if(e.result?.validation?.passed!==true) throw new Error("Experiment validation failed");
+            if(!Array.isArray(e.result?.rawResults)||e.result.rawResults.length!==2) throw new Error("Expected 2 raw results");
+            if(!a.some(x=>x.name==="experiment.json")) throw new Error("Missing experiment artifact");
+            console.log(JSON.stringify({status:e.status,runCount:e.result.runCount,artifactCount:a.length}));
+          })().catch(e=>{console.error(e.message);process.exit(1)});
+          NODE
+          )
+          echo "$FINAL"
+          echo "--- worker log ---"
+          cat /tmp/hb-worker.log
