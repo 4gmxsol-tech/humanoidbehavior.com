@@ -11,7 +11,7 @@ function serve(res,u){let p=decodeURIComponent(u.pathname);if(p==="/")p="/index.
 async function main(){
  const dbState=await db.init();http.createServer(async(req,res)=>{const u=url.parse(req.url,true);if(req.method==="OPTIONS"){res.writeHead(204);return res.end()}if(limited(req))return send(res,429,{error:"Rate limit exceeded"});
  try{
-  if(u.pathname==="/api/health")return send(res,200,{ok:true,service:"humanoidbehavior",version:"1.0.0",storage:dbState.mode,capabilities:["simulation","benchmark","real-benchmarking-contract","postgresql","authentication","api-keys","billing","robot-adapters","model-adapters"]});
+  if(u.pathname==="/api/health")return send(res,200,{ok:true,service:"humanoidbehavior",version:"1.0.0",storage:dbState.mode,capabilities:["simulation","benchmark","real-benchmarking-contract","postgresql","authentication","api-keys","billing","robot-adapters","model-adapters"]}); if(u.pathname==="/api/readiness")return send(res,200,{ok:true,ready:true,storage:dbState.mode,databaseConfigured:!!process.env.DATABASE_URL,stripeConfigured:!!process.env.STRIPE_SECRET_KEY,simulationHarness:true,mujocoWorkflow:true});
   if(u.pathname==="/api/behaviors"){let d=load(BEHAVIORS);if(u.query.q){const q=u.query.q.toLowerCase();d=d.filter(x=>(x.name+" "+x.description+" "+x.category).toLowerCase().includes(q))}return send(res,200,{data:d,count:d.length})}
   if(u.pathname.startsWith("/api/behaviors/")){const b=load(BEHAVIORS).find(x=>x.id===u.pathname.split("/").pop());return b?send(res,200,b):send(res,404,{error:"Behavior not found"})}
   if(u.pathname==="/api/plans")return send(res,200,{data:load(PLANS)});
