@@ -30,7 +30,27 @@ jobs:
         run: |
           node --check db.js
           node --check worker.js
-          python -m py_compile simulation/mujoco_worker.py
+          python -m py_compile simulation/mujoco_worker.py simulation/behavior_task_worker.py simulation/experiment_manager.py
+      - name: Smoke test executable behavior tasks
+        env:
+          MUJOCO_PYTHON: python3
+        run: |
+          set -euo pipefail
+          for behavior in pick-place open-door handover follow-person; do
+            echo "Testing $behavior"
+            OUT=$(printf '%s' "{\"behaviorId\":\"$behavior\",\"seed\":\"ci-task\",\"seconds\":1,\"policy\":\"A\"}" | python simulation/behavior_task_worker.py)
+            echo "$OUT"
+            BEHAVIOR="$behavior" OUT="$OUT" python - <<'PY'
+          import json, os
+          x=json.loads(os.environ["OUT"])
+          assert x["measured"] is True
+          assert x["behaviorId"] == os.environ["BEHAVIOR"]
+          assert x["engine"] == "MuJoCo"
+          assert "taskSuccess" in x["metrics"]
+          assert "simulatedSeconds" in x["metrics"]
+          PY
+          done
+
       - name: Run durable MuJoCo worker end-to-end test
         env:
           MUJOCO_PYTHON: python3
@@ -57,7 +77,7 @@ jobs:
             await db.enqueueJob({
               id:db.id(),experimentId:id,userId,type:"experiment",status:"queued",
               payload:{
-                behaviorId:"pick-place",behaviorVersion:"1.0.0",environment:"hb-humanoid-v1",seconds:0.2,
+                behaviorId:"pick-place",behaviorVersion:"1.0.0",environment:"hb-pick-place-v1",seconds:2,
                 seeds:["ci-e2e"],policies:["policy-a","policy-b"],engine:"MuJoCo"
               }
             });
