@@ -70,3 +70,20 @@ The included Dockerfile runs the Node API and serves the complete frontend on po
 The repository now contains a working web application and API foundation. For a real public production launch, configure a Node-capable host, persistent PostgreSQL storage, managed authentication, HTTPS, secrets, backups, monitoring and a real payment processor. GitHub Pages alone cannot run the Node API.
 
 The benchmark runner is a deterministic task-specification validator. It is intentionally not presented as physical-robot or simulator performance. Hardware/simulation adapters must be connected before publishing measured robotics results.
+
+## v1 platform integrations
+
+The repository now contains the integration foundation for:
+
+- **PostgreSQL** via `DATABASE_URL`, with JSON fallback for local development.
+- **Authentication** via email/password + scrypt and bearer sessions.
+- **API keys** with hashed storage, plan limits and revocation.
+- **Billing** via Stripe Checkout/webhook verification; requires real Stripe secrets/prices.
+- **Robot adapters** for generic HTTP and ROS 2 command contracts.
+- **Simulation adapters** for MuJoCo, Isaac Lab and Gazebo through an external worker command.
+- **Model/policy benchmarking** through the benchmark request's `model` / `policy` fields and persisted run metadata.
+- **Docker Compose** with PostgreSQL for an end-to-end local infrastructure environment.
+
+### Important execution boundary
+
+The adapter layer is designed so that the platform does not claim a robot or simulator executed a task when it did not. A real measured benchmark requires a connected simulator/robot worker. Stripe and PostgreSQL also remain configuration-dependent.
