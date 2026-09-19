@@ -15,3 +15,6 @@ assert.ok(typeof db.getExperiment==="function");
 console.log("experiment persistence API passed");
 
 const validPackage={id:"pick-place",name:"Pick & Place",version:"1.0.0",description:"test",steps:["one","two"]};assert.strictEqual(validateBehaviorPackage(validPackage).valid,true);assert.strictEqual(validateBehaviorPackage({...validPackage,id:"Bad ID"}).valid,false);console.log("behavior package schema passed");
+
+const registry=require("./behavior-registry");
+(async()=>{await registry.init();const versions=await registry.versions("pick-place",{publicOnly:true});assert.ok(versions.length>=1);const latest=versions[0];assert.strictEqual(latest.visibility,"public");assert.strictEqual(latest.status,"published");console.log("behavior registry/versioning passed")})().catch(e=>{console.error(e);process.exit(1)});
