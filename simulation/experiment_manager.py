@@ -1,5 +1,6 @@
 import json, math, os, statistics, sys
 from mujoco_worker import run
+from behavior_task_worker import run_behavior
 
 POLICIES = [
     {"name": "policy-a-stabilizer", "kp": 38.0, "kd": 8.0},
@@ -43,7 +44,7 @@ def summarize(rows, seconds):
         ("maxTiltRad", "max_tilt_rad"),
         ("controlCost", "control_cost"),
     ]
-    out = {"runs": len(rows), "fallRate": mean([1.0 if r["metrics"]["fell"] else 0.0 for r in rows])}
+    out = {"runs": len(rows), "fallRate": mean([1.0 if r["metrics"].get("fell",False) else 0.0 for r in rows]), "taskSuccessRate": mean([1.0 if r["metrics"].get("taskSuccess",False) else 0.0 for r in rows])}
     for source, name in metrics:
         values = [float(r["metrics"][source]) for r in rows]
         out[name] = {
@@ -57,13 +58,17 @@ def summarize(rows, seconds):
     out["targetSeconds"] = seconds
     return out
 
-def build_experiment(seeds, seconds, provenance=None):
+def build_experiment(seeds, seconds, provenance=None, behavior_id="humanoid-stand-v1"):
     results = []
     for seed in seeds:
         for policy in POLICIES:
-            row = run(policy, seed, seconds)
-            row["benchmark"] = "humanoid-stand-v1"
-            row["environment"] = "hb-humanoid-v1"
+            if behavior_id in ("pick-place","open-door","handover","follow-person"):
+                row = run_behavior(behavior_id, seed, seconds, "A" if policy["name"].endswith("a-stabilizer") else "B")
+            else:
+                row = run(policy, seed, seconds)
+                row["behaviorId"] = behavior_id
+            row["benchmark"] = row.get("benchmark", behavior_id)
+            row["environment"] = row.get("environment", "hb-"+behavior_id+"-v1")
             results.append(row)
 
     expected_runs = len(seeds) * len(POLICIES)
@@ -164,7 +169,9 @@ def main():
             "runNumber": os.environ.get("GITHUB_RUN_NUMBER"),
         }.items() if value
     }
-    report = build_experiment(seeds, seconds, provenance)
+    behavior_id = str(job.get("behaviorId", "humanoid-stand-v1"))
+    report = build_experiment(seeds, seconds, provenance, behavior_id)
+    report["behaviorId"] = behavior_id
     print(json.dumps(report))
     with open("mujoco-experiment.md", "w", encoding="utf-8") as f:
         f.write(markdown(report))
