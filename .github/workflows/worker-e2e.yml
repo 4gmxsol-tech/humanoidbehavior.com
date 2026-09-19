@@ -65,10 +65,10 @@ jobs:
             const id=db.id();
             const userId="ci-worker-e2e";
             await db.saveExperiment({
-              id,userId,benchmark:"humanoid-stand-v1",engine:"MuJoCo",status:"queued",
+              id,userId,benchmark:"humanoid-pick-place-v1",engine:"MuJoCo",status:"queued",
               createdAt:new Date().toISOString(),
               result:{
-                schemaVersion:"1.0",benchmark:"humanoid-stand-v1",environment:"hb-humanoid-v1",
+                schemaVersion:"1.0",benchmark:"humanoid-pick-place-v1",environment:"hb-pick-place-v1",
                 engine:"MuJoCo",measured:false,simulation:true,targetSeconds:0.2,runCount:0,
                 expectedRunCount:2,validation:{passed:false,message:"queued"},
                 seeds:["ci-e2e"],policies:["policy-a","policy-b"],rawResults:[],summary:{}
@@ -120,6 +120,8 @@ jobs:
             if(e.result?.runCount!==2) throw new Error("Expected 2 runs");
             if(e.result?.behaviorId!=="pick-place" || e.result?.behaviorVersion!=="1.0.0") throw new Error("Behavior provenance missing");
             if(e.result?.validation?.passed!==true) throw new Error("Experiment validation failed");
+            if(e.result?.benchmark!=="humanoid-pick-place-v1") throw new Error("Behavior benchmark contract missing");
+            if(!e.result?.summary || !Object.values(e.result.summary).every(x=>typeof x.taskSuccessRate==="number")) throw new Error("Task success summary missing");
             if(!Array.isArray(e.result?.rawResults)||e.result.rawResults.length!==2) throw new Error("Expected 2 raw results");
             if(!a.some(x=>x.name==="experiment.json")) throw new Error("Missing experiment artifact");
             console.log(JSON.stringify({status:e.status,runCount:e.result.runCount,artifactCount:a.length}));
