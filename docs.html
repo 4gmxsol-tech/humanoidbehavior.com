@@ -1,3 +1,14 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Developer Docs — HumanoidBehavior</title><link rel="stylesheet" href="styles.css"></head><body><header class="nav"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><nav><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a href="builder.html">Builder</a><a href="dashboard.html">Workspace</a></nav></header><main class="page"><div class="eyebrow">DEVELOPER DOCS</div><h1>Build against the behavior layer.</h1><p class="lead">Behavior specifications, benchmark runs and adapters form the core platform contract.</p><div class="doc-grid"><article><h2>Behavior schema</h2><pre>{ "id":"pick-place", "steps":["perceive","grasp","place"], "metrics":{"success":94} }</pre></article><article><h2>Benchmark API</h2><pre>POST /api/benchmark
-{ "behaviorId":"pick-place",
-  "completedSteps":[...] }</pre></article><article><h2>Roadmap</h2><p>Simulation adapters → model evaluation → authenticated API → teams → marketplace → enterprise.</p></article></div></main></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Developer Docs — HumanoidBehavior</title><link rel="stylesheet" href="styles.css"></head><body><header class="nav"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><nav><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a href="simulation.html">Simulation</a><a href="dashboard.html">Workspace</a></nav></header><main class="page"><div class="eyebrow">DEVELOPER DOCS</div><h1>Build against the behavior layer.</h1><p class="lead">Behavior specifications, experiments, benchmark runs and adapters form the platform contract.</p><div class="doc-grid"><article><h2>Behavior API</h2><pre>GET /api/behaviors
+GET /api/behaviors/:id</pre><p>Discover reusable task specifications.</p></article><article><h2>Experiment API</h2><pre>POST /api/experiments/run
+GET /api/experiments
+GET /api/experiments/:id
+GET /api/experiments/compare?ids=...</pre><p>Run and inspect reproducible multi-seed experiments.</p></article><article><h2>Authentication</h2><pre>Authorization: Bearer hb_live_...</pre><p>Use account sessions or API keys for authenticated endpoints.</p></article><article><h2>Execution boundary</h2><pre>simulation-harness
+measured=false
+
+MuJoCo
+measured=true</pre><p>The platform keeps deterministic harness results separate from measured simulator results.</p></article><article><h2>Health & readiness</h2><pre>GET /api/health
+GET /api/readiness</pre><p>Use readiness checks in production deployment monitoring.</p></article><article><h2>Robotics adapters</h2><pre>MuJoCo
+Isaac Lab
+Gazebo
+ROS 2
+HTTP robot gateway</pre><p>Workers connect these execution contracts to real simulation or hardware environments.</p></article></div></main></body></html>
