@@ -7,6 +7,9 @@ on:
       - "db.js"
       - "package.json"
       - "simulation/**"
+      - "api.js"
+      - "auth.js"
+      - "evaluation.test.js"
       - ".github/workflows/worker-e2e.yml"
   workflow_dispatch:
 jobs:
@@ -216,6 +219,29 @@ jobs:
           assert "maxTiltRad" in x and "controlCost" in x
           print("G1 Menagerie measured smoke passed")
           PY
+
+      - name: Run measured Unitree G1 Pick & Place behavior smoke evaluation
+        run: |
+          set -euo pipefail
+          for version in 1.0.0 1.1.0; do
+            OUT=$(printf '%s' "{\"behaviorVersion\":\"$version\",\"seed\":\"ci-g1-behavior\",\"seconds\":1,\"policy\":\"A\"}" | python simulation/robot_behavior_worker.py)
+            VERSION="$version" OUT="$OUT" python - <<'PY'
+          import json, os
+          x=json.loads(os.environ["OUT"])
+          assert x["robotId"]=="unitree_g1"
+          assert x["behaviorId"]=="pick-place"
+          assert x["behaviorVersion"]==os.environ["VERSION"]
+          assert x["engine"]=="MuJoCo"
+          assert x["measured"] is True
+          assert "taskSuccess" in x
+          assert "completionTime" in x
+          assert "controlCost" in x
+          assert "maxTiltRad" in x
+          assert "collisionCount" in x
+          assert x["provenance"]["modelSource"]=="MuJoCo Menagerie"
+          print("G1 Pick & Place", os.environ["VERSION"], "passed")
+          PY
+          done
 
       - name: Verify version-aware MuJoCo evaluation
         run: |
