@@ -1,0 +1,1 @@
+let b="";process.stdin.on("data",d=>b+=d);process.stdin.on("end",()=>{try{const j=JSON.parse(b);process.stdout.write(JSON.stringify({status:"accepted",job:j,contract:"humanoidbehavior-simulation-v1"}))}catch(e){process.stderr.write(e.message);process.exit(1)}});
