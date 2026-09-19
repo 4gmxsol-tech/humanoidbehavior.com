@@ -28,3 +28,38 @@ Open `index.html` in a browser. The project is static HTML/CSS for the first dep
 ## Repository
 
 https://github.com/4gmxsol-tech/humanoidbehavior.com
+
+
+## Deployment
+
+The included Dockerfile runs the Node API and serves the complete frontend on port 3000. Copy .env.example to .env for local configuration. The current account system is an MVP session layer; production deployments should replace it with a managed identity provider and durable database before handling real users.
+
+## Product roadmap
+
+### Foundation
+- Behavior catalog and specifications
+- Benchmark contract
+- Developer workspace
+- API and CI
+
+### Robotics execution
+- MuJoCo adapter
+- Isaac Lab adapter
+- Gazebo adapter
+- Containerized benchmark workers
+- Robot/model adapters
+
+### SaaS
+- Durable PostgreSQL storage
+- OAuth/email authentication
+- API keys
+- Team workspaces
+- Usage metering
+- Stripe billing
+
+### Marketplace
+- Publish behavior packages
+- Versioning and provenance
+- Private/public visibility
+- Ratings and usage analytics
+- Paid behavior packages
