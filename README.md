@@ -63,3 +63,10 @@ The included Dockerfile runs the Node API and serves the complete frontend on po
 - Private/public visibility
 - Ratings and usage analytics
 - Paid behavior packages
+
+
+## Production status
+
+The repository now contains a working web application and API foundation. For a real public production launch, configure a Node-capable host, persistent PostgreSQL storage, managed authentication, HTTPS, secrets, backups, monitoring and a real payment processor. GitHub Pages alone cannot run the Node API.
+
+The benchmark runner is a deterministic task-specification validator. It is intentionally not presented as physical-robot or simulator performance. Hardware/simulation adapters must be connected before publishing measured robotics results.
