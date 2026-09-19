@@ -1,4 +1,4 @@
-import json, math, statistics, sys
+import json, math, os, statistics, sys
 from compare_mujoco import run
 
 POLICIES = [
@@ -57,7 +57,7 @@ def summarize(rows, seconds):
     out["targetSeconds"] = seconds
     return out
 
-def build_experiment(seeds, seconds):
+def build_experiment(seeds, seconds, provenance=None):
     results = []
     for seed in seeds:
         for policy in POLICIES:
@@ -65,6 +65,21 @@ def build_experiment(seeds, seconds):
             row["benchmark"] = "humanoid-stand-v1"
             row["environment"] = "hb-humanoid-v1"
             results.append(row)
+
+    expected_runs = len(seeds) * len(POLICIES)
+    if len(results) != expected_runs:
+        raise RuntimeError(
+            f"Experiment integrity check failed: expected {expected_runs} runs, got {len(results)}"
+        )
+
+    expected_pairs = {(str(seed), policy["name"]) for seed in seeds for policy in POLICIES}
+    actual_pairs = {(str(row["seed"]), row["policy"]) for row in results}
+    if actual_pairs != expected_pairs:
+        missing = sorted(expected_pairs - actual_pairs)
+        unexpected = sorted(actual_pairs - expected_pairs)
+        raise RuntimeError(
+            f"Experiment integrity check failed: missing={missing}, unexpected={unexpected}"
+        )
 
     summaries = {}
     for policy in POLICIES:
@@ -90,6 +105,13 @@ def build_experiment(seeds, seconds):
         "measured": True,
         "simulation": True,
         "targetSeconds": seconds,
+        "runCount": len(results),
+        "expectedRunCount": len(seeds) * len(POLICIES),
+        "validation": {
+            "passed": True,
+            "message": "Every requested seed was evaluated against every policy."
+        },
+        "provenance": provenance or {},
         "seeds": seeds,
         "policies": [p["name"] for p in POLICIES],
         "rawResults": results,
@@ -134,7 +156,15 @@ def main():
         raise ValueError("At least one seed is required")
     if seconds <= 0:
         raise ValueError("seconds must be greater than zero")
-    report = build_experiment(seeds, seconds)
+    provenance = {
+        key: value for key, value in {
+            "gitSha": os.environ.get("GITHUB_SHA"),
+            "workflow": os.environ.get("GITHUB_WORKFLOW"),
+            "runId": os.environ.get("GITHUB_RUN_ID"),
+            "runNumber": os.environ.get("GITHUB_RUN_NUMBER"),
+        }.items() if value
+    }
+    report = build_experiment(seeds, seconds, provenance)
     print(json.dumps(report))
     with open("mujoco-experiment.md", "w", encoding="utf-8") as f:
         f.write(markdown(report))
