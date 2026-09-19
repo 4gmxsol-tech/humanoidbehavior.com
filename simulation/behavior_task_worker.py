@@ -18,7 +18,7 @@ ARM_XML = r"""<mujoco model="hb_manipulation_task">
 <body name="object" pos="0 0 0"><freejoint name="object_free"/><geom name="object_geom" type="sphere" size=".055" mass=".4"/></body>
 <body name="target" pos="0 0 0"><geom name="target_geom" type="cylinder" size=".09 .01" mass="0.01" contype="0" conaffinity="0"/></body>
 </worldbody>
-<equality><weld name="grasp" body1="hand" body2="object" relpose="false" active="false"/></equality>
+<equality><weld name="grasp" body1="hand" body2="object" active="false"/></equality>
 <actuator><motor joint="shoulder" gear="20"/><motor joint="elbow" gear="15"/></actuator>
 </mujoco>"""
 
