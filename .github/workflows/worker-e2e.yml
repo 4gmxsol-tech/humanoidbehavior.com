@@ -148,3 +148,18 @@ jobs:
           echo "$FINAL"
           echo "--- worker log ---"
           cat /tmp/hb-worker.log
+
+      - name: Verify version-aware MuJoCo evaluation
+        run: |
+          set -euo pipefail
+          for version in 1.0.0 1.1.0; do
+            OUT=$(printf '%s' "{\"behaviorId\":\"pick-place\",\"behaviorVersion\":\"$version\",\"seed\":\"ci-version\",\"seconds\":1,\"policy\":\"A\"}" | python simulation/behavior_task_worker.py)
+            VERSION="$version" OUT="$OUT" python - <<'PY'
+          import json, os
+          x=json.loads(os.environ["OUT"])
+          assert x["measured"] is True
+          assert x["behaviorVersion"] == os.environ["VERSION"]
+          assert x["engine"] == "MuJoCo"
+          assert "taskSuccess" in x["metrics"]
+          PY
+          done
