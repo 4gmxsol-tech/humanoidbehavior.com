@@ -7,3 +7,9 @@ assert.strictEqual(sr.simulation,true);
 assert.ok(sr.metrics.stepsTotal>0);
 assert.ok(["passed","failed"].includes(sr.status));
 console.log("simulation harness passed");
+
+const db=require("./db");
+assert.ok(typeof db.saveExperiment==="function");
+assert.ok(typeof db.listExperiments==="function");
+assert.ok(typeof db.getExperiment==="function");
+console.log("experiment persistence API passed");
