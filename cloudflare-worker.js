@@ -381,12 +381,16 @@ export default {
         const policies=Array.isArray(x.policies)&&x.policies.length?x.policies.map(String).filter(Boolean).slice(0,8):["policy-a"];
         if(seeds.length<1||seeds.length>20)return json({error:"Use 1–20 seeds"},400);
         if(policies.length<1||policies.length>8)return json({error:"Use 1–8 policies"},400);
+        const requestedRuns=seeds.length*policies.length;
+        if(requestedRuns>20)return json({error:"Maximum 20 runs per evaluation"},400);
         const behaviorId=String(x.behaviorId||"pick-place"),behaviorVersion=String(x.behaviorVersion||"1.1.0"),engine=String(x.engine||"MuJoCo");
         if(!["MuJoCo","simulation-harness"].includes(engine))return json({error:"Unsupported engine"},400);
         const spec=behaviorSpec(behaviorId,behaviorVersion);
         if(!spec)return json({error:"Published behavior version not found: "+behaviorId+"@"+behaviorVersion},404);
         if(!spec.compatibleEngines.includes(engine))return json({error:"Behavior version is not compatible with "+engine},400);
-        const requested=seeds.length*policies.length,plan=planFor(user),used=await usage(user.id,env);
+        const requested=requestedRuns,plan=planFor(user),used=await usage(user.id,env);
+        const active=await env.DB.prepare("SELECT COUNT(*) AS n FROM jobs WHERE user_id=? AND status IN ('queued','running')").bind(user.id).first();
+        if(Number(active?.n||0)>=3)return json({error:"Too many evaluations already queued or running. Wait for one to finish."},429);
         if(plan.limits.benchmarksPerMonth>=0&&used+requested>plan.limits.benchmarksPerMonth)return json({error:"Monthly benchmark limit reached",limit:plan.limits.benchmarksPerMonth,used,requested},429);
         const expId=id(),jobId=id(),seconds=Math.max(1,Math.min(Number(x.seconds||5),60));
         const result={id:expId,userId:user.id,benchmark:"behavior-evaluation",engine,status:"queued",behaviorId,behaviorVersion,createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-evaluation",measured:engine==="MuJoCo",reproducible:true,seeds,policies,seconds,runCount:0,expectedRunCount:requested,validation:{passed:false,message:"Evaluation queued for execution worker"},rawResults:[],summary:{}}};
