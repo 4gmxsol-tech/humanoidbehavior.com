@@ -25,7 +25,7 @@ async function load(){
   document.getElementById("plan-limits").textContent=`${u.limits?.privateBehaviors<0?"Unlimited":u.limits?.privateBehaviors??0} private behaviors`;
   document.getElementById("billing-status").innerHTML="<b>"+String(u.plan||"free").toUpperCase()+"</b> · Cloudflare D1 account active";
   document.getElementById("key-list").innerHTML=(k.data||[]).map(x=>`<div class="run-row"><span><b>${x.name}</b><br><small>${x.prefix}••••</small></span><span>${x.createdAt?new Date(x.createdAt).toLocaleString():""}</span><span>${x.revokedAt?"Revoked":"Active"}</span><button class="button" onclick="revokeKey('${x.id}')">Revoke</button></div>`).join("")||"<div class='empty'>No API keys yet.</div>";
-  document.getElementById("experiments").innerHTML=(e.data||[]).map(x=>`<div class="run-row"><input type="checkbox" class="exp" value="${x.id}"><span><b>${x.benchmark}</b><br><small>${x.engine} · ${x.status}</small></span><span>${x.result?.runCount||0} runs</span><span>${x.createdAt?new Date(x.createdAt).toLocaleString():""}</span><a class="button" href="experiment.html?id=${encodeURIComponent(x.id)}">Open</a></div>`).join("")||"<div class='empty'>No experiments yet.</div>";
+  document.getElementById("experiments").innerHTML=(e.data||[]).map(x=>`<div class="run-row"><input type="checkbox" class="exp" value="${x.id}"><span><b>${x.benchmark}</b><br><small>${x.engine} · ${x.status}</small></span><span>${x.result?.runCount||0} runs</span><span>${x.createdAt?new Date(x.createdAt).toLocaleString():""}</span><span><a class="button" href="experiment.html?id=${encodeURIComponent(x.id)}">Open</a> ${["queued","running"].includes(x.status)?`<button class="button" onclick="cancelExperiment('${x.id}')">Cancel</button>`:""}</span></div>`).join("")||"<div class='empty'>No experiments yet.</div>";
   document.getElementById("runs").innerHTML="<div class='empty'>Evaluation runs are available from Experiments.</div>";
  }catch(e){
   authFail("✕ Workspace load failed — "+e.message);
@@ -42,6 +42,13 @@ document.getElementById("create-key").onclick=async()=>{
   document.getElementById("key-name").value="";load();
  }catch(e){out.textContent="✕ Failed — "+e.message}
 };
+async function cancelExperiment(id){
+ if(!confirm("Cancel this evaluation?"))return;
+ try{
+  await getJson("/api/experiments/"+encodeURIComponent(id)+"/cancel",{method:"POST"});
+  await load();
+ }catch(e){alert("✕ Cancel failed — "+e.message)}
+}
 async function revokeKey(id){
  if(!confirm("Revoke this API key?"))return;
  try{await getJson("/api/keys/"+encodeURIComponent(id),{method:"DELETE"});load()}catch(e){alert("✕ Failed — "+e.message)}
