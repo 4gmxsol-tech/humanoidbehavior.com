@@ -1,4 +1,4 @@
-const VERSION = "cloudflare-d1-api-1";
+const VERSION = "cloudflare-d1-api-2";
 const encoder = new TextEncoder();
 
 const PLANS = {
@@ -8,7 +8,7 @@ const PLANS = {
 };
 
 const ROBOTS = {
-  "unitree-g1": { name: "Unitree G1", manufacturer: "Unitree Robotics", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation", "whole-body"] },
+  "unitree-g1": { name: "Unitree G1", manufacturer: "Unitree Robotics", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "catalog-only", capabilities: ["locomotion", "manipulation", "whole-body"] },
   "unitree-h1": { name: "Unitree H1", manufacturer: "Unitree Robotics", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation", "whole-body"] },
   "unitree-t1": { name: "Unitree T1", manufacturer: "Unitree Robotics", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation"] },
   apollo: { name: "Apollo", manufacturer: "Apptronik", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation", "whole-body"] },
@@ -116,6 +116,10 @@ async function body(request) {
 }
 function planFor(user) { return PLANS[user?.plan] || PLANS.free; }
 function publicUser(u) { return { id:u.id, email:u.email, name:u.name, plan:u.plan }; }
+function validEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254; }
+function behaviorSpec(id, version) { return BEHAVIORS.find(b => b.id === id && b.version === version) || null; }
+function sanitizeName(value, fallback="Untitled") { const s=String(value||"").trim().replace(/\s+/g," "); return s.slice(0,160)||fallback; }
+function sanitizeSteps(value) { return Array.isArray(value) ? value.map(v=>String(v||"").trim().slice(0,300)).filter(Boolean).slice(0,20) : []; }
 
 async function authUser(request, env) {
   const h = request.headers.get("Authorization") || "";
@@ -153,7 +157,18 @@ function cleanBehavior(row) {
 
 export default {
   async fetch(request, env) {
-    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", "Access-Control-Max-Age": "86400", "Cache-Control": "no-store" }});
+    if (request.method === "OPTIONS") {
+      const origin = request.headers.get("Origin");
+      if (origin && origin !== ALLOWED_ORIGIN) return new Response(null, { status: 403 });
+      return new Response(null, { status: 204, headers: {
+        "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
+        "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization",
+        "Access-Control-Max-Age": "86400",
+        "Vary": "Origin",
+        "Cache-Control": "no-store"
+      }});
+    }
     let stage = "start";
     try {
       stage = "ensure-schema";
@@ -186,6 +201,22 @@ export default {
         return json({ data, count:data.length });
       }
 
+      if (path === "/api/behaviors" && request.method === "POST") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const plan=planFor(user);
+        if(plan.limits.privateBehaviors>=0){const count=await env.DB.prepare("SELECT COUNT(*) AS n FROM behaviors WHERE user_id=? AND visibility='private'").bind(user.id).first();if(Number(count?.n||0)>=plan.limits.privateBehaviors)return json({error:"Private behavior limit reached",limit:plan.limits.privateBehaviors},403);}
+        const x=await body(request),name=sanitizeName(x.name),description=sanitizeName(x.description,name),steps=sanitizeSteps(x.steps);
+        if(!steps.length)return json({error:"At least one behavior step is required"},400);
+        const behaviorId=sanitizeName(x.id,"generated-behavior").toLowerCase().replace(/[^a-z0-9-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80)||("behavior-"+crypto.randomUUID().slice(0,8));
+        const version=sanitizeName(x.version,"1.0.0");
+        if(!/^\d+\.\d+\.\d+$/.test(version))return json({error:"Version must use semantic versioning, e.g. 1.0.0"},400);
+        const existing=await env.DB.prepare("SELECT id FROM behaviors WHERE id=? AND version=?").bind(behaviorId,version).first();
+        if(existing)return json({error:"Behavior version already exists"},409);
+        const pkg={schemaVersion:"1.0",id:behaviorId,version,name,category:sanitizeName(x.category,"Custom"),level:sanitizeName(x.level,"Custom"),description,steps,metrics:x.metrics||{},metricsStatus:"user-defined",compatibleEngines:Array.isArray(x.compatibleEngines)?x.compatibleEngines.slice(0,5):["MuJoCo"],compatibleRobots:Array.isArray(x.compatibleRobots)?x.compatibleRobots.slice(0,10):["generic-humanoid"],provenance:x.provenance||{source:"Behavior Builder",createdBy:user.id},tags:Array.isArray(x.tags)?x.tags.slice(0,20):[]};
+        await env.DB.prepare("INSERT INTO behaviors(id,version,user_id,name,description,visibility,status,package_json) VALUES(?,?,?,?,?,?,?,?)").bind(behaviorId,version,user.id,name,description,"private","draft",JSON.stringify(pkg)).run();
+        return json({behavior:{...pkg,userId:user.id,visibility:"private",status:"draft"}},201);
+      }
+
       const versionMatch = path.match(/^\/api\/behaviors\/([^/]+)\/versions$/);
       if (versionMatch && request.method === "GET") {
         const rows = await env.DB.prepare("SELECT * FROM behaviors WHERE id=? AND visibility='public' AND status='published' ORDER BY updated_at DESC").bind(decodeURIComponent(versionMatch[1])).all();
@@ -204,7 +235,7 @@ export default {
         try {
           const x = await body(request);
           const email = String(x.email||"").trim().toLowerCase(), password = String(x.password||"");
-          if (!email || !password || password.length < 8) return json({error:"Email and password (8+ chars) required"},400);
+          if (!validEmail(email) || !password || password.length < 8 || password.length > 200) return json({error:"Valid email and password (8–200 chars) required"},400);
           stage = "check-email";
           const exists = await env.DB.prepare("SELECT id FROM users WHERE email=?").bind(email).first();
           if (exists) return json({error:"Account already exists"},409);
@@ -217,7 +248,7 @@ export default {
           const token = await createSession(user,env);
           return json({ token, user },201);
         } catch (error) {
-          return json({error:"Signup failed",stage,message:String(error?.message||error),name:String(error?.name||"Error")},500);
+          console.error("Signup failed", error); return json({error:"Signup failed"},500);
         }
       }
 
@@ -228,7 +259,7 @@ export default {
         return json({ token:await createSession(user,env), user:publicUser(user) });
       }
 
-      if (path === "/api/auth/demo" && request.method === "POST") {
+      if (path === "/api/auth/demo" && request.method === "POST") { return json({error:"Demo access is disabled in production"},403); }\n\n      if (false && path === "/api/auth/demo" && request.method === "POST") {
         const user={id:"demo_"+crypto.randomUUID().replaceAll("-",""),email:"demo@example.invalid",name:"Demo Developer",plan:"free"};
         await env.DB.prepare("INSERT INTO users(id,email,name,plan) VALUES(?,?,?,?)").bind(user.id,user.email,user.name,user.plan).run();
         return json({ token:await createSession(user,env), user },200);
@@ -237,6 +268,12 @@ export default {
       if (path === "/api/me" && request.method === "GET") {
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
         return json({user:publicUser(user),plan:planFor(user),storage:"cloudflare-d1"});
+      }
+
+      if (path === "/api/auth/logout" && request.method === "POST") {
+        const h=request.headers.get("Authorization")||"";
+        if(h.startsWith("Bearer ")){const token=h.slice(7).trim();if(token)await env.DB.prepare("DELETE FROM sessions WHERE token_hash=?").bind(await sha256(token)).run();}
+        return json({ok:true});
       }
 
       if (path === "/api/usage" && request.method === "GET") {
@@ -270,6 +307,9 @@ export default {
       if (path === "/api/robots" && request.method === "GET") return json({data:Object.entries(ROBOTS).map(([id,robot])=>({id,...robot}))});
       const robotMatch=path.match(/^\/api\/robots\/([^/]+)$/);
       if(robotMatch && request.method==="GET"){const rid=decodeURIComponent(robotMatch[1]),robot=ROBOTS[rid];return robot?json({id:rid,...robot}):json({error:"Robot model not found"},404);}
+
+      const robotEval=path.match(/^\/api\/robots\/([^/]+)\/evaluate$/),robotBehaviorEval=path.match(/^\/api\/robots\/([^/]+)\/behaviors\/([^/]+)$/);
+      if((robotEval||robotBehaviorEval)&&request.method==="POST")return json({error:"Robot-specific MuJoCo adapters are not enabled yet. Use Generic behavior evaluation until a verified robot model is connected."},501);
 
       if (path === "/api/experiments" && request.method === "GET") {
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
@@ -305,6 +345,32 @@ export default {
         return json(result);
       }
 
+      if (path === "/api/experiments/compare" && request.method === "GET") {
+        const user=await requireUser(request,env);if(!user)return json({error:"Authentication required"},401);
+        const ids=(u.searchParams.get("ids")||"").split(",").map(s=>s.trim()).filter(Boolean).slice(0,20);
+        if(!ids.length)return json({data:[]});
+        const placeholders=ids.map(()=>"?").join(",");
+        const rows=await env.DB.prepare("SELECT result_json FROM experiments WHERE user_id=? AND id IN ("+placeholders+") ORDER BY created_at DESC").bind(user.id,...ids).all();
+        return json({data:rows.results.map(x=>JSON.parse(x.result_json))});
+      }
+
+      const shareExpMatch=path.match(/^\/api\/experiments\/([^/]+)\/share$/);
+      if(shareExpMatch&&request.method==="POST"){
+        const user=await requireUser(request,env);if(!user)return json({error:"Authentication required"},401);
+        const expId=decodeURIComponent(shareExpMatch[1]),row=await env.DB.prepare("SELECT id,status FROM experiments WHERE id=? AND user_id=?").bind(expId,user.id).first();
+        if(!row)return json({error:"Experiment not found"},404);
+        if(row.status!=="completed")return json({error:"Only completed experiments can be shared"},409);
+        const token=crypto.randomUUID().replaceAll("-","")+crypto.randomUUID().replaceAll("-","");
+        await env.DB.prepare("INSERT INTO experiment_shares(token,experiment_id,user_id) VALUES(?,?,?)").bind(token,expId,user.id).run();
+        return json({url:"share.html?token="+encodeURIComponent(token),token});
+      }
+      if(path==="/api/share"&&request.method==="GET"){
+        const token=String(u.searchParams.get("token")||"").trim();
+        if(!token||token.length>100)return json({error:"Invalid share token"},400);
+        const row=await env.DB.prepare("SELECT e.result_json,e.status FROM experiment_shares s JOIN experiments e ON e.id=s.experiment_id WHERE s.token=?").bind(token).first();
+        return row?json(JSON.parse(row.result_json)):json({error:"Shared report not found"},404);
+      }
+
       if (path === "/api/experiments/run" && request.method === "POST") {
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
         const x=await body(request), seeds=Array.isArray(x.seeds)?x.seeds.map(String):String(x.seeds||"42,1337").split(",").map(s=>s.trim()).filter(Boolean);
@@ -312,7 +378,7 @@ export default {
         if(plan.limits.benchmarksPerMonth>=0 && used+requested>plan.limits.benchmarksPerMonth) return json({error:"Monthly benchmark limit reached",limit:plan.limits.benchmarksPerMonth,used,requested},429);
         if(seeds.length>20)return json({error:"Maximum 20 seeds"},400);
         const expId=id(),jobId=id(),seconds=Math.max(.1,Math.min(Number(x.seconds||5),60));
-        const result={id:expId,userId:user.id,benchmark:"behavior-evaluation",engine:String(x.engine||"simulation-harness"),status:"queued",behaviorId:String(x.behaviorId||"pick-place"),behaviorVersion:String(x.behaviorVersion||"1.1.0"),createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-evaluation",measured:String(x.engine||"simulation-harness")==="MuJoCo",reproducible:true,seeds,policies:x.policies||["policy-a"],seconds,runCount:0,expectedRunCount:seeds.length,validation:{passed:false,message:"Evaluation queued for execution worker"},rawResults:[],summary:{}}};
+        const result={id:expId,userId:user.id,benchmark:"behavior-evaluation",engine:String(x.engine||"simulation-harness"),status:"queued",behaviorId:String(x.behaviorId||"pick-place"),behaviorVersion:String(x.behaviorVersion||"1.1.0"),createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-evaluation",measured:engine==="MuJoCo",reproducible:true,seeds,policies,seconds,runCount:0,expectedRunCount:seeds.length*policies.length,validation:{passed:false,message:"Evaluation queued for execution worker"},rawResults:[],summary:{}}};
         await env.DB.batch([
           env.DB.prepare("INSERT INTO experiments(id,user_id,benchmark,engine,status,behavior_id,behavior_version,result_json) VALUES(?,?,?,?,?,?,?,?)").bind(expId,user.id,result.benchmark,result.engine,result.status,result.behaviorId,result.behaviorVersion,JSON.stringify(result)),
           env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"experiment-run","queued",JSON.stringify(x))
@@ -341,7 +407,7 @@ export default {
 
       return json({error:"Not found"},404);
     } catch (error) {
-      return json({error:"Worker error",stage,message:String(error?.message||error),name:String(error?.name||"Error")},500);
+      console.error("Worker error",{stage,error}); return json({error:"Internal server error"},500);
     }
   }
 };
