@@ -37,8 +37,8 @@ ARM_XML = r"""<mujoco model="hb_manipulation_task">
 </worldbody>
 <equality><weld name="grasp" body1="hand" body2="object" active="false"/></equality>
 <actuator>
-  <position name="shoulder_position" joint="shoulder" kp="85" kv="10" ctrlrange="-2.8 2.8"/>
-  <position name="elbow_position" joint="elbow" kp="70" kv="8" ctrlrange="-2.8 2.8"/>
+  <motor name="shoulder_motor" joint="shoulder" gear="1" ctrlrange="-80 80"/>
+  <motor name="elbow_motor" joint="elbow" gear="1" ctrlrange="-70 70"/>
 </actuator>
 </mujoco>"""
 
@@ -146,15 +146,17 @@ def manipulation(behavior, seed, seconds, policy, behavior_version="1.0.0"):
         q1, q2, reachable = ik(gx, gz)
         reachability = reachability and reachable
 
-        # Position actuators make the benchmark controller explicit and
-        # reproducible: the policy supplies joint targets, while MuJoCo applies
-        # the configured kp/kv dynamics.
+        # Explicit torque-PD control with enough authority to reach the
+        # manipulation workspace. The previous position-actuator configuration
+        # left the arm effectively stationary on the free runner.
         if policy == "A":
-            data.ctrl[0], data.ctrl[1] = q1, q2
+            kp_s, kp_e, kd = 75.0, 65.0, 12.0
         else:
-            # Policy B is deliberately slower, providing a second controller
-            # profile for future comparison without changing task geometry.
-            data.ctrl[0], data.ctrl[1] = q1, q2
+            kp_s, kp_e, kd = 58.0, 50.0, 10.0
+        tau_s = kp_s * (q1 - data.qpos[qs]) - kd * data.qvel[vs]
+        tau_e = kp_e * (q2 - data.qpos[qe]) - kd * data.qvel[ve]
+        data.ctrl[0] = max(-80.0, min(80.0, tau_s))
+        data.ctrl[1] = max(-70.0, min(70.0, tau_e))
 
         mujoco.mj_step(model, data)
 
@@ -215,7 +217,9 @@ def manipulation(behavior, seed, seconds, policy, behavior_version="1.0.0"):
             "reachability": bool(reachability),
             "minimumHandObjectDistanceM": round(min_hand_object, 5) if math.isfinite(min_hand_object) else None,
             "minimumObjectTargetDistanceM": round(min_object_target, 5) if math.isfinite(min_object_target) else None,
-            "graspDurationS": round(grasp_duration, 4) if grasp_duration is not None else None
+            "graspDurationS": round(grasp_duration, 4) if grasp_duration is not None else None,
+            "finalShoulderRad": round(float(data.qpos[qs]), 4),
+            "finalElbowRad": round(float(data.qpos[qe]), 4)
         }
     }
 
