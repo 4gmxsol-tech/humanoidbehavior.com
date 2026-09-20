@@ -284,6 +284,27 @@ export default {
         return row?json(JSON.parse(row.result_json)):json({error:"Experiment not found"},404);
       }
 
+      const cancelMatch=path.match(/^\\/api\\/experiments\\/([^/]+)\\/cancel$/);
+      if(cancelMatch && request.method==="POST"){
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const expId=decodeURIComponent(cancelMatch[1]);
+        const row=await env.DB.prepare("SELECT id,status FROM experiments WHERE id=? AND user_id=?").bind(expId,user.id).first();
+        if(!row)return json({error:"Experiment not found"},404);
+        if(row.status==="completed" || row.status==="failed" || row.status==="cancelled") return json({error:"Experiment is already "+row.status},409);
+        const now=new Date().toISOString();
+        const resultRow=await env.DB.prepare("SELECT result_json FROM experiments WHERE id=? AND user_id=?").bind(expId,user.id).first();
+        const result=JSON.parse(resultRow.result_json);
+        result.status="cancelled";
+        result.result.status="cancelled";
+        result.result.validation={passed:false,message:"Evaluation cancelled by user."};
+        result.cancelledAt=now;
+        await env.DB.batch([
+          env.DB.prepare("UPDATE experiments SET status='cancelled',result_json=? WHERE id=? AND user_id=?").bind(JSON.stringify(result),expId,user.id),
+          env.DB.prepare("UPDATE jobs SET status='cancelled',error='Cancelled by user',finished_at=CURRENT_TIMESTAMP WHERE experiment_id=? AND user_id=? AND status IN ('queued','running')").bind(expId,user.id)
+        ]);
+        return json(result);
+      }
+
       if (path === "/api/experiments/run" && request.method === "POST") {
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
         const x=await body(request), seeds=Array.isArray(x.seeds)?x.seeds.map(String):String(x.seeds||"42,1337").split(",").map(s=>s.trim()).filter(Boolean);
