@@ -166,7 +166,7 @@ def main():
         return
     job = jobs[0]
     claimed = d1(
-        "UPDATE jobs SET status='running', started_at=datetime('now'), attempts=COALESCE(attempts,0)+1 WHERE id=? AND status='queued'",
+        "UPDATE jobs SET status='running', started_at=datetime('now'), attempts=COALESCE(attempts,0)+1 WHERE id=? AND status='queued' RETURNING id",
         [job["id"]],
     )
     if not claimed:
