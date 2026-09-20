@@ -46,14 +46,17 @@ def seed01(seed):
     return int.from_bytes(hashlib.sha256(str(seed).encode()).digest()[:8], "big") / 2**64
 
 def ik(x,z):
+    # MuJoCo's positive rotation about +Y moves +X toward -Z.
+    # Solve the planar IK in the conventional X/Z frame, then negate
+    # the joint angles when mapping them to MuJoCo hinge coordinates.
     l1,l2=.28,.25
     dx=x-.20; dz=z-1.17
     d=min(l1+l2-.001,max(abs(l1-l2)+.001,math.hypot(dx,dz)))
     c2=max(-1,min(1,(d*d-l1*l1-l2*l2)/(2*l1*l2)))
-    e=math.acos(c2)
-    s2=math.sin(e)
-    q1=math.atan2(dz,dx)-math.atan2(l2*s2,l1+l2*c2)
-    return q1,e
+    theta2=math.acos(c2)
+    s2=math.sin(theta2)
+    theta1=math.atan2(dz,dx)-math.atan2(l2*s2,l1+l2*c2)
+    return -theta1,-theta2
 
 def collisions(model,data,allowed=("floor","object_geom","target_geom")):
     count=0
