@@ -44,6 +44,23 @@ jobs:
           cat /tmp/d1-response.json
           test "${HTTP_CODE}" = "200"
 
+      - name: Verify D1 query access
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: de530114-adc7-4c5a-b0de-cdc2e5379ed5
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -e
+          BODY='{"sql":"SELECT 1 AS ok"}'
+          HTTP_CODE=$(curl -sS -o /tmp/d1-query-response.json -w "%{http_code}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}/query" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data "${BODY}")
+          echo "D1 query HTTP status: ${HTTP_CODE}"
+          cat /tmp/d1-query-response.json
+          test "${HTTP_CODE}" = "200"
+
       - name: Run one queued evaluation
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
