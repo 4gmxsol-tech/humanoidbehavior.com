@@ -37,7 +37,7 @@ def d1(sql, params=None):
 
 def update_progress(job_id, exp, completed, total):
     pct = round(completed / total * 100) if total else 0
-    d1("UPDATE jobs SET progress=? WHERE id=?", [json.dumps({"completed": completed, "total": total, "percentage": pct}), job_id])
+    d1("UPDATE jobs SET progress_json=? WHERE id=?", [json.dumps({"completed": completed, "total": total, "percentage": pct}), job_id])
     exp["status"] = "running"
     exp["result"]["status"] = "running"
     exp["result"]["runCount"] = completed
@@ -141,11 +141,11 @@ def execute_job(job):
     })
     save_experiment(exp)
     d1(
-        "UPDATE jobs SET status=?, result=?, progress=?, finished_at=datetime('now') WHERE id=?",
+        "UPDATE jobs SET status=?, result_json=?, progress_json=?, finished_at=datetime('now') WHERE id=?",
         ["completed", json.dumps(exp["result"], separators=(",", ":")), json.dumps({"completed": len(rows), "total": total, "percentage": 100}), job["id"]],
     )
     d1(
-        "INSERT INTO artifacts(id,experiment_id,user_id,name,content_type,storage,payload) VALUES(?,?,?,?,?,?,?)",
+        "INSERT INTO artifacts(id,experiment_id,user_id,name,content_type,storage,payload_json) VALUES(?,?,?,?,?,?,?)",
         [__import__("uuid").uuid4().hex, job["experiment_id"], job["user_id"], "experiment.json", "application/json", "database", json.dumps(exp["result"], separators=(",", ":"))],
     )
 
