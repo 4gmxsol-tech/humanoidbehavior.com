@@ -1,0 +1,106 @@
+name: Create And Run Regression Evaluation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/create-regression-evaluation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  create-and-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create one site evaluation
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          python - <<'PY'
+          import json, os, uuid, urllib.request
+          account = os.environ["CLOUDFLARE_ACCOUNT_ID"]
+          token = os.environ["CLOUDFLARE_API_TOKEN"]
+          db = "de530114-adc7-4c5a-b0de-cdc2e5379ed5"
+          endpoint = f"https://api.cloudflare.com/client/v4/accounts/{account}/d1/database/{db}/query"
+          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+          def query(sql, params=None):
+              payload = {"sql": sql}
+              if params is not None:
+                  payload["params"] = params
+              req = urllib.request.Request(endpoint, data=json.dumps(payload).encode(), headers=headers, method="POST")
+              with urllib.request.urlopen(req) as r:
+                  out = json.load(r)
+              if not out.get("success"):
+                  raise RuntimeError(json.dumps(out))
+              return out["result"][0]["results"]
+
+          users = query("SELECT id,email FROM users WHERE email NOT LIKE 'demo@%' ORDER BY created_at DESC LIMIT 1")
+          if not users:
+              raise RuntimeError("No real user account found")
+          user_id = users[0]["id"]
+          exp_id, job_id = str(uuid.uuid4()), str(uuid.uuid4())
+          now = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat()
+
+          payload = {
+              "behaviorId": "pick-place",
+              "behaviorVersion": "1.0.0",
+              "engine": "MuJoCo",
+              "robotId": "generic-humanoid",
+              "seeds": ["42","1337","2026","7","99"],
+              "policies": ["policy-a"],
+              "seconds": 5
+          }
+          result = {
+              "id": exp_id,
+              "userId": user_id,
+              "benchmark": "behavior-evaluation",
+              "engine": "MuJoCo",
+              "status": "queued",
+              "behaviorId": "pick-place",
+              "behaviorVersion": "1.0.0",
+              "createdAt": now,
+              "result": {
+                  "schemaVersion": "1.0",
+                  "comparisonType": "behavior-evaluation",
+                  "measured": True,
+                  "reproducible": True,
+                  "seeds": payload["seeds"],
+                  "policies": payload["policies"],
+                  "seconds": 5,
+                  "runCount": 0,
+                  "expectedRunCount": 5,
+                  "validation": {"passed": False, "message": "Evaluation queued for execution worker"},
+                  "rawResults": [],
+                  "summary": {}
+              },
+              "jobId": job_id
+          }
+
+          query("INSERT INTO experiments(id,user_id,benchmark,engine,status,behavior_id,behavior_version,result_json) VALUES(?,?,?,?,?,?,?,?)",
+                [exp_id,user_id,"behavior-evaluation","MuJoCo","queued","pick-place","1.0.0",json.dumps(result,separators=(",",":"))])
+          query("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)",
+                [job_id,exp_id,user_id,"experiment-run","queued",json.dumps(payload,separators=(",",":"))])
+          print(f"CREATED_EXPERIMENT={exp_id}")
+          print(f"CREATED_JOB={job_id}")
+          print(f"USER={users[0]['email']}")
+          PY
+
+      - name: Install MuJoCo dependencies
+        run: pip install -r simulation/requirements.txt
+
+      - name: Run queued evaluation
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: python simulation/github_actions_runner.py
