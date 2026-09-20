@@ -103,4 +103,5 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: de530114-adc7-4c5a-b0de-cdc2e5379ed5
         run: python simulation/github_actions_runner.py
