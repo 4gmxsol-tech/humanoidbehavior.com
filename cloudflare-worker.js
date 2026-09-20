@@ -70,7 +70,8 @@ function json(data, status = 200) {
   }});
 }
 function id() { return crypto.randomUUID(); }
-function b64(bytes) { return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,""); }
+function b64(bytes) { return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+function unb64(value) { const normalized = String(value || "").replace(/-/g,"+").replace(/_/g,"/"); return Uint8Array.from(atob(normalized + "=".repeat((4 - normalized.length % 4) % 4)), c => c.charCodeAt(0)); }
 function hex(bytes) { return [...new Uint8Array(bytes)].map(x => x.toString(16).padStart(2,"0")).join(""); }
 async function sha256(text) { return hex(await crypto.subtle.digest("SHA-256", encoder.encode(text))); }
 
@@ -83,7 +84,7 @@ async function passwordHash(password) {
 async function passwordVerify(password, stored) {
   const [kind, iter, salt64, hash64] = String(stored || "").split("$");
   if (kind !== "pbkdf2" || !iter || !salt64 || !hash64) return false;
-  const salt = Uint8Array.from(atob(salt64.replace(/-/g,"+").replace(/_/g,"/") + "=="), c => c.charCodeAt(0));
+  const salt = unb64(salt64);
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
   const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: Number(iter), hash: "SHA-256" }, key, 256);
   return b64(bits) === hash64;
