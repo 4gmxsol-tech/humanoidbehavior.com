@@ -284,7 +284,7 @@ export default {
         return row?json(JSON.parse(row.result_json)):json({error:"Experiment not found"},404);
       }
 
-      const cancelMatch=path.match(/^\\/api\\/experiments\\/([^/]+)\\/cancel$/);
+      const cancelMatch=path.match(/^\/api\/experiments\/([^/]+)\/cancel$/);
       if(cancelMatch && request.method==="POST"){
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
         const expId=decodeURIComponent(cancelMatch[1]);
