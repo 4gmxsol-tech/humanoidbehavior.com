@@ -2,5 +2,12 @@
   "$schema": "https://developers.cloudflare.com/workers/wrangler/config-schema.json",
   "name": "humanoidbehavior-com",
   "main": "cloudflare-worker.js",
-  "compatibility_date": "2026-09-20"
+  "compatibility_date": "2026-09-20",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "humanoidbehavior",
+      "database_id": "de530114-adc7-4c5a-b0de-cdc2e5379ed5"
+    }
+  ]
 }
