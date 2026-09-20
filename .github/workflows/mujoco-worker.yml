@@ -2,6 +2,12 @@ name: MuJoCo Compute Worker
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/mujoco-worker.yml"
+      - "simulation/github_actions_runner.py"
   schedule:
     # GitHub Actions does not support cron intervals shorter than 5 minutes.
     # For this test, one scheduled invocation performs two runner passes 60s apart.
