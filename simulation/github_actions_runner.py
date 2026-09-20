@@ -112,7 +112,7 @@ def execute_job(job):
                 check=False,
             )
             if is_cancelled(job["id"]):
-                raise RuntimeError("Evaluation cancelled by user")
+                raise EvaluationCancelled("Evaluation cancelled by user")
             if proc.returncode != 0:
                 raise RuntimeError(proc.stderr.strip() or "MuJoCo task worker failed")
             line = proc.stdout.strip().splitlines()[-1] if proc.stdout.strip() else ""
