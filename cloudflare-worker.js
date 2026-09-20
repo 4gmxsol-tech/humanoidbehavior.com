@@ -296,7 +296,7 @@ export default {
         const seconds=Math.max(.1,Math.min(Number(x.seconds||5),60)),expId=id(),jobId=id(),result={id:expId,userId:user.id,benchmark:"version-vs-version-"+behaviorId,engine:"MuJoCo",status:"queued",behaviorId,behaviorVersion:versions.join(" vs "),createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-version-vs-version",behaviorId,versions,engine:"MuJoCo",measured:true,reproducible:true,seeds,policies,seconds,runCount:0,expectedRunCount:seeds.length*policies.length*2,validation:{passed:false,message:"Comparison queued for execution worker"},rawResults:[],summary:{}}};
         await env.DB.batch([
           env.DB.prepare("INSERT INTO experiments(id,user_id,benchmark,engine,status,behavior_id,behavior_version,result_json) VALUES(?,?,?,?,?,?,?,?)").bind(expId,user.id,result.benchmark,result.engine,result.status,result.behaviorId,result.behaviorVersion,JSON.stringify(result)),
-          env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"behavior-version-compare",JSON.stringify(x))
+          env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"behavior-version-compare","queued",JSON.stringify(x))
         ]);
         result.jobId=jobId;
         await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
