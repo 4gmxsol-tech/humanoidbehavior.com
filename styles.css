@@ -63,3 +63,6 @@ footer{border-color:var(--line);color:#667085;background:#fff}
 .auth-card{border-color:var(--line);border-radius:20px;box-shadow:0 20px 60px rgba(16,24,40,.08)}
 .code-block{background:#101828;border:1px solid #253148}
 @media(max-width:900px){.nav nav{display:none}.section{padding:75px 24px}.hero-product{padding-left:24px;padding-right:24px}}
+
+/* Accessibility + layout polish */
+.skip-link{position:fixed;left:16px;top:-60px;z-index:9999;background:#fff;color:#101828;border:2px solid var(--primary);padding:10px 14px;border-radius:10px;font-weight:800;text-decoration:none}.skip-link:focus{top:16px}.nav a:focus-visible,.button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(91,91,214,.28);outline-offset:3px}.muted,.section-note{color:var(--muted)}
