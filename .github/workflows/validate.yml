@@ -1,0 +1,31 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cloudflare-worker.js"
+      - "simulation/**/*.py"
+      - ".github/workflows/**"
+  pull_request:
+    paths:
+      - "cloudflare-worker.js"
+      - "simulation/**/*.py"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate Python
+        run: python -m compileall -q simulation
+      - name: Validate Worker JavaScript
+        run: node --check cloudflare-worker.js
