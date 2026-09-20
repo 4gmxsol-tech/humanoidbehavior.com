@@ -1,27 +1,25 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Developer Access — HumanoidBehavior</title><link rel="stylesheet" href="styles.css">  <script src="api-base.js"></script>
-</head><body><main class="auth-page"><div class="auth-card"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><div class="eyebrow">DEVELOPER ACCESS</div><h1>Enter the workspace.</h1><p>Create an account or sign in to run experiments and manage API keys.</p><input id="email" type="email" placeholder="Email" style="width:100%;padding:12px;margin:6px 0;border:1px solid #d5d8dd;border-radius:8px"><input id="password" type="password" placeholder="Password (8+ characters)" style="width:100%;padding:12px;margin:6px 0 14px;border:1px solid #d5d8dd;border-radius:8px"><div class="actions"><button id="signup" class="button primary">Create account</button><button id="login" class="button secondary">Sign in</button></div><button id="demo" class="button" style="margin-top:12px">Use demo (if enabled)</button><div id="status" aria-live="polite" style="min-height:24px;margin-top:12px;font-size:14px;font-weight:600"></div></div></main><script>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Developer Access — HumanoidBehavior</title><link rel="stylesheet" href="styles.css"><script src="api-base.js"></script></head><body><main class="auth-page"><div class="auth-card"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><div class="eyebrow">DEVELOPER ACCESS</div><h1>Enter the workspace.</h1><p>Create an account or sign in to run experiments and manage API keys.</p><form id="authForm" novalidate><input id="email" name="email" type="email" autocomplete="email" placeholder="Email" required style="width:100%;padding:12px;margin:6px 0;border:1px solid #d5d8dd;border-radius:8px"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password (8+ characters)" minlength="8" required style="width:100%;padding:12px;margin:6px 0 14px;border:1px solid #d5d8dd;border-radius:8px"><div class="actions"><button id="login" type="submit" class="button primary">Sign in</button><button id="signup" type="button" class="button secondary">Create account</button></div></form><button id="demo" type="button" class="button" style="margin-top:12px">Use demo (if enabled)</button><div id="status" aria-live="polite" style="min-height:24px;margin-top:12px;font-size:14px;font-weight:600"></div></div></main><script>
 const API_ORIGIN=window.HB_API_ORIGIN||"https://humanoidbehavior-com.4gmxsol.workers.dev";
 const emailInput=document.getElementById("email");
 const passwordInput=document.getElementById("password");
 const statusEl=document.getElementById("status");
+const authForm=document.getElementById("authForm");
 const signupButton=document.getElementById("signup");
 const loginButton=document.getElementById("login");
 const demoButton=document.getElementById("demo");
 
-function showStatus(message, ok=false){
-  statusEl.textContent=message;
-  statusEl.style.color=ok?"#16794c":"#b42318";
-}
+function showStatus(message,ok=false){statusEl.textContent=message;statusEl.style.color=ok?"#16794c":"#b42318";}
+function setBusy(busy){signupButton.disabled=busy;loginButton.disabled=busy;demoButton.disabled=busy;}
 
-async function requestJson(path, options={}){
+async function requestJson(path,options={}){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),15000);
   try{
-    const response=await fetch(API_ORIGIN+path,{...options,signal:controller.signal});
+    const response=await fetch(API_ORIGIN+path,{...options,signal:controller.signal,cache:"no-store"});
     const text=await response.text();
     let data={};
     try{data=text?JSON.parse(text):{};}catch{throw Error("Server returned invalid JSON (HTTP "+response.status+")");}
-    if(!response.ok) throw Error([data.error,data.stage,data.message,data.name].filter(Boolean).join(" · ")||("Request failed (HTTP "+response.status+")"));
+    if(!response.ok) throw Error([data.error,data.stage].filter(Boolean).join(" · ")||("Request failed (HTTP "+response.status+")"));
     return data;
   }catch(e){
     if(e.name==="AbortError") throw Error("Request timed out. Please try again.");
@@ -33,43 +31,34 @@ async function finishAuth(data){
   if(!data?.token) throw Error("Authentication succeeded but no session token was returned.");
   localStorage.setItem("hb_token",data.token);
   if(data.user) localStorage.setItem("hb_user",JSON.stringify(data.user));
-  showStatus("✓ Success — session created. Opening workspace…",true);
+  showStatus("✓ Sign-in successful — verifying session…",true);
   const me=await requestJson("/api/me",{headers:{Authorization:"Bearer "+data.token}});
   if(!me?.user) throw Error("Session was created but could not be verified.");
-  await new Promise(resolve=>setTimeout(resolve,500));
   window.location.assign("dashboard.html");
 }
 
-async function go(path){
-  signupButton.disabled=true; loginButton.disabled=true; demoButton.disabled=true;
+async function authenticate(path,successMessage){
+  setBusy(true);
   showStatus("Connecting to HumanoidBehavior…");
   try{
-    const data=await requestJson(path,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({email:emailInput.value.trim(),password:passwordInput.value})
-    });
+    const email=emailInput.value.trim().toLowerCase();
+    const password=passwordInput.value;
+    if(!email||!password) throw Error("Enter your email and password.");
+    if(password.length<8) throw Error("Password must be at least 8 characters.");
+    const data=await requestJson(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
     await finishAuth(data);
   }catch(e){
-    showStatus("✕ Failed — "+e.message);
-  }finally{
-    signupButton.disabled=false; loginButton.disabled=false; demoButton.disabled=false;
-  }
+    showStatus("✕ "+(e.message||"Authentication failed."));
+  }finally{setBusy(false);}
 }
 
-signupButton.onclick=()=>go("/api/auth/signup");
-loginButton.onclick=()=>go("/api/auth/login");
+authForm.addEventListener("submit",event=>{event.preventDefault();authenticate("/api/auth/login","Sign-in successful");});
+signupButton.onclick=()=>authenticate("/api/auth/signup","Account created");
 
 demoButton.onclick=async()=>{
-  signupButton.disabled=true; loginButton.disabled=true; demoButton.disabled=true;
-  showStatus("Connecting to demo account…");
-  try{
-    const data=await requestJson("/api/auth/demo",{method:"POST"});
-    await finishAuth(data);
-  }catch(e){
-    showStatus("✕ Failed — "+e.message);
-  }finally{
-    signupButton.disabled=false; loginButton.disabled=false; demoButton.disabled=false;
-  }
+  setBusy(true);showStatus("Connecting to demo account…");
+  try{await finishAuth(await requestJson("/api/auth/demo",{method:"POST"}));}
+  catch(e){showStatus("✕ "+(e.message||"Demo sign-in failed."));}
+  finally{setBusy(false);}
 };
-</script>></body></html>
+</script></body></html>
