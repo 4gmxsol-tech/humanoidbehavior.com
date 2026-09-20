@@ -45,7 +45,7 @@ jobs:
                   raise RuntimeError(json.dumps(out))
               return out["result"][0]["results"]
 
-          users = query("SELECT id,email FROM users WHERE email NOT LIKE 'demo@%' ORDER BY created_at DESC LIMIT 1")
+          users = query("SELECT id,email FROM users WHERE email = ? LIMIT 1", ["asas@gmail.com"])
           if not users:
               raise RuntimeError("No real user account found")
           user_id = users[0]["id"]
