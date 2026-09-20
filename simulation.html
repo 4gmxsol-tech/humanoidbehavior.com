@@ -1,32 +1,70 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Experiment Lab — HumanoidBehavior</title><link rel="stylesheet" href="styles.css">  <script src="api-base.js"></script>
-</head><body><header class="nav"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><nav><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a class="active" href="simulation.html">Simulation</a><a href="builder.html">Builder</a><a href="docs.html">Docs</a></nav><a class="nav-cta" href="dashboard.html">Workspace</a></header><main class="page"><div class="eyebrow">EXPERIMENT LAB</div><h1>Run an evaluation.</h1><p class="lead">Choose a behavior, robot and engine, then launch a measured reproducible evaluation. Your result report updates automatically when the worker finishes.</p><div class="builder-result"><label>Behavior</label><select id="behavior" style="width:100%;padding:12px;margin:8px 0 18px"><option value="pick-place">Pick & Place</option><option value="open-door">Open a Door</option><option value="follow-person">Follow a Person</option><option value="handover">Hand Object to Person</option></select><label>Robot embodiment</label><select id="robot" style="width:100%;padding:12px;margin:8px 0 18px"><option value="">Generic behavior evaluation</option><option value="unitree-g1">Unitree G1 — Menagerie</option></select><label>Behavior version</label><select id="behaviorVersion" style="width:100%;padding:12px;margin:8px 0 18px"><option value="1.1.0">Loading registry…</option></select><label>G1 Behavior</label><select id="g1behavior" style="width:100%;padding:12px;margin:8px 0 18px"><option value="">Stand / generic evaluation</option><option value="pick-place">Pick & Place — measured embodiment</option></select><label>Seeds</label><input id="seeds" value="42,1337,2026,7,99" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 18px"><label>Engine</label><select id="engine" style="width:100%;padding:12px;margin:8px 0 18px"><option value="MuJoCo">MuJoCo — measured simulation</option><option value="simulation-harness">Deterministic harness</option></select><label>Seconds</label><input id="seconds" type="number" min="1" max="60" value="5" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 20px"><div id="quota" class="run-result" style="margin:8px 0 18px"></div><div id="g1config" style="display:none"><label>Object mass (kg)</label><input id="objectMassKg" type="number" min=".08" max=".50" step=".01" value=".22" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 14px"><label>Object size (m)</label><input id="objectSizeM" type="number" min=".02" max=".05" step=".002" value=".032" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 14px"><label>Target distance (m)</label><input id="targetDistanceM" type="number" min=".12" max=".35" step=".01" value=".22" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 20px"><p class="muted">Contact benchmark: articulated thumb + index + middle fingers, free-body object, physical release and settling.</p></div><button class="button primary" id="run">Run Evaluation</button><div id="progress" class="run-result">Ready to configure.</div><pre id="out" style="margin-top:25px;background:#111318;color:#e5e7ea;padding:22px;border-radius:10px;overflow:auto">Ready.</pre><p id="link"></p></div></main><script>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Experiment Lab — HumanoidBehavior</title><link rel="stylesheet" href="styles.css"><script src="api-base.js"></script></head><body><header class="nav"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><nav><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a class="active" href="simulation.html">Simulation</a><a href="builder.html">Builder</a><a href="docs.html">Docs</a></nav><a class="nav-cta" href="dashboard.html">Workspace</a></header><main class="page"><div class="eyebrow">EXPERIMENT LAB</div><h1>Run an evaluation.</h1><p class="lead">Choose a behavior, robot and engine, then launch a measured reproducible evaluation. Your result report updates automatically when the worker finishes.</p><div class="builder-result"><label>Behavior</label><select id="behavior" style="width:100%;padding:12px;margin:8px 0 18px"><option value="pick-place">Pick & Place</option><option value="open-door">Open a Door</option><option value="follow-person">Follow a Person</option><option value="handover">Hand Object to Person</option></select><label>Robot embodiment</label><select id="robot" style="width:100%;padding:12px;margin:8px 0 18px"><option value="">Generic behavior evaluation</option><option value="unitree-g1">Unitree G1 — Menagerie</option></select><label>Behavior version</label><select id="behaviorVersion" style="width:100%;padding:12px;margin:8px 0 18px"><option value="1.1.0">Loading registry…</option></select><label>G1 Behavior</label><select id="g1behavior" style="width:100%;padding:12px;margin:8px 0 18px"><option value="">Stand / generic evaluation</option><option value="pick-place">Pick & Place — measured embodiment</option></select><label>Seeds</label><input id="seeds" value="42,1337,2026,7,99" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 18px"><label>Engine</label><select id="engine" style="width:100%;padding:12px;margin:8px 0 18px"><option value="MuJoCo">MuJoCo — measured simulation</option><option value="simulation-harness">Deterministic harness</option></select><label>Seconds</label><input id="seconds" type="number" min="1" max="60" value="5" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 20px"><div id="quota" class="run-result" style="margin:8px 0 18px"></div><div id="g1config" style="display:none"><label>Object mass (kg)</label><input id="objectMassKg" type="number" min=".08" max=".50" step=".01" value=".22" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 14px"><label>Object size (m)</label><input id="objectSizeM" type="number" min=".02" max=".05" step=".002" value=".032" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 14px"><label>Target distance (m)</label><input id="targetDistanceM" type="number" min=".12" max=".35" step=".01" value=".22" style="width:100%;padding:12px;border:1px solid #d5d8dd;border-radius:8px;margin:8px 0 20px"><p class="muted">Contact benchmark: articulated thumb + index + middle fingers, free-body object, physical release and settling.</p></div><button class="button primary" id="run">Run Evaluation</button><div id="progress" class="run-result">Ready to configure.</div><pre id="out" style="margin-top:25px;background:#111318;color:#e5e7ea;padding:22px;border-radius:10px;overflow:auto">Ready.</pre><p id="link"></p></div></main><script>
+const API_ORIGIN=window.HB_API_ORIGIN||"https://humanoidbehavior-com.4gmxsol.workers.dev";
 const token=localStorage.getItem("hb_token");
-async function loadQuota(){const q=document.getElementById("quota");if(!q)return;if(!token){q.innerHTML="<b>Sign in required</b> · <a href=\"login.html\">Open developer workspace</a>";return}try{const r=await fetch("/api/usage",{headers:{Authorization:"Bearer "+token}}),x=await r.json();if(!r.ok)throw Error(x.error||"Usage unavailable");const limit=x.limits?.benchmarksPerMonth,used=x.usage?.benchmarksThisMonth||0;q.innerHTML="<b>"+String(x.plan||"free").toUpperCase()+"</b> · "+used+" / "+(limit<0?"∞":limit)+" benchmark runs this month · <a href=\"pricing.html\">Manage plan</a>"}catch(e){q.textContent="Usage unavailable"}}\nloadQuota();
 const $=id=>document.getElementById(id);
-async function loadVersions(){
- try{const id=$("behavior").value,r=await fetch("/api/behaviors/"+encodeURIComponent(id)+"/versions"),x=await r.json();if(!r.ok)throw Error(x.error||"Registry unavailable");
- const vs=(x.data||x.versions||[]).map(v=>typeof v==="string"?v:v.version).filter(Boolean);
- $("behaviorVersion").innerHTML=vs.length?vs.map(v=>'<option value="'+v+'">'+v+(v==="1.1.0"?" — latest":"")+'</option>').join(""):'<option value="1.0.0">1.0.0</option>';
- }catch(e){$("behaviorVersion").innerHTML='<option value="1.1.0">1.1.0</option>'}
+async function api(path,options={}){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),15000);
+  try{
+    const headers={"Accept":"application/json",...(options.headers||{})};
+    if(options.body)headers["Content-Type"]="application/json";
+    const r=await fetch(API_ORIGIN+path,{...options,headers,signal:controller.signal});
+    const text=await r.text();
+    let x={};try{x=text?JSON.parse(text):{}}catch(_){x={error:text||"Empty response"}}
+    if(!r.ok)throw new Error([x.error,x.stage,x.message].filter(Boolean).join(" · ")||("HTTP "+r.status));
+    return x;
+  }catch(e){
+    if(e.name==="AbortError")throw new Error("Request timed out after 15 seconds");
+    throw e;
+  }finally{clearTimeout(timer)}
 }
-$("behavior").onchange=loadVersions;loadVersions();
-function syncG1(){ $("g1config").style.display=($("robot").value==="unitree-g1" && $("g1behavior").value==="pick-place")?"block":"none"; }
-$("robot").onchange=syncG1; $("g1behavior").onchange=syncG1; syncG1();
-$("run").onclick=async()=>{
- const out=$("out"),link=$("link"),progress=$("progress");
- if(!token){out.textContent="Please sign in to run an experiment.";return}
- $("run").disabled=true;out.textContent="Creating evaluation…";link.textContent="";
- try{
-  const robot=$("robot").value,g1behavior=$("g1behavior").value;
-  const endpoint=g1behavior&&robot?"/api/robots/"+encodeURIComponent(robot)+"/behaviors/"+g1behavior:(robot?"/api/robots/"+encodeURIComponent(robot)+"/evaluate":"/api/experiments/run");
-  const body={behaviorId:$("behavior").value,behaviorVersion:$("behaviorVersion").value,engine:$("engine").value,seeds:$("seeds").value.split(",").map(x=>x.trim()).filter(Boolean),seconds:Number($("seconds").value),objectMassKg:Number($("objectMassKg")?.value||.22),objectSizeM:Number($("objectSizeM")?.value||.032),targetDistanceM:Number($("targetDistanceM")?.value||.22)};
-  const r=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify(body)}),x=await r.json();
-  if(!r.ok)throw Error(x.error||"Experiment failed");
-  out.textContent="Queued · "+(x.engine||"MuJoCo")+" · "+(x.result?.expectedRunCount||0)+" runs";
-  progress.innerHTML='<span class="spinner"></span> Evaluation queued — live progress will appear here.';
-  const exp=x.id;link.innerHTML='<a class="button primary" href="experiment.html?id='+encodeURIComponent(exp)+'">Open live experiment</a>';
-  let polls=0;
-  const poll=async()=>{if(polls++>150)return;try{const q=await fetch("/api/experiments/"+encodeURIComponent(exp),{headers:{Authorization:"Bearer "+token}}),e=await q.json();if(q.ok){const rr=e.result||{};const pct=rr.expectedRunCount?Math.min(100,Math.round((rr.runCount||0)/rr.expectedRunCount*100)):0;progress.innerHTML='<b>'+e.status+'</b> · '+(rr.runCount||0)+'/'+(rr.expectedRunCount||0)+' runs · '+pct+'%';if(e.status==="completed"||e.status==="failed"){out.textContent=e.status==="completed"?"Measured evaluation complete.":"Evaluation failed: "+(rr.validation?.message||"worker error");return}}}catch(_){}setTimeout(poll,1500)};poll();
- }catch(e){out.textContent=e.message;progress.textContent="Unable to start evaluation."}finally{$("run").disabled=false}
-};
+async function loadQuota(){
+  const q=$("quota");if(!q)return;
+  if(!token){q.innerHTML="<b>Sign in required</b> · <a href=\"login.html\">Open developer workspace</a>";return}
+  try{const x=await api("/api/usage",{headers:{Authorization:"Bearer "+token}});const limit=x.limits?.benchmarksPerMonth,used=x.usage?.benchmarksThisMonth||0;q.innerHTML="<b>"+String(x.plan||"free").toUpperCase()+"</b> · "+used+" / "+(limit<0?"∞":limit)+" benchmark runs this month · <a href=\"pricing.html\">Manage plan</a>"}catch(e){q.textContent="Usage unavailable · "+e.message}
+}
+async function loadVersions(){
+  const select=$("behavior");
+  try{
+    const x=await api("/api/behaviors/"+encodeURIComponent(select.value)+"/versions");
+    const vs=(x.data||x.versions||[]).map(v=>typeof v==="string"?v:v.version).filter(Boolean);
+    $("behaviorVersion").innerHTML=vs.length?vs.map(v=>"<option value=\""+v+"\">"+v+(v==="1.1.0"?" — latest":"")+"</option>").join(""):"<option value=\"1.0.0\">1.0.0</option>";
+  }catch(e){
+    $("behaviorVersion").innerHTML="<option value=\"1.1.0\">1.1.0 — registry unavailable</option>";
+    $("progress").textContent="Registry check failed · "+e.message;
+  }
+}
+$("behavior").onchange=loadVersions;
+function syncG1(){ $("g1config").style.display=($("robot").value==="unitree-g1"&&$("g1behavior").value==="pick-place")?"block":"none"; }
+$("robot").onchange=syncG1;$("g1behavior").onchange=syncG1;syncG1();
+async function runEvaluation(){
+  const out=$("out"),link=$("link"),progress=$("progress"),button=$("run");
+  if(!token){out.textContent="Please sign in to run an experiment.";progress.textContent="Authentication required.";return}
+  button.disabled=true;out.textContent="Creating evaluation…";progress.textContent="Sending evaluation to the API…";link.textContent="";
+  try{
+    const robot=$("robot").value,g1behavior=$("g1behavior").value;
+    const endpoint=g1behavior&&robot?"/api/robots/"+encodeURIComponent(robot)+"/behaviors/"+encodeURIComponent(g1behavior):(robot?"/api/robots/"+encodeURIComponent(robot)+"/evaluate":"/api/experiments/run");
+    const body={behaviorId:$("behavior").value,behaviorVersion:$("behaviorVersion").value,engine:$("engine").value,seeds:$("seeds").value.split(",").map(x=>x.trim()).filter(Boolean),seconds:Number($("seconds").value),objectMassKg:Number($("objectMassKg")?.value||.22),objectSizeM:Number($("objectSizeM")?.value||.032),targetDistanceM:Number($("targetDistanceM")?.value||.22)};
+    const x=await api(endpoint,{method:"POST",headers:{Authorization:"Bearer "+token},body:JSON.stringify(body)});
+    out.textContent="Queued · "+(x.engine||"MuJoCo")+" · "+(x.result?.expectedRunCount||0)+" runs";
+    progress.innerHTML="<span class=\"spinner\"></span> Evaluation queued — live progress will appear here.";
+    const exp=x.id;
+    link.innerHTML="<a class=\"button primary\" href=\"experiment.html?id="+encodeURIComponent(exp)+"\">Open live experiment</a>";
+    let polls=0;
+    const poll=async()=>{
+      if(polls++>150)return;
+      try{
+        const e=await api("/api/experiments/"+encodeURIComponent(exp),{headers:{Authorization:"Bearer "+token}});
+        const rr=e.result||{},pct=rr.expectedRunCount?Math.min(100,Math.round((rr.runCount||0)/rr.expectedRunCount*100)):0;
+        progress.innerHTML="<b>"+e.status+"</b> · "+(rr.runCount||0)+"/"+(rr.expectedRunCount||0)+" runs · "+pct+"%";
+        if(e.status==="completed"||e.status==="failed"){out.textContent=e.status==="completed"?"Measured evaluation complete.":"Evaluation failed: "+(rr.validation?.message||"worker error");return}
+      }catch(e){progress.textContent="Polling error · "+e.message}
+      setTimeout(poll,1500);
+    };
+    poll();
+  }catch(e){out.textContent=e.message;progress.textContent="Unable to start evaluation."}
+  finally{button.disabled=false}
+}
+$("run").onclick=runEvaluation;
+loadQuota();loadVersions();
 </script></body></html>
