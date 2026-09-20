@@ -8,6 +8,9 @@ It claims one queued D1 job, executes it, and writes progress/results back to D1
 import json, os, subprocess, sys, urllib.request, urllib.error
 from statistics import mean, median, stdev
 
+class EvaluationCancelled(Exception):
+    pass
+
 ACCOUNT_ID = os.environ["CLOUDFLARE_ACCOUNT_ID"]
 DATABASE_ID = os.environ["D1_DATABASE_ID"]
 TOKEN = os.environ["CLOUDFLARE_API_TOKEN"]
@@ -73,6 +76,8 @@ def run_task(payload):
 
     rows = []
     total = len(seeds) * len(policies)
+    if behavior == "handover":
+        raise RuntimeError("Handover is not yet backed by a verified recipient model; evaluation is disabled.")
     return rows, behavior, version, seconds, seeds, policies, total
 
 def execute_job(job):
@@ -97,7 +102,7 @@ def execute_job(job):
                 "seconds": seconds,
             }
             if is_cancelled(job["id"]):
-                raise RuntimeError("Evaluation cancelled by user")
+                raise EvaluationCancelled("Evaluation cancelled by user")
             proc = subprocess.run(
                 [sys.executable, "simulation/behavior_task_worker.py"],
                 input=json.dumps(request_payload),
@@ -120,11 +125,11 @@ def execute_job(job):
 
     def metric(key):
         vals = [float(r.get("metrics", {}).get(key, 0) or 0) for r in rows]
-        return {
-            "mean": mean(vals) if vals else 0,
-            "median": median(vals) if vals else 0,
-            "stddev": stdev(vals) if len(vals) > 1 else 0,
-        }
+        return {"mean": mean(vals) if vals else 0, "median": median(vals) if vals else 0, "stddev": stdev(vals) if len(vals) > 1 else 0}
+
+    def metric_optional(key):
+        vals = [float(r["metrics"][key]) for r in rows if isinstance(r.get("metrics", {}).get(key), (int, float))]
+        return {"mean": mean(vals) if vals else None, "median": median(vals) if vals else None, "stddev": stdev(vals) if len(vals) > 1 else (0 if vals else None), "sampleCount": len(vals)}
 
     exp["status"] = "completed"
     exp["result"].update({
@@ -139,7 +144,7 @@ def execute_job(job):
         "rawResults": rows,
         "summary": {
             "taskSuccessRate": sum(bool(r.get("metrics", {}).get("taskSuccess")) for r in rows) / max(1, len(rows)),
-            "completionTime": metric("completionTime"),
+            "completionTime": metric_optional("completionTime"),
             "survivalRate": metric("survivalRate"),
             "controlCost": metric("controlCost"),
             "maxTiltRad": metric("maxTiltRad"),
@@ -169,7 +174,7 @@ def fail_job(job, message):
     d1("UPDATE jobs SET status=?, error=?, finished_at=datetime('now') WHERE id=?", ["failed", message[:2000], job["id"]])
 
 def main():
-    d1("UPDATE jobs SET status='queued', started_at=NULL WHERE status='running' AND started_at < datetime('now','-3 minutes')")
+    d1("UPDATE jobs SET status='queued', started_at=NULL WHERE status='running' AND started_at < datetime('now','-15 minutes')")
     jobs = d1("SELECT id,experiment_id,user_id,type,status,attempts,payload_json FROM jobs WHERE status='queued' ORDER BY created_at LIMIT 1")
     if not jobs:
         print("No queued jobs.")
@@ -188,10 +193,16 @@ def main():
             raise RuntimeError("Unsupported job type for GitHub Actions runner: " + str(job["type"]))
         execute_job(job)
         print("Completed job", job["id"])
+    except EvaluationCancelled as exc:
+        print("Job cancelled:", exc)
+        d1("UPDATE jobs SET status='cancelled', error=?, finished_at=datetime('now') WHERE id=? AND status='running'", [str(exc)[:2000], job["id"]])
     except Exception as exc:
         print("Job failed:", exc, file=sys.stderr)
-        fail_job(job, str(exc))
-        raise
+        if is_cancelled(job["id"]):
+            d1("UPDATE jobs SET status='cancelled', error=?, finished_at=datetime('now') WHERE id=? AND status IN ('running','queued')", ["Cancelled by user", job["id"]])
+        else:
+            fail_job(job, str(exc))
+            raise
 
 if __name__ == "__main__":
     main()
