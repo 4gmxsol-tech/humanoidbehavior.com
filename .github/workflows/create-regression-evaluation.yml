@@ -1,5 +1,5 @@
 name: Create And Run Regression Evaluation
-# retrigger after test account creation
+# retrigger after pick-place environment fix
 
 on:
   push:
