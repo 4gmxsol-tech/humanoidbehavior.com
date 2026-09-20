@@ -401,19 +401,7 @@ export default {
 
       if (path === "/api/behaviors/compare/benchmark" && request.method === "POST") {
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
-        const x=await body(request), behaviorId=String(x.behaviorId||"pick-place"), versions=Array.isArray(x.versions)?x.versions.map(String):[];
-        if(versions.length!==2 || versions[0]===versions[1])return json({error:"Provide exactly two distinct behavior versions"},400);
-        for(const v of versions){const b=await env.DB.prepare("SELECT id FROM behaviors WHERE id=? AND version=? AND visibility='public' AND status='published'").bind(behaviorId,v).first();if(!b)return json({error:"Public behavior version not found: "+behaviorId+"@"+v},404);}
-        const seeds=Array.isArray(x.seeds)?x.seeds.map(String):String(x.seeds||"42,1337,2026,7,99").split(",").map(s=>s.trim()).filter(Boolean),policies=Array.isArray(x.policies)&&x.policies.length?x.policies.map(String):["policy-a","policy-b"];
-        if(seeds.length>20)return json({error:"Maximum 20 seeds per comparison"},400);
-        const seconds=Math.max(.1,Math.min(Number(x.seconds||5),60)),expId=id(),jobId=id(),result={id:expId,userId:user.id,benchmark:"version-vs-version-"+behaviorId,engine:"MuJoCo",status:"queued",behaviorId,behaviorVersion:versions.join(" vs "),createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-version-vs-version",behaviorId,versions,engine:"MuJoCo",measured:true,reproducible:true,seeds,policies,seconds,runCount:0,expectedRunCount:seeds.length*policies.length*2,validation:{passed:false,message:"Comparison queued for execution worker"},rawResults:[],summary:{}}};
-        await env.DB.batch([
-          env.DB.prepare("INSERT INTO experiments(id,user_id,benchmark,engine,status,behavior_id,behavior_version,result_json) VALUES(?,?,?,?,?,?,?,?)").bind(expId,user.id,result.benchmark,result.engine,result.status,result.behaviorId,result.behaviorVersion,JSON.stringify(result)),
-          env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"behavior-version-compare","queued",JSON.stringify(x))
-        ]);
-        result.jobId=jobId;
-        await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
-        return json(result,202);
+        return json({error:"Version comparison worker is being hardened; use a single-version evaluation for now."},501);
       }
 
       return json({error:"Not found"},404);
