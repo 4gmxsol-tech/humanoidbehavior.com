@@ -1,72 +1,311 @@
-const VERSION = "cloudflare-d1-bootstrap-1";
+const VERSION = "cloudflare-d1-api-1";
+const encoder = new TextEncoder();
 
-function corsHeaders() {
-  return {
+const PLANS = {
+  free: { id: "free", name: "Free", price: 0, currency: "USD", limits: { benchmarksPerMonth: 25, privateBehaviors: 5, apiKeys: 0 } },
+  pro: { id: "pro", name: "Pro", price: 49, currency: "USD", limits: { benchmarksPerMonth: 500, privateBehaviors: -1, apiKeys: 3 } },
+  team: { id: "team", name: "Team", price: 299, currency: "USD", limits: { benchmarksPerMonth: 5000, privateBehaviors: -1, apiKeys: 20 } }
+};
+
+const ROBOTS = {
+  "unitree-g1": { name: "Unitree G1", manufacturer: "Unitree Robotics", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation", "whole-body"] },
+  "unitree-h1": { name: "Unitree H1", manufacturer: "Unitree Robotics", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation", "whole-body"] },
+  "unitree-t1": { name: "Unitree T1", manufacturer: "Unitree Robotics", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation"] },
+  apollo: { name: "Apollo", manufacturer: "Apptronik", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation", "whole-body"] },
+  talos: { name: "TALOS", manufacturer: "PAL Robotics", class: "humanoid", engines: ["MuJoCo"], modelSource: "MuJoCo Menagerie", status: "adapter-ready", capabilities: ["locomotion", "manipulation", "whole-body"] },
+  "generic-humanoid": { name: "Generic Humanoid", manufacturer: "HumanoidBehavior", class: "reference", engines: ["MuJoCo", "simulation-harness"], modelSource: "Built-in task worker", status: "active", capabilities: ["benchmarking"] }
+};
+
+const BEHAVIORS = [
+  {
+    id: "pick-place", version: "1.0.0", name: "Pick & Place", category: "Manipulation", level: "Core",
+    description: "Pick a specified object and place it at a target location.",
+    steps: ["Perceive target object", "Navigate to workspace", "Reach and grasp", "Transport object", "Release at target", "Verify placement"],
+    metrics: { success: 94, time: 8.2, collision: 1.4, recovery: 87 }, schemaVersion: "1.0",
+    metricsStatus: "illustrative-baseline", compatibleEngines: ["simulation-harness", "MuJoCo"],
+    compatibleRobots: ["generic-humanoid"], provenance: { source: "HumanoidBehavior behavior specification", revision: "1.0.0" }, tags: ["manipulation", "core"]
+  },
+  {
+    id: "pick-place", version: "1.1.0", name: "Pick & Place", category: "Manipulation", level: "Core",
+    description: "Pick a specified object and place it at a target location with explicit post-placement verification.",
+    steps: ["Perceive target object", "Navigate to workspace", "Reach and grasp", "Transport object", "Release at target", "Verify placement", "Verify object settled"],
+    metrics: { success: 94, time: 8.2, collision: 1.4, recovery: 87 }, schemaVersion: "1.0",
+    metricsStatus: "illustrative-baseline", compatibleEngines: ["simulation-harness", "MuJoCo"],
+    compatibleRobots: ["generic-humanoid"], provenance: { source: "HumanoidBehavior behavior specification", revision: "1.1.0" }, tags: ["manipulation", "core", "verification"]
+  },
+  {
+    id: "open-door", version: "1.0.0", name: "Open a Door", category: "Whole-body", level: "Interaction",
+    description: "Approach a door, operate its handle and pass through safely.",
+    steps: ["Detect door and handle", "Align body", "Grasp handle", "Apply force", "Rotate/pull", "Pass through and verify"],
+    metrics: { success: 89, time: 12.7, collision: 2.1, recovery: 81 }, schemaVersion: "1.0",
+    metricsStatus: "illustrative-baseline", compatibleEngines: ["simulation-harness", "MuJoCo"],
+    compatibleRobots: ["generic-humanoid"], provenance: { source: "HumanoidBehavior behavior specification", revision: "1.0.0" }, tags: ["whole-body", "interaction"]
+  },
+  {
+    id: "follow-person", version: "1.0.0", name: "Follow a Person", category: "Navigation", level: "Social",
+    description: "Track a moving person while maintaining a safe distance.",
+    steps: ["Detect person", "Estimate motion", "Set following distance", "Plan collision-free path", "Track and adapt", "Recover if target is lost"],
+    metrics: { success: 91, time: 18.4, collision: 0.8, recovery: 93 }, schemaVersion: "1.0",
+    metricsStatus: "illustrative-baseline", compatibleEngines: ["simulation-harness", "MuJoCo"],
+    compatibleRobots: ["generic-humanoid"], provenance: { source: "HumanoidBehavior behavior specification", revision: "1.0.0" }, tags: ["navigation", "social"]
+  },
+  {
+    id: "handover", version: "1.0.0", name: "Hand Object to Person", category: "Interaction", level: "Bimanual",
+    description: "Move an object into a human's reachable handover zone.",
+    steps: ["Detect object", "Grasp securely", "Detect recipient", "Predict handover pose", "Transfer object", "Confirm release"],
+    metrics: { success: 86, time: 10.1, collision: 1.1, recovery: 79 }, schemaVersion: "1.0",
+    metricsStatus: "illustrative-baseline", compatibleEngines: ["simulation-harness", "MuJoCo"],
+    compatibleRobots: ["generic-humanoid"], provenance: { source: "HumanoidBehavior behavior specification", revision: "1.0.0" }, tags: ["interaction", "bimanual"]
+  }
+];
+
+let schemaPromise;
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), { status, headers: {
+    "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization",
     "Cache-Control": "no-store"
-  };
+  }});
+}
+function id() { return crypto.randomUUID(); }
+function b64(bytes) { return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,""); }
+function hex(bytes) { return [...new Uint8Array(bytes)].map(x => x.toString(16).padStart(2,"0")).join(""); }
+async function sha256(text) { return hex(await crypto.subtle.digest("SHA-256", encoder.encode(text))); }
+
+async function passwordHash(password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 20000, hash: "SHA-256" }, key, 256);
+  return "pbkdf2$20000$" + b64(salt) + "$" + b64(bits);
+}
+async function passwordVerify(password, stored) {
+  const [kind, iter, salt64, hash64] = String(stored || "").split("$");
+  if (kind !== "pbkdf2" || !iter || !salt64 || !hash64) return false;
+  const salt = Uint8Array.from(atob(salt64.replace(/-/g,"+").replace(/_/g,"/") + "=="), c => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: Number(iter), hash: "SHA-256" }, key, 256);
+  return b64(bits) === hash64;
 }
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json; charset=utf-8", ...corsHeaders() }
-  });
+async function ensureSchema(env) {
+  if (!env.DB) throw new Error("D1 binding DB is not configured");
+  if (!schemaPromise) schemaPromise = (async () => {
+    await env.DB.batch([
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS behaviors (id TEXT NOT NULL, version TEXT NOT NULL, user_id TEXT NOT NULL, name TEXT NOT NULL, description TEXT NOT NULL, visibility TEXT NOT NULL DEFAULT 'private', status TEXT NOT NULL DEFAULT 'draft', package_json TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(id,version))"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_behaviors_public ON behaviors(visibility,status)"),
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, token_hash TEXT UNIQUE NOT NULL, user_id TEXT NOT NULL, expires_at TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id)")
+    ]);
+    const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM behaviors WHERE user_id='system'").first();
+    if (!Number(row?.n || 0)) {
+      for (const p of BEHAVIORS) {
+        await env.DB.prepare("INSERT OR IGNORE INTO behaviors(id,version,user_id,name,description,visibility,status,package_json) VALUES(?,?,?,?,?,?,?,?)")
+          .bind(p.id,p.version,"system",p.name,p.description,"public","published",JSON.stringify({...p,status:"published",visibility:"public"})).run();
+      }
+    }
+  })();
+  return schemaPromise;
+}
+
+async function body(request) {
+  try { return await request.json(); } catch { return {}; }
+}
+function planFor(user) { return PLANS[user?.plan] || PLANS.free; }
+function publicUser(u) { return { id:u.id, email:u.email, name:u.name, plan:u.plan }; }
+
+async function authUser(request, env) {
+  const h = request.headers.get("Authorization") || "";
+  if (!h.startsWith("Bearer ")) return null;
+  const token = h.slice(7).trim();
+  if (!token) return null;
+  const hash = await sha256(token);
+  const session = await env.DB.prepare("SELECT u.* FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>datetime('now')").bind(hash).first();
+  if (session) return session;
+  const key = await env.DB.prepare("SELECT u.* FROM api_keys k JOIN users u ON u.id=k.user_id WHERE k.hash=? AND k.revoked_at IS NULL").bind(hash).first();
+  return key || null;
+}
+
+async function createSession(user, env) {
+  const token = "hb_session_" + crypto.randomUUID().replaceAll("-","");
+  await env.DB.prepare("INSERT INTO sessions(id,token_hash,user_id,expires_at) VALUES(?,?,?,datetime('now','+30 days'))")
+    .bind(id(), await sha256(token), user.id).run();
+  return token;
+}
+async function requireUser(request, env) {
+  const u = await authUser(request, env);
+  return u || null;
+}
+
+async function usage(userId, env) {
+  const runs = await env.DB.prepare("SELECT COUNT(*) AS n FROM benchmark_runs WHERE user_id=? AND created_at>=datetime('now','start of month')").bind(userId).first();
+  const experiments = await env.DB.prepare("SELECT COALESCE(SUM(CASE WHEN json_extract(result_json,'$.runCount') IS NOT NULL THEN json_extract(result_json,'$.runCount') ELSE 0 END),0) AS n FROM experiments WHERE user_id=? AND created_at>=datetime('now','start of month')").bind(userId).first();
+  return Number(runs?.n||0) + Number(experiments?.n||0);
+}
+
+function cleanBehavior(row) {
+  const p = JSON.parse(row.package_json);
+  return { ...p, id: row.id, version: row.version, userId: row.user_id, visibility: row.visibility, status: row.status, createdAt: row.created_at, updatedAt: row.updated_at };
 }
 
 export default {
   async fetch(request, env) {
-    if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: corsHeaders() });
-    }
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*" }});
+    try {
+      await ensureSchema(env);
+      const u = new URL(request.url);
+      const path = u.pathname;
 
-    const url = new URL(request.url);
+      if (path === "/api/health") {
+        const d1 = await env.DB.prepare("SELECT 1 AS ok").first();
+        return json({ ok:true, service:"humanoidbehavior-api", version:VERSION, storage:"cloudflare-d1", d1:{bound:true,reachable:d1?.ok===1}, capabilities:["cloudflare-workers","d1","behavior-registry","authentication","api-keys","experiments"] });
+      }
+      if (path === "/api/readiness") {
+        return json({ ok:true, ready:true, checks:{ worker:true, databaseConfigured:true, database:"cloudflare-d1", schema:true }});
+      }
+      if (path === "/") return json({ service:"HumanoidBehavior API", status:"online", version:VERSION });
 
-    if (url.pathname === "/api/health") {
-      let d1 = { bound: Boolean(env.DB), reachable: false };
+      if (path === "/api/plans" && request.method === "GET") return json({ data:Object.values(PLANS) });
 
-      if (env.DB) {
-        try {
-          await env.DB.prepare("SELECT 1 AS ok").first();
-          d1.reachable = true;
-        } catch (error) {
-          d1.error = String(error?.message || error);
-        }
+      if (path === "/api/behaviors" && request.method === "GET") {
+        const q = (u.searchParams.get("q")||"").toLowerCase();
+        const category = u.searchParams.get("category")||"";
+        let sql = "SELECT * FROM behaviors WHERE visibility='public' AND status='published'";
+        const args = [];
+        if (q) { sql += " AND (LOWER(name) LIKE ? OR LOWER(description) LIKE ?)"; args.push("%"+q+"%","%"+q+"%"); }
+        if (category) { sql += " AND json_extract(package_json,'$.category')=?"; args.push(category); }
+        sql += " ORDER BY updated_at DESC";
+        const rows = await env.DB.prepare(sql).bind(...args).all();
+        const data = rows.results.map(cleanBehavior);
+        return json({ data, count:data.length });
       }
 
-      return json({
-        ok: true,
-        service: "humanoidbehavior-api",
-        version: VERSION,
-        storage: d1.reachable ? "cloudflare-d1" : "not-connected",
-        d1,
-        capabilities: ["cloudflare-workers", "d1-bootstrap"]
-      });
-    }
+      const versionMatch = path.match(/^\/api\/behaviors\/([^/]+)\/versions$/);
+      if (versionMatch && request.method === "GET") {
+        const rows = await env.DB.prepare("SELECT * FROM behaviors WHERE id=? AND visibility='public' AND status='published' ORDER BY updated_at DESC").bind(decodeURIComponent(versionMatch[1])).all();
+        const data = rows.results.map(cleanBehavior);
+        return json({ data, count:data.length });
+      }
 
-    if (url.pathname === "/api/readiness") {
-      const d1Ready = Boolean(env.DB);
-      return json({
-        ok: d1Ready,
-        ready: d1Ready,
-        checks: {
-          worker: true,
-          databaseConfigured: d1Ready,
-          database: d1Ready ? "cloudflare-d1" : "not-connected"
-        }
-      }, d1Ready ? 200 : 503);
-    }
+      const behaviorMatch = path.match(/^\/api\/behaviors\/([^/]+)\/([^/]+)$/);
+      if (behaviorMatch && request.method === "GET") {
+        const row = await env.DB.prepare("SELECT * FROM behaviors WHERE id=? AND version=? AND visibility='public' AND status='published'").bind(decodeURIComponent(behaviorMatch[1]),decodeURIComponent(behaviorMatch[2])).first();
+        return row ? json(cleanBehavior(row)) : json({error:"Behavior not found"},404);
+      }
 
-    if (url.pathname === "/") {
-      return json({
-        service: "HumanoidBehavior API",
-        status: "online",
-        next: "D1 binding and API migration"
-      });
-    }
+      if (path === "/api/auth/signup" && request.method === "POST") {
+        const x = await body(request);
+        const email = String(x.email||"").trim().toLowerCase(), password = String(x.password||"");
+        if (!email || !password || password.length < 8) return json({error:"Email and password (8+ chars) required"},400);
+        const exists = await env.DB.prepare("SELECT id FROM users WHERE email=?").bind(email).first();
+        if (exists) return json({error:"Account already exists"},409);
+        const user = { id:id(), email, name:String(x.name||email.split("@")[0]), plan:"free" };
+        await env.DB.prepare("INSERT INTO users(id,email,name,password_hash,plan) VALUES(?,?,?,?,?)").bind(user.id,user.email,user.name,await passwordHash(password),user.plan).run();
+        return json({ token:await createSession(user,env), user },201);
+      }
 
-    return json({ error: "Not found" }, 404);
+      if (path === "/api/auth/login" && request.method === "POST") {
+        const x = await body(request), email=String(x.email||"").trim().toLowerCase();
+        const user = await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first();
+        if (!user || !(await passwordVerify(String(x.password||""),user.password_hash))) return json({error:"Invalid credentials"},401);
+        return json({ token:await createSession(user,env), user:publicUser(user) });
+      }
+
+      if (path === "/api/auth/demo" && request.method === "POST") {
+        const user={id:"demo_"+crypto.randomUUID().replaceAll("-",""),email:"demo@example.invalid",name:"Demo Developer",plan:"free"};
+        await env.DB.prepare("INSERT INTO users(id,email,name,plan) VALUES(?,?,?,?)").bind(user.id,user.email,user.name,user.plan).run();
+        return json({ token:await createSession(user,env), user },200);
+      }
+
+      if (path === "/api/me" && request.method === "GET") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        return json({user:publicUser(user),plan:planFor(user),storage:"cloudflare-d1"});
+      }
+
+      if (path === "/api/usage" && request.method === "GET") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const used=await usage(user.id,env), plan=planFor(user);
+        return json({plan:user.plan,limits:plan.limits,usage:{benchmarksThisMonth:used}});
+      }
+
+      if (path === "/api/keys" && request.method === "GET") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const rows=await env.DB.prepare("SELECT id,name,prefix,created_at,revoked_at FROM api_keys WHERE user_id=? ORDER BY created_at DESC").bind(user.id).all();
+        return json({data:rows.results.map(x=>({...x,createdAt:x.created_at,revokedAt:x.revoked_at}))});
+      }
+
+      if (path === "/api/keys" && request.method === "POST") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const plan=planFor(user), count=await env.DB.prepare("SELECT COUNT(*) AS n FROM api_keys WHERE user_id=? AND revoked_at IS NULL").bind(user.id).first();
+        if (plan.limits.apiKeys>=0 && Number(count?.n||0)>=plan.limits.apiKeys) return json({error:"API key limit reached",limit:plan.limits.apiKeys},403);
+        const x=await body(request), raw="hb_live_"+crypto.randomUUID().replaceAll("-","")+crypto.randomUUID().replaceAll("-",""), name=String(x.name||"Default key");
+        await env.DB.prepare("INSERT INTO api_keys(id,user_id,hash,prefix,name) VALUES(?,?,?,?,?)").bind(id(),await sha256(raw),raw.slice(0,15),name).run();
+        return json({key:raw,message:"Store this key now. It will not be shown again."},201);
+      }
+
+      const keyDelete=path.match(/^\/api\/keys\/([^/]+)$/);
+      if (keyDelete && request.method==="DELETE") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const r=await env.DB.prepare("UPDATE api_keys SET revoked_at=CURRENT_TIMESTAMP WHERE id=? AND user_id=?").bind(decodeURIComponent(keyDelete[1]),user.id).run();
+        return r.meta.changes ? json({ok:true}) : json({error:"API key not found"},404);
+      }
+
+      if (path === "/api/robots" && request.method === "GET") return json({data:Object.entries(ROBOTS).map(([id,robot])=>({id,...robot}))});
+      const robotMatch=path.match(/^\/api\/robots\/([^/]+)$/);
+      if(robotMatch && request.method==="GET"){const rid=decodeURIComponent(robotMatch[1]),robot=ROBOTS[rid];return robot?json({id:rid,...robot}):json({error:"Robot model not found"},404);}
+
+      if (path === "/api/experiments" && request.method === "GET") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const rows=await env.DB.prepare("SELECT result_json FROM experiments WHERE user_id=? ORDER BY created_at DESC LIMIT 100").bind(user.id).all();
+        return json({data:rows.results.map(x=>JSON.parse(x.result_json))});
+      }
+
+      const expMatch=path.match(/^\/api\/experiments\/([^/]+)$/);
+      if(expMatch && request.method==="GET"){
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const row=await env.DB.prepare("SELECT result_json FROM experiments WHERE id=? AND user_id=?").bind(decodeURIComponent(expMatch[1]),user.id).first();
+        return row?json(JSON.parse(row.result_json)):json({error:"Experiment not found"},404);
+      }
+
+      if (path === "/api/experiments/run" && request.method === "POST") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const x=await body(request), seeds=Array.isArray(x.seeds)?x.seeds.map(String):String(x.seeds||"42,1337").split(",").map(s=>s.trim()).filter(Boolean);
+        const plan=planFor(user), used=await usage(user.id,env), requested=seeds.length;
+        if(plan.limits.benchmarksPerMonth>=0 && used+requested>plan.limits.benchmarksPerMonth) return json({error:"Monthly benchmark limit reached",limit:plan.limits.benchmarksPerMonth,used,requested},429);
+        if(seeds.length>20)return json({error:"Maximum 20 seeds"},400);
+        const expId=id(),jobId=id(),seconds=Math.max(.1,Math.min(Number(x.seconds||5),60));
+        const result={id:expId,userId:user.id,benchmark:"behavior-evaluation",engine:String(x.engine||"simulation-harness"),status:"queued",behaviorId:String(x.behaviorId||"pick-place"),behaviorVersion:String(x.behaviorVersion||"1.1.0"),createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-evaluation",measured:String(x.engine||"simulation-harness")==="MuJoCo",reproducible:true,seeds,policies:x.policies||["policy-a"],seconds,runCount:0,expectedRunCount:seeds.length,validation:{passed:false,message:"Evaluation queued for execution worker"},rawResults:[],summary:{}}};
+        await env.DB.batch([
+          env.DB.prepare("INSERT INTO experiments(id,user_id,benchmark,engine,status,behavior_id,behavior_version,result_json) VALUES(?,?,?,?,?,?,?,?)").bind(expId,user.id,result.benchmark,result.engine,result.status,result.behaviorId,result.behaviorVersion,JSON.stringify(result)),
+          env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"experiment-run","queued",JSON.stringify(x))
+        ]);
+        result.jobId=jobId;
+        await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
+        return json(result,202);
+      }
+
+      if (path === "/api/behaviors/compare/benchmark" && request.method === "POST") {
+        const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
+        const x=await body(request), behaviorId=String(x.behaviorId||"pick-place"), versions=Array.isArray(x.versions)?x.versions.map(String):[];
+        if(versions.length!==2 || versions[0]===versions[1])return json({error:"Provide exactly two distinct behavior versions"},400);
+        for(const v of versions){const b=await env.DB.prepare("SELECT id FROM behaviors WHERE id=? AND version=? AND visibility='public' AND status='published'").bind(behaviorId,v).first();if(!b)return json({error:"Public behavior version not found: "+behaviorId+"@"+v},404);}
+        const seeds=Array.isArray(x.seeds)?x.seeds.map(String):String(x.seeds||"42,1337,2026,7,99").split(",").map(s=>s.trim()).filter(Boolean),policies=Array.isArray(x.policies)&&x.policies.length?x.policies.map(String):["policy-a","policy-b"];
+        if(seeds.length>20)return json({error:"Maximum 20 seeds per comparison"},400);
+        const seconds=Math.max(.1,Math.min(Number(x.seconds||5),60)),expId=id(),jobId=id(),result={id:expId,userId:user.id,benchmark:"version-vs-version-"+behaviorId,engine:"MuJoCo",status:"queued",behaviorId,behaviorVersion:versions.join(" vs "),createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-version-vs-version",behaviorId,versions,engine:"MuJoCo",measured:true,reproducible:true,seeds,policies,seconds,runCount:0,expectedRunCount:seeds.length*policies.length*2,validation:{passed:false,message:"Comparison queued for execution worker"},rawResults:[],summary:{}}};
+        await env.DB.batch([
+          env.DB.prepare("INSERT INTO experiments(id,user_id,benchmark,engine,status,behavior_id,behavior_version,result_json) VALUES(?,?,?,?,?,?,?,?)").bind(expId,user.id,result.benchmark,result.engine,result.status,result.behaviorId,result.behaviorVersion,JSON.stringify(result)),
+          env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"behavior-version-compare",JSON.stringify(x))
+        ]);
+        result.jobId=jobId;
+        await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
+        return json(result,202);
+      }
+
+      return json({error:"Not found"},404);
+    } catch (error) {
+      return json({error:"Worker error",message:String(error?.message||error)},500);
+    }
   }
 };
