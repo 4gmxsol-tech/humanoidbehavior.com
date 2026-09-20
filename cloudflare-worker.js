@@ -259,7 +259,10 @@ export default {
         return json({ token:await createSession(user,env), user:publicUser(user) });
       }
 
-      if (path === "/api/auth/demo" && request.method === "POST") { return json({error:"Demo access is disabled in production"},403); }\n\n      if (false && path === "/api/auth/demo" && request.method === "POST") {
+      if (path === "/api/auth/demo" && request.method === "POST") {
+        return json({error:"Demo access is disabled in production"},403);
+      }
+      if (false && path === "/api/auth/demo" && request.method === "POST") {
         const user={id:"demo_"+crypto.randomUUID().replaceAll("-",""),email:"demo@example.invalid",name:"Demo Developer",plan:"free"};
         await env.DB.prepare("INSERT INTO users(id,email,name,plan) VALUES(?,?,?,?)").bind(user.id,user.email,user.name,user.plan).run();
         return json({ token:await createSession(user,env), user },200);
@@ -373,15 +376,23 @@ export default {
 
       if (path === "/api/experiments/run" && request.method === "POST") {
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
-        const x=await body(request), seeds=Array.isArray(x.seeds)?x.seeds.map(String):String(x.seeds||"42,1337").split(",").map(s=>s.trim()).filter(Boolean);
-        const plan=planFor(user), used=await usage(user.id,env), requested=seeds.length;
-        if(plan.limits.benchmarksPerMonth>=0 && used+requested>plan.limits.benchmarksPerMonth) return json({error:"Monthly benchmark limit reached",limit:plan.limits.benchmarksPerMonth,used,requested},429);
-        if(seeds.length>20)return json({error:"Maximum 20 seeds"},400);
-        const expId=id(),jobId=id(),seconds=Math.max(.1,Math.min(Number(x.seconds||5),60));
-        const result={id:expId,userId:user.id,benchmark:"behavior-evaluation",engine:String(x.engine||"simulation-harness"),status:"queued",behaviorId:String(x.behaviorId||"pick-place"),behaviorVersion:String(x.behaviorVersion||"1.1.0"),createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-evaluation",measured:engine==="MuJoCo",reproducible:true,seeds,policies,seconds,runCount:0,expectedRunCount:seeds.length*policies.length,validation:{passed:false,message:"Evaluation queued for execution worker"},rawResults:[],summary:{}}};
+        const x=await body(request);
+        const seeds=Array.isArray(x.seeds)?x.seeds.map(String).filter(Boolean):String(x.seeds||"42,1337").split(",").map(s=>s.trim()).filter(Boolean);
+        const policies=Array.isArray(x.policies)&&x.policies.length?x.policies.map(String).filter(Boolean).slice(0,8):["policy-a"];
+        if(seeds.length<1||seeds.length>20)return json({error:"Use 1–20 seeds"},400);
+        if(policies.length<1||policies.length>8)return json({error:"Use 1–8 policies"},400);
+        const behaviorId=String(x.behaviorId||"pick-place"),behaviorVersion=String(x.behaviorVersion||"1.1.0"),engine=String(x.engine||"MuJoCo");
+        if(!["MuJoCo","simulation-harness"].includes(engine))return json({error:"Unsupported engine"},400);
+        const spec=behaviorSpec(behaviorId,behaviorVersion);
+        if(!spec)return json({error:"Published behavior version not found: "+behaviorId+"@"+behaviorVersion},404);
+        if(!spec.compatibleEngines.includes(engine))return json({error:"Behavior version is not compatible with "+engine},400);
+        const requested=seeds.length*policies.length,plan=planFor(user),used=await usage(user.id,env);
+        if(plan.limits.benchmarksPerMonth>=0&&used+requested>plan.limits.benchmarksPerMonth)return json({error:"Monthly benchmark limit reached",limit:plan.limits.benchmarksPerMonth,used,requested},429);
+        const expId=id(),jobId=id(),seconds=Math.max(1,Math.min(Number(x.seconds||5),60));
+        const result={id:expId,userId:user.id,benchmark:"behavior-evaluation",engine,status:"queued",behaviorId,behaviorVersion,createdAt:new Date().toISOString(),result:{schemaVersion:"1.0",comparisonType:"behavior-evaluation",measured:engine==="MuJoCo",reproducible:true,seeds,policies,seconds,runCount:0,expectedRunCount:requested,validation:{passed:false,message:"Evaluation queued for execution worker"},rawResults:[],summary:{}}};
         await env.DB.batch([
           env.DB.prepare("INSERT INTO experiments(id,user_id,benchmark,engine,status,behavior_id,behavior_version,result_json) VALUES(?,?,?,?,?,?,?,?)").bind(expId,user.id,result.benchmark,result.engine,result.status,result.behaviorId,result.behaviorVersion,JSON.stringify(result)),
-          env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"experiment-run","queued",JSON.stringify(x))
+          env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"experiment-run","queued",JSON.stringify({...x,seeds,policies,behaviorId,behaviorVersion,engine,seconds}))
         ]);
         result.jobId=jobId;
         await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
