@@ -154,10 +154,13 @@ function cleanBehavior(row) {
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", "Access-Control-Max-Age": "86400", "Cache-Control": "no-store" }});
+    let stage = "start";
     try {
+      stage = "ensure-schema";
       await ensureSchema(env);
       const u = new URL(request.url);
       const path = u.pathname;
+      stage = path;
 
       if (path === "/api/health") {
         const d1 = await env.DB.prepare("SELECT 1 AS ok").first();
@@ -317,7 +320,7 @@ export default {
 
       return json({error:"Not found"},404);
     } catch (error) {
-      return json({error:"Worker error",message:String(error?.message||error)},500);
+      return json({error:"Worker error",stage,message:String(error?.message||error),name:String(error?.name||"Error")},500);
     }
   }
 };
