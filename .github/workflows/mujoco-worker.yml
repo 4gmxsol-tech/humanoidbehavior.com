@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/mujoco-worker.yml"
       - "simulation/github_actions_runner.py"
+      - "simulation/behavior_task_worker.py"
   schedule:
     # GitHub Actions does not support cron intervals shorter than 5 minutes.
     # For this test, one scheduled invocation performs two runner passes 60s apart.\n    # Triggered by workflow changes for immediate queue testing.
