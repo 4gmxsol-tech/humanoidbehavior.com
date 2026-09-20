@@ -45,6 +45,11 @@ def update_progress(job_id, exp, completed, total):
     exp["result"]["validation"] = {"passed": False, "message": f"Evaluation running: {completed}/{total} runs completed."}
     save_experiment(exp)
 
+def is_cancelled(job_id):
+    rows = d1("SELECT status FROM jobs WHERE id=?", [job_id])
+    return bool(rows and rows[0].get("status") == "cancelled")
+
+
 def save_experiment(exp):
     d1(
         "UPDATE experiments SET status=?, engine=?, behavior_id=?, behavior_version=?, result_json=? WHERE id=?",
@@ -91,6 +96,8 @@ def execute_job(job):
                 "policy": policy,
                 "seconds": seconds,
             }
+            if is_cancelled(job["id"]):
+                raise RuntimeError("Evaluation cancelled by user")
             proc = subprocess.run(
                 [sys.executable, "simulation/behavior_task_worker.py"],
                 input=json.dumps(request_payload),
@@ -99,6 +106,8 @@ def execute_job(job):
                 timeout=max(30, int(seconds * 8)),
                 check=False,
             )
+            if is_cancelled(job["id"]):
+                raise RuntimeError("Evaluation cancelled by user")
             if proc.returncode != 0:
                 raise RuntimeError(proc.stderr.strip() or "MuJoCo task worker failed")
             line = proc.stdout.strip().splitlines()[-1] if proc.stdout.strip() else ""
