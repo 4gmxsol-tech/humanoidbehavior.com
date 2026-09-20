@@ -30,6 +30,20 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r simulation/requirements.txt
 
+      - name: Verify Cloudflare D1 token access
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: de530114-adc7-4c5a-b0de-cdc2e5379ed5
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -e
+          HTTP_CODE=$(curl -sS -o /tmp/d1-response.json -w "%{http_code}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}")
+          echo "D1 metadata HTTP status: ${HTTP_CODE}"
+          cat /tmp/d1-response.json
+          test "${HTTP_CODE}" = "200"
+
       - name: Run one queued evaluation
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
