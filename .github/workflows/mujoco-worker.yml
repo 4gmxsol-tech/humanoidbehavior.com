@@ -39,7 +39,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -e
-          HTTP_CODE=$(curl -sS -o /tmp/d1-response.json -w "%{http_code}"             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}"             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}")
+          HTTP_CODE=$(curl -sS -o /tmp/d1-response.json -w "%{http_code}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}" -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}")
           echo "D1 metadata HTTP status: ${HTTP_CODE}"
           cat /tmp/d1-response.json
           test "${HTTP_CODE}" = "200"
@@ -52,7 +52,7 @@ jobs:
         run: |
           set -e
           BODY='{"sql":"SELECT 1 AS ok"}'
-          HTTP_CODE=$(curl -sS -o /tmp/d1-query-response.json -w "%{http_code}"             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}/query"             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"             -H "Content-Type: application/json"             --data "${BODY}")
+          HTTP_CODE=$(curl -sS -o /tmp/d1-query-response.json -w "%{http_code}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}/query" -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H "Content-Type: application/json" --data "${BODY}")
           echo "D1 query HTTP status: ${HTTP_CODE}"
           cat /tmp/d1-query-response.json
           test "${HTTP_CODE}" = "200"
