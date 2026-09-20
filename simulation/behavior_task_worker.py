@@ -10,6 +10,7 @@ ARM_XML = r"""<mujoco model="hb_manipulation_task">
 <option timestep="0.002" integrator="RK4" gravity="0 0 -9.81"/>
 <worldbody>
 <geom name="floor" type="plane" size="5 5 .1"/>
+<geom name="tabletop" type="box" pos=".60 0 .87" size=".42 .35 .03" mass="20"/>
 <body name="torso" pos="0 0 1.05"><freejoint name="root"/><geom type="box" size=".22 .16 .32" mass="10"/>
 <body name="upper" pos=".20 0 .12"><joint name="shoulder" type="hinge" axis="0 1 0" range="-2.8 2.8"/><geom type="capsule" fromto="0 0 0 .28 0 0" size=".06" mass="2"/>
 <body name="fore" pos=".28 0 0"><joint name="elbow" type="hinge" axis="0 1 0" range="-2.8 2.8"/><geom type="capsule" fromto="0 0 0 .25 0 0" size=".05" mass="1.5"/>
@@ -58,7 +59,7 @@ def ik(x,z):
     theta1=math.atan2(dz,dx)-math.atan2(l2*s2,l1+l2*c2)
     return -theta1,-theta2
 
-def collisions(model,data,allowed=("floor","object_geom","target_geom")):
+def collisions(model,data,allowed=("floor","tabletop","object_geom","target_geom")):
     count=0
     for i in range(data.ncon):
         a,b=data.contact[i].geom1,data.contact[i].geom2
@@ -69,6 +70,10 @@ def collisions(model,data,allowed=("floor","object_geom","target_geom")):
 
 def manipulation(behavior,seed,seconds,policy,behavior_version="1.0.0"):
     cfg=TASKS[behavior]; model=mujoco.MjModel.from_xml_string(ARM_XML); data=mujoco.MjData(model)
+    # Pick/place objects rest on the tabletop instead of falling freely under gravity.
+    # The object center is kept one radius above the tabletop and the target is placed on the same surface.
+    if behavior == "pick-place":
+        cfg = dict(cfg, object=[0.55, 0.0, 0.955], target=[0.72, 0.0, 0.955])
     rng=seed01(seed); data.qpos[2]=1.08; data.qpos[3]=1.0
     data.qpos[4]=(rng-.5)*.02; data.qpos[5]=((rng*1.7)%1-.5)*.02
     obj=model.body("object").id; target=model.body("target").id
@@ -91,17 +96,20 @@ def manipulation(behavior,seed,seconds,policy,behavior_version="1.0.0"):
         mujoco.mj_step(model,data)
         hand=data.xpos[model.body("hand").id]; ob=data.xpos[obj]; tg=data.xpos[target]
         dist=math.dist(hand,ob if not grabbed else tg)
-        if not grabbed and dist<.09:
+        if not grabbed and dist<.075:
+            # Capture the object at the actual hand pose before enabling the weld.
+            # This avoids an artificial impulse from a large initial equality error.
+            data.qpos[obj_q:obj_q+3] = hand
+            data.qvel[model.joint("object_free").dofadr[0]:model.joint("object_free").dofadr[0]+3] = 0
             model.eq_active[0]=1; grabbed=True
-        if grabbed and math.dist(ob,tg)<.10:
+        if grabbed and math.dist(ob,tg)<.065:
+            # Release only when the object is actually over the target, then require it to settle.
             model.eq_active[0]=0; released=True
-            if behavior_version=="1.1.0":
-                if settled_since is None: settled_since=float(data.time)
-                if float(data.time)-settled_since>=0.15:
-                    success=True; complete=float(data.time); break
-            else:
+            if settled_since is None: settled_since=float(data.time)
+            object_speed=math.sqrt(sum(float(v)*float(v) for v in data.qvel[model.joint("object_free").dofadr[0]:model.joint("object_free").dofadr[0]+3]))
+            if math.dist(ob,tg)<.08 and object_speed < .08 and float(data.time)-settled_since>=0.15:
                 success=True; complete=float(data.time); break
-        elif grabbed:
+        else:
             settled_since=None
         min_h=min(min_h,float(data.xpos[model.body("torso").id,2]))
         max_tilt=max(max_tilt,math.sqrt(float(data.qpos[4])**2+float(data.qpos[5])**2))
