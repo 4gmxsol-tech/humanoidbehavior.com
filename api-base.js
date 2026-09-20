@@ -1,5 +1,5 @@
 (() => {
-  const API_ORIGIN = "https://api.humanoidbehavior.com";
+  const API_ORIGIN = "https://humanoidbehavior-com.4gmxsol.workers.dev";
   window.HB_API_ORIGIN = API_ORIGIN;
 
   const nativeFetch = window.fetch.bind(window);
