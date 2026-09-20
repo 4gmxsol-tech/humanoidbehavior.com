@@ -1,5 +1,5 @@
 name: Create And Run Regression Evaluation
-# regression after simulation and UI hardening
+# regression after controller and collision-metric fix
 
 on:
   push:
