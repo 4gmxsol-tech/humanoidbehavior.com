@@ -1,5 +1,5 @@
 name: Create And Run Regression Evaluation
-# retrigger after pick-place environment fix
+# regression after simulation and UI hardening
 
 on:
   push:
