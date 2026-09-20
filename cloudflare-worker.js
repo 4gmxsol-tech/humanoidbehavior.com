@@ -197,14 +197,25 @@ export default {
       }
 
       if (path === "/api/auth/signup" && request.method === "POST") {
-        const x = await body(request);
-        const email = String(x.email||"").trim().toLowerCase(), password = String(x.password||"");
-        if (!email || !password || password.length < 8) return json({error:"Email and password (8+ chars) required"},400);
-        const exists = await env.DB.prepare("SELECT id FROM users WHERE email=?").bind(email).first();
-        if (exists) return json({error:"Account already exists"},409);
-        const user = { id:id(), email, name:String(x.name||email.split("@")[0]), plan:"free" };
-        await env.DB.prepare("INSERT INTO users(id,email,name,password_hash,plan) VALUES(?,?,?,?,?)").bind(user.id,user.email,user.name,await passwordHash(password),user.plan).run();
-        return json({ token:await createSession(user,env), user },201);
+        let stage = "parse";
+        try {
+          const x = await body(request);
+          const email = String(x.email||"").trim().toLowerCase(), password = String(x.password||"");
+          if (!email || !password || password.length < 8) return json({error:"Email and password (8+ chars) required"},400);
+          stage = "check-email";
+          const exists = await env.DB.prepare("SELECT id FROM users WHERE email=?").bind(email).first();
+          if (exists) return json({error:"Account already exists"},409);
+          const user = { id:id(), email, name:String(x.name||email.split("@")[0]), plan:"free" };
+          stage = "hash-password";
+          const hash = await passwordHash(password);
+          stage = "insert-user";
+          await env.DB.prepare("INSERT INTO users(id,email,name,password_hash,plan) VALUES(?,?,?,?,?)").bind(user.id,user.email,user.name,hash,user.plan).run();
+          stage = "create-session";
+          const token = await createSession(user,env);
+          return json({ token, user },201);
+        } catch (error) {
+          return json({error:"Signup failed",stage,message:String(error?.message||error),name:String(error?.name||"Error")},500);
+        }
       }
 
       if (path === "/api/auth/login" && request.method === "POST") {
