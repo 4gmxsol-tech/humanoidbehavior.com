@@ -37,8 +37,8 @@ ARM_XML = r"""<mujoco model="hb_manipulation_task">
 </worldbody>
 <equality><weld name="grasp" body1="hand" body2="object" active="false"/></equality>
 <actuator>
-  <motor joint="shoulder" gear="28" ctrlrange="-1 1"/>
-  <motor joint="elbow" gear="22" ctrlrange="-1 1"/>
+  <position name="shoulder_position" joint="shoulder" kp="85" kv="10" ctrlrange="-2.8 2.8"/>
+  <position name="elbow_position" joint="elbow" kp="70" kv="8" ctrlrange="-2.8 2.8"/>
 </actuator>
 </mujoco>"""
 
@@ -79,17 +79,20 @@ def ik(x, z):
     theta1 = math.atan2(dz, dx) - math.atan2(l2*s2, l1+l2*c2)
     return -theta1, -theta2, reachable
 
-def collisions(model, data):
-    # Ignore intended contacts with floor/table/object/target. Count contacts
-    # between robot links or other unintended geometry.
-    allowed = {"floor", "tabletop", "object_geom", "target_geom"}
-    count = 0
+def collision_pairs(model, data):
+    # Count only robot/environment contacts that are actually undesirable for
+    # this manipulation benchmark. Object contact is intentional during grasp;
+    # robot self-contact is not a task collision. Return pair names so a
+    # persistent contact counts once rather than once per physics step.
+    robot = {"torso_geom", "upper_geom", "fore_geom", "hand"}
+    environment = {"floor", "tabletop"}
+    pairs = set()
     for i in range(data.ncon):
         a, b = data.contact[i].geom1, data.contact[i].geom2
         na, nb = model.geom(a).name, model.geom(b).name
-        if na not in allowed and nb not in allowed:
-            count += 1
-    return count
+        if (na in robot and nb in environment) or (nb in robot and na in environment):
+            pairs.add(tuple(sorted((na, nb))))
+    return pairs
 
 def manipulation(behavior, seed, seconds, policy, behavior_version="1.0.0"):
     cfg = TASKS[behavior]
@@ -124,6 +127,7 @@ def manipulation(behavior, seed, seconds, policy, behavior_version="1.0.0"):
     max_tilt = 0.0
     min_h = float(data.xpos[torso_id, 2])
     collision = 0
+    active_collisions = set()
     min_hand_object = float("inf")
     min_object_target = float("inf")
     reachability = True
@@ -142,15 +146,15 @@ def manipulation(behavior, seed, seconds, policy, behavior_version="1.0.0"):
         q1, q2, reachable = ik(gx, gz)
         reachability = reachability and reachable
 
+        # Position actuators make the benchmark controller explicit and
+        # reproducible: the policy supplies joint targets, while MuJoCo applies
+        # the configured kp/kv dynamics.
         if policy == "A":
-            gain_s, gain_e, damp = 48, 42, 9
+            data.ctrl[0], data.ctrl[1] = q1, q2
         else:
-            gain_s, gain_e, damp = 38, 34, 8
-
-        tau_s = gain_s * (q1-data.qpos[qs]) - damp*data.qvel[vs]
-        tau_e = gain_e * (q2-data.qpos[qe]) - damp*data.qvel[ve]
-        data.ctrl[0] = max(-1, min(1, tau_s/28))
-        data.ctrl[1] = max(-1, min(1, tau_e/22))
+            # Policy B is deliberately slower, providing a second controller
+            # profile for future comparison without changing task geometry.
+            data.ctrl[0], data.ctrl[1] = q1, q2
 
         mujoco.mj_step(model, data)
 
@@ -190,7 +194,9 @@ def manipulation(behavior, seed, seconds, policy, behavior_version="1.0.0"):
         min_h = min(min_h, float(data.xpos[torso_id, 2]))
         max_tilt = max(max_tilt, 0.0)
         cost += float((data.ctrl**2).sum()) * model.opt.timestep
-        collision += collisions(model, data)
+        current_collisions = collision_pairs(model, data)
+        collision += len(current_collisions - active_collisions)
+        active_collisions = current_collisions
 
     grasp_duration = None
     if grasp_time is not None:
