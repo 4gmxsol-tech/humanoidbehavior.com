@@ -160,6 +160,7 @@ def fail_job(job, message):
     d1("UPDATE jobs SET status=?, error=?, finished_at=datetime('now') WHERE id=?", ["failed", message[:2000], job["id"]])
 
 def main():
+    d1("UPDATE jobs SET status='queued', started_at=NULL WHERE status='running' AND started_at < datetime('now','-3 minutes')")
     jobs = d1("SELECT id,experiment_id,user_id,type,status,attempts,payload_json FROM jobs WHERE status='queued' ORDER BY created_at LIMIT 1")
     if not jobs:
         print("No queued jobs.")
