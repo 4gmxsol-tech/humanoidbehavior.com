@@ -1,4 +1,4 @@
-const CACHE="hb-shell-v3";
+const CACHE="hb-shell-v9";
 const SHELL=["/","/index.html","/simulation.html","/experiment.html","/styles.css","/api-base.js","/browser-compute.js","/browser-compute-worker.js","/manifest.webmanifest","/icon.svg"];
 
 self.addEventListener("install",event=>{
