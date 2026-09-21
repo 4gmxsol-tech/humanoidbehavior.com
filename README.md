@@ -1,97 +1,119 @@
 # HumanoidBehavior.com
 
-HumanoidBehavior is an engineering platform concept for designing, testing and benchmarking behaviors for humanoid robots.
+HumanoidBehavior is a robotics behavior evaluation platform for defining reusable humanoid-robot tasks, running reproducible experiments, and keeping measured simulation results attached to the exact behavior/version configuration.
 
-## MVP
+## Current product
 
-The first release is intentionally lightweight:
+The current public MVP provides:
 
-- Behavior Library
-- Benchmark concepts and metrics
-- Developer workflow
-- Early-access funnel
+- Versioned public behavior specifications
+- Authenticated workspaces
+- Persistent experiments and job status
+- Multi-seed evaluation configuration
+- Measured MuJoCo execution through a dedicated GitHub Actions worker
+- Cloudflare D1 persistence for accounts, experiments, jobs and artifacts
+- Experiment reports with raw JSON/CSV export
+- API-key and usage foundations
+- A public behavior registry and developer documentation
 
-## Roadmap
+The supported measured execution path today is **MuJoCo**. Deterministic/specification validation is kept separate from physics-based measurement.
 
-1. Behavior specifications
-2. Benchmark runner
-3. Simulation adapters
-4. Developer API
-5. Accounts and usage limits
-6. Marketplace for reusable behaviors
-7. Enterprise evaluation
+## Architecture
 
-## Local preview
+```
+HumanoidBehavior.com
+       |
+       v
+GitHub Pages frontend
+       |
+       v
+Cloudflare Worker API
+       |
+       v
+Cloudflare D1
+       |
+       v
+experiments / jobs / artifacts
+       |
+       v
+Manual GitHub Actions MuJoCo worker
+       |
+       v
+MuJoCo task runner
+       |
+       v
+D1 result persistence
+```
 
-Open `index.html` in a browser. The project is static HTML/CSS for the first deployment and can be hosted with GitHub Pages.
+The compute worker is intentionally separate from the Cloudflare Worker. Long-running MuJoCo simulation is not executed inside the request/response API.
 
-## Repository
+## Free deployment model
 
-https://github.com/4gmxsol-tech/humanoidbehavior.com
+The current MVP uses:
 
+- GitHub Pages for the static frontend
+- Cloudflare Workers for the API
+- Cloudflare D1 for durable application data
+- GitHub Actions for on-demand MuJoCo compute
 
-## Deployment
+No paid cloud database or always-on compute server is required for the current MVP architecture.
 
-The included Dockerfile runs the Node API and serves the complete frontend on port 3000. Copy .env.example to .env for local configuration. The current account system is an MVP session layer; production deployments should replace it with a managed identity provider and durable database before handling real users.
+The MuJoCo worker is currently **manual-dispatch only**. Automatic scheduled execution is disabled so queued evaluations do not consume GitHub Actions compute unexpectedly.
 
-## Product roadmap
+## Evaluation model
 
-### Foundation
-- Behavior catalog and specifications
-- Benchmark contract
-- Developer workspace
-- API and CI
+A typical evaluation flow is:
 
-### Robotics execution
-- MuJoCo adapter
-- Isaac Lab adapter
-- Gazebo adapter
-- Durable asynchronous benchmark queue + containerized workers
-- MuJoCo worker execution from queued experiments
-- Persisted experiment artifacts and job status APIs
-- Robot/model adapters
+1. Select a published behavior.
+2. Choose a version, engine, seeds and policy.
+3. Create a durable experiment.
+4. The experiment is stored as a queued job.
+5. A manual MuJoCo worker run claims the job.
+6. The worker executes the requested seeds/policies.
+7. Results and an experiment artifact are persisted to D1.
+8. The dashboard/report displays the measured output.
 
-### SaaS
-- Durable PostgreSQL storage
-- OAuth/email authentication
-- API keys
-- Team workspaces
-- Usage metering
-- Stripe billing
+A successful validation check is not presented as a physics success. Measured metrics are only shown for actual simulator execution.
 
-### Marketplace
-- Publish behavior packages
-- Versioning and provenance
-- Private/public visibility
-- Ratings and usage analytics
-- Paid behavior packages
+## Current limitations
 
+The following are deliberately not presented as enabled production capabilities:
 
-## Current launch status
+- Physical-robot execution
+- Robot-specific hardware adapters
+- Live Stripe checkout
+- Behavior-version comparison worker
+- Unverified human handover evaluation
+- Browser-side fake benchmark execution
 
-The platform now supports authenticated workspaces, persisted experiments, multi-seed experiment execution, durable asynchronous jobs, persisted artifacts, experiment comparison, measured MuJoCo workflows through GitHub Actions and the dedicated worker runtime, API keys, usage metering, billing integration foundations, and simulation/robot adapter contracts. The browser experiment lab queues work instead of executing long jobs inside the API process; the worker selects the deterministic harness or MuJoCo engine and records the resulting artifact. Physical-robot execution remains explicitly separated and provenance-tracked.
+The public registry uses **Not measured** for specifications that do not have a verified measured baseline. This prevents illustrative numbers from being mistaken for benchmark evidence.
 
-## Production status
+## Repository structure
 
-The repository now contains a working web application and API foundation. For a real public production launch, configure a Node-capable host, persistent PostgreSQL storage, managed authentication, HTTPS, secrets, backups, monitoring and a real payment processor. GitHub Pages alone cannot run the Node API.
+- `index.html` — public product landing page
+- `behaviors.html` / `behavior.html` — public behavior registry and specifications
+- `simulation.html` — experiment launcher
+- `experiment.html` — persistent experiment report
+- `dashboard.html` — authenticated workspace
+- `docs.html` — developer/API documentation
+- `pricing.html` — current plan positioning
+- `cloudflare-worker.js` — Worker API and D1 integration
+- `wrangler.jsonc` — Cloudflare Worker/D1 configuration
+- `simulation/` — MuJoCo worker and task execution code
+- `.github/workflows/mujoco-worker.yml` — manual MuJoCo compute workflow
 
-The benchmark runner is a deterministic task-specification validator. It is intentionally not presented as physical-robot or simulator performance. Hardware/simulation adapters must be connected before publishing measured robotics results.
+## Development
 
-## v1 platform integrations
+The frontend is static and can be previewed locally. The production frontend is served from GitHub Pages and routes `/api/*` requests to the Cloudflare Worker origin.
 
-The repository now contains the integration foundation for:
+The current Worker uses PBKDF2 password hashing, hashed bearer sessions/API keys, CORS restricted to the production origin, and D1-backed authorization.
 
-- **PostgreSQL** via `DATABASE_URL`, with JSON fallback for local development.
-- **Authentication** via email/password + scrypt and bearer sessions.
-- **API keys** with hashed storage, plan limits and revocation.
-- **Billing** via Stripe Checkout/webhook verification; requires real Stripe secrets/prices.
-- **Robot adapters** for generic HTTP and ROS 2 command contracts.
-- **Simulation adapters** for MuJoCo, Isaac Lab and Gazebo through an external worker command.
-- **Model/policy benchmarking** through the benchmark request's `model` / `policy` fields and persisted run metadata.
-- **Docker Compose** with PostgreSQL, API and a dedicated benchmark worker.
-- **Job queue** persisted in PostgreSQL/JSON fallback with bounded worker retries.
-- **Artifacts** persisted per experiment for reproducible report retrieval.
+## Positioning
 
-### Important execution boundary
+HumanoidBehavior is best understood today as an **early-stage robotics infrastructure asset / MVP**, not as a claim of completed physical-robot benchmarking coverage.
 
-The adapter layer is designed so that the platform does not claim a robot or simulator executed a task when it did not. A real measured benchmark requires a connected simulator/robot worker. Stripe and PostgreSQL also remain configuration-dependent.
+Its core value is the integrated behavior-specification → durable experiment → simulator worker → reproducible report workflow, with a clean path toward additional simulator and robot adapters.
+
+## License
+
+See repository files for the current project/license terms.
