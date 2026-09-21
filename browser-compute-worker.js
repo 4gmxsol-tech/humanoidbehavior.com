@@ -1,4 +1,4 @@
-import { runBrowserEvaluation } from "./browser-compute.js?v=14";
+import { runBrowserEvaluation } from "./browser-compute.js?v=15";
 
 self.onmessage = async event => {
   try {
