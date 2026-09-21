@@ -136,7 +136,8 @@ async function runEvaluation(){
           body:JSON.stringify({result:browserResult})
         });
         progress.innerHTML="<b>Browser evaluation complete.</b> · Results saved to D1.";
-        out.textContent="Measured evaluation complete on this device · "+(browserResult.provenance?.computeBuild||"unknown build");\n        initLiveSimulation(browserResult);
+        out.textContent="Measured evaluation complete on this device · "+(browserResult.provenance?.computeBuild||"unknown build");
+        initLiveSimulation(browserResult);
       }catch(browserError){
         progress.innerHTML="<b>Browser compute unavailable.</b> · "+browserError.message+" · Job remains queued for the local worker.";
       }
