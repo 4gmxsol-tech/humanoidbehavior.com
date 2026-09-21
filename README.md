@@ -102,7 +102,8 @@ The public registry uses **Not measured** for specifications that do not have a 
 - `cloudflare-worker.js` — Worker API and D1 integration
 - `wrangler.jsonc` — Cloudflare Worker/D1 configuration
 - `simulation/` — MuJoCo worker and task execution code
-- `browser-compute.js` — phone/browser MuJoCo WASM compute worker
+- `browser-compute.js` — phone/browser MuJoCo WASM compute engine
+- `browser-compute-worker.js` — off-main-thread browser worker
 - `simulation/local_worker.py` — optional no-token local MuJoCo queue worker
 - `.github/workflows/mujoco-worker.yml` — optional legacy GitHub Actions compute workflow
 
