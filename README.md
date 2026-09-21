@@ -36,7 +36,7 @@ Cloudflare D1
 experiments / jobs / artifacts
        |
        v
-Manual GitHub Actions MuJoCo worker
+Event-dispatched GitHub Actions MuJoCo worker
        |
        v
 MuJoCo task runner
@@ -54,11 +54,13 @@ The current MVP uses:
 - GitHub Pages for the static frontend
 - Cloudflare Workers for the API
 - Cloudflare D1 for durable application data
-- GitHub Actions for on-demand MuJoCo compute
+- GitHub Actions for event-triggered MuJoCo compute
 
 No paid cloud database or always-on compute server is required for the current MVP architecture.
 
-The MuJoCo worker is currently **manual-dispatch only**. Automatic scheduled execution is disabled so queued evaluations do not consume GitHub Actions compute unexpectedly.
+The API now requests a `workflow_dispatch` run after queueing a MuJoCo evaluation. This requires a GitHub Actions write token stored as the Cloudflare Worker secret `GITHUB_ACTIONS_TOKEN`. Automatic scheduled polling remains disabled, so the system does not consume compute on a timer.
+
+If that secret is not configured, evaluations remain safely queued and can still be started manually from GitHub Actions.
 
 ## Evaluation model
 
@@ -68,8 +70,8 @@ A typical evaluation flow is:
 2. Choose a version, engine, seeds and policy.
 3. Create a durable experiment.
 4. The experiment is stored as a queued job.
-5. A manual MuJoCo worker run claims the job.
-6. The worker executes the requested seeds/policies.
+5. The API requests a GitHub Actions `workflow_dispatch` run for the MuJoCo worker.
+6. The worker claims the job and executes the requested seeds/policies.
 7. Results and an experiment artifact are persisted to D1.
 8. The dashboard/report displays the measured output.
 
@@ -100,7 +102,7 @@ The public registry uses **Not measured** for specifications that do not have a 
 - `cloudflare-worker.js` — Worker API and D1 integration
 - `wrangler.jsonc` — Cloudflare Worker/D1 configuration
 - `simulation/` — MuJoCo worker and task execution code
-- `.github/workflows/mujoco-worker.yml` — manual MuJoCo compute workflow
+- `.github/workflows/mujoco-worker.yml` — event-triggered MuJoCo compute workflow
 
 ## Development
 
@@ -117,3 +119,7 @@ Its core value is the integrated behavior-specification → durable experiment �
 ## License
 
 See repository files for the current project/license terms.
+
+## Compute dispatch setup
+
+For automatic execution, create a GitHub fine-grained token with Actions: Read and write permission for this repository, then store it in the Cloudflare Worker as the secret **GITHUB_ACTIONS_TOKEN**. The Worker uses it only to dispatch `mujoco-worker.yml` on the `main` branch. The token is never returned to the browser or persisted in D1.
