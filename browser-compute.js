@@ -47,7 +47,7 @@ function manipulation(mj,behavior,seed,seconds,policy,version){
   if(grabbed&&!released&&td<=.075){model.eq_active[0]=0;released=true;settledSince=Number(data.time)}
   if(released){const ov=model.joint("object_free").dofadr[0],speed=Math.hypot(data.qvel[ov],data.qvel[ov+1],data.qvel[ov+2]);if(td<=.085&&speed<.08){if(settledSince==null)settledSince=Number(data.time);const req=version==="1.1.0" ? 0.15 : 0.05;if(Number(data.time)-settledSince>=req){success=true;complete=Number(data.time);break}}else settledSince=null}
  }
- const graspDuration=graspTime!=null?(complete??Number(data.time))-graspTime;
+ const graspDuration=graspTime!=null ? (complete??Number(data.time))-graspTime : null;
  const out={behaviorId:behavior,seed:String(seed),policy,engine:"MuJoCo",measured:true,simulation:true,benchmark:"humanoid-pick-place-v1",environment:"hb-pick-place-v1",behaviorVersion:version,metrics:{taskSuccess:success,completionTime:complete,simulatedSeconds:Number(data.time),survivalRate:1,minTorsoHeightM:Number(data.xpos[torso*3+2].toFixed(4)),maxTiltRad:0,controlCost:Number(cost.toFixed(5)),collisionCount:0,grasped:grabbed,released,reachability,minimumHandObjectDistanceM:Number(minHO.toFixed(5)),minimumObjectTargetDistanceM:Number(minOT.toFixed(5)),graspDurationS:graspDuration==null?null:Number(graspDuration.toFixed(4)),finalShoulderRad:Number(data.qpos[qs].toFixed(4)),finalElbowRad:Number(data.qpos[qe].toFixed(4))}};
  data.delete();model.delete();return out;
 }
