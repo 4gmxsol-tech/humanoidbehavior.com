@@ -37,8 +37,9 @@ async function loadVersions(){
 $("behavior").onchange=loadVersions;
 function syncG1(){ $("g1config").style.display="none"; }
 $("robot").onchange=syncG1;syncG1();
+const COMPUTE_BUILD="HB-CONTROLLER-V21";
 async function loadBrowserComputeModule(){
-  const url=new URL("browser-compute.js?v=21",location.href).toString();
+  const url=new URL("browser-compute.js?build="+encodeURIComponent(COMPUTE_BUILD),location.href).toString();
   const response=await fetch(url,{cache:"no-store",headers:{"Accept":"text/javascript"}});
   const source=await response.text();
   if(!response.ok)throw new Error("browser-compute.js HTTP "+response.status);
@@ -48,7 +49,13 @@ async function loadBrowserComputeModule(){
 }
 async function runBrowserCompute(payload,onProgress=()=>{}){
   try{
-    const worker=new Worker("./browser-compute-worker.js?v=21",{type:"module"});
+    const workerSourceResponse=await fetch(new URL("browser-compute-worker.js?build="+encodeURIComponent(COMPUTE_BUILD),location.href),{cache:"no-store",headers:{"Accept":"text/javascript"}});
+    if(!workerSourceResponse.ok)throw new Error("browser-compute-worker.js HTTP "+workerSourceResponse.status);
+    const workerSource=await workerSourceResponse.text();
+    const computeUrl=new URL("browser-compute.js?build="+encodeURIComponent(COMPUTE_BUILD+"-"+Date.now()),location.href).toString();
+    const workerBlobSource=workerSource.replace("from \"./browser-compute.js?v=21\"", "from \""+computeUrl+"\"");
+    if(workerBlobSource===workerSource)throw new Error("Worker source is not the expected build");
+    const worker=new Worker(URL.createObjectURL(new Blob([workerBlobSource],{type:"text/javascript"})),{type:"module"});
     return await new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
       worker.onmessage=event=>{
@@ -93,7 +100,7 @@ async function runEvaluation(){
           body:JSON.stringify({result:browserResult})
         });
         progress.innerHTML="<b>Browser evaluation complete.</b> · Results saved to D1.";
-        out.textContent="Measured evaluation complete on this device.";
+        out.textContent="Measured evaluation complete on this device · "+(browserResult.provenance?.computeBuild||"unknown build");
       }catch(browserError){
         progress.innerHTML="<b>Browser compute unavailable.</b> · "+browserError.message+" · Job remains queued for the local worker.";
       }
@@ -115,4 +122,4 @@ async function runEvaluation(){
 }
 $("run").onclick=runEvaluation;
 loadQuota();loadVersions();
-if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js?v=13").catch(()=>{});}</script></body></html>
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js?v=14").catch(()=>{});}</script></body></html>
