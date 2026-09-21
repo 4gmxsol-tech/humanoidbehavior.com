@@ -215,34 +215,5 @@ status         queued
   });
 })();
 </script>
-<script src="/analytics.js?v=1"></script><script>
-(()=> {
-  const el=document.getElementById("hb-secret-entry");
-  if(!el)return;
-  let taps=0;
-  let resetTimer=0;
-  let lastTap=0;
-  const maxGap=2500;
-  const reset=()=>{
-    taps=0;
-    clearTimeout(resetTimer);
-    resetTimer=0;
-  };
-  el.addEventListener("click",(e)=>{
-    e.preventDefault();
-    const now=Date.now();
-    if(now-lastTap>maxGap) taps=0;
-    lastTap=now;
-    taps++;
-    clearTimeout(resetTimer);
-    if(taps>=5){
-      reset();
-      window.location.href="/analytics.html";
-      return;
-    }
-    resetTimer=setTimeout(reset,maxGap);
-  });
-})();
-</script>
-</body>
+<script src="/analytics.js?v=1"></script></body>
 </html>
