@@ -61,6 +61,9 @@ jobs:
           cat /tmp/d1-query-response.json
           test "${HTTP_CODE}" = "200"
 
+      - name: Worker heartbeat
+        run: echo "MuJoCo Compute Worker started at $(date -u +%FT%TZ)"
+
       - name: Process queued evaluations
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
