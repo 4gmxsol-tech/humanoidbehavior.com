@@ -2,6 +2,8 @@ name: MuJoCo Compute Worker
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
   push:
     branches:
       - main
@@ -59,17 +61,7 @@ jobs:
           cat /tmp/d1-query-response.json
           test "${HTTP_CODE}" = "200"
 
-      - name: Test pass 1
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          D1_DATABASE_ID: de530114-adc7-4c5a-b0de-cdc2e5379ed5
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: python simulation/github_actions_runner.py
-
-      - name: Wait 60 seconds
-        run: sleep 60
-
-      - name: Test pass 2
+      - name: Process queued evaluations
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           D1_DATABASE_ID: de530114-adc7-4c5a-b0de-cdc2e5379ed5
