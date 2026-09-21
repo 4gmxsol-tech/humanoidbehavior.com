@@ -1,5 +1,5 @@
-const CACHE="hb-shell-v10";
-const SHELL=["/","/index.html","/simulation.html","/experiment.html","/styles.css","/api-base.js","/browser-compute.js","/browser-compute-worker.js","/manifest.webmanifest","/icon.svg"];
+const CACHE="hb-shell-v11";
+const SHELL=["/","/index.html","/simulation.html","/experiment.html","/styles.css","/api-base.js","/browser-compute.js?v=18",/browser-compute-worker.js?v=18",/manifest.webmanifest","/icon.svg"];
 
 self.addEventListener("install",event=>{
   event.waitUntil(
