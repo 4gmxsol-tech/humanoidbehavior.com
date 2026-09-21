@@ -52,20 +52,23 @@ async function runEvaluation(){
     link.innerHTML="<a class=\"button primary\" href=\"experiment.html?id="+encodeURIComponent(exp)+"\">Open live experiment</a>";
     if($("engine").value==="MuJoCo"){
       try{
-        const module=await import("./browser-compute.js");
         progress.innerHTML="<span class=\"spinner\"></span> Browser MuJoCo loading…";
-        const result=await module.runBrowserEvaluation({
-          behaviorId:body.behaviorId,
-          behaviorVersion:body.behaviorVersion,
-          seeds:body.seeds,
-          policies:body.policies||["policy-a"],
-          seconds:body.seconds,
-          onProgress:(done,total)=>{progress.innerHTML="<b>Browser MuJoCo running</b> · "+done+"/"+total+" runs · "+Math.round(done/total*100)+"%";}
+        const worker=new Worker("./browser-compute-worker.js",{type:"module"});
+        const browserResult=await new Promise((resolve,reject)=>{
+          const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
+          worker.onmessage=event=>{
+            const m=event.data||{};
+            if(m.type==="progress"){progress.innerHTML="<b>Browser MuJoCo running</b> · "+m.done+"/"+m.total+" runs · "+Math.round(m.done/m.total*100)+"%";}
+            if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result);}
+            if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"));}
+          };
+          worker.onerror=event=>{clearTimeout(timer);worker.terminate();reject(new Error(event.message||"Browser worker failed"));};
+          worker.postMessage({behaviorId:body.behaviorId,behaviorVersion:body.behaviorVersion,seeds:body.seeds,policies:body.policies||["policy-a"],seconds:body.seconds});
         });
         await api("/api/experiments/"+encodeURIComponent(exp)+"/browser-result",{
           method:"POST",
           headers:{Authorization:"Bearer "+token},
-          body:JSON.stringify({result})
+          body:JSON.stringify({result:browserResult})
         });
         progress.innerHTML="<b>Browser evaluation complete.</b> · Results saved to D1.";
         out.textContent="Measured evaluation complete on this device.";
