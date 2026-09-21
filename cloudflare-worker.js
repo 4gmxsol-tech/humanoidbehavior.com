@@ -100,7 +100,9 @@ async function ensureSchema(env) {
       env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_behaviors_public ON behaviors(visibility,status)"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, token_hash TEXT UNIQUE NOT NULL, user_id TEXT NOT NULL, expires_at TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
       env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash)"),
-      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id)")
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id)"),
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS auth_attempts (id TEXT PRIMARY KEY, email TEXT NOT NULL, ip_hash TEXT NOT NULL, success INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_auth_attempts_window ON auth_attempts(email,ip_hash,created_at)")
     ]);
     const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM behaviors WHERE user_id='system'").first();
     if (!Number(row?.n || 0)) {
@@ -256,8 +258,15 @@ export default {
 
       if (path === "/api/auth/login" && request.method === "POST") {
         const x = await body(request), email=String(x.email||"").trim().toLowerCase();
+        const ip=String(request.headers.get("CF-Connecting-IP")||request.headers.get("X-Forwarded-For")||"unknown").split(",")[0].trim();
+        const ipHash=await sha256(ip);
+        const attempts=await env.DB.prepare("SELECT COUNT(*) AS n FROM auth_attempts WHERE email=? AND ip_hash=? AND success=0 AND created_at>=datetime('now','-15 minutes')").bind(email,ipHash).first();
+        if(Number(attempts?.n||0)>=8) return json({error:"Too many failed attempts. Please wait 15 minutes and try again."},429);
         const user = await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first();
-        if (!user || !(await passwordVerify(String(x.password||""),user.password_hash))) return json({error:"Invalid credentials"},401);
+        const valid=!!user && await passwordVerify(String(x.password||""),user.password_hash);
+        await env.DB.prepare("INSERT INTO auth_attempts(id,email,ip_hash,success) VALUES(?,?,?,?)").bind(id(),email,ipHash,valid?1:0).run();
+        if(!valid) return json({error:"Invalid credentials"},401);
+        await env.DB.prepare("DELETE FROM auth_attempts WHERE email=? AND ip_hash=? AND success=0").bind(email,ipHash).run();
         return json({ token:await createSession(user,env), user:publicUser(user) });
       }
 
