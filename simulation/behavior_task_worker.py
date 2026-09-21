@@ -2,7 +2,7 @@ import hashlib, json, math, sys
 import mujoco
 
 TASKS = {
-    "pick-place": {"object": [0.55, 0.0, 0.955], "target": [0.72, 0.0, 0.955], "benchmark": "humanoid-pick-place-v1"},
+    "pick-place": {"object": [0.46, 0.0, 0.955], "target": [0.62, 0.0, 0.955], "benchmark": "humanoid-pick-place-v1"},
     "handover": {"object": [0.52, 0.0, 1.02], "target": [0.68, 0.0, 1.15], "benchmark": "humanoid-handover-v1"},
 }
 
@@ -101,7 +101,7 @@ def manipulation(behavior, seed, seconds, policy, behavior_version="1.0.0"):
     rng = seed01(seed)
 
     if behavior == "pick-place":
-        cfg = dict(cfg, object=[.55 + (rng-.5)*.01, 0, .955], target=[.72, 0, .955])
+        cfg = dict(cfg, object=[.46 + (rng-.5)*.01, 0, .955], target=[.62, 0, .955])
 
     obj_id = model.body("object").id
     target_id = model.body("target").id
