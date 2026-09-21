@@ -10,6 +10,15 @@ async function getJson(path,options={}){
  if(!r.ok) throw Error(x.error||x.message||("HTTP "+r.status+" from "+path));
  return x;
 }
+async function loadBrowserComputeModule(){
+  const url=new URL("browser-compute.js?v=5",location.href).toString();
+  const response=await fetch(url,{cache:"no-store",headers:{"Accept":"text/javascript"}});
+  const source=await response.text();
+  if(!response.ok)throw new Error("browser-compute.js HTTP "+response.status);
+  if(!source.includes("export async function runBrowserEvaluation"))throw new Error("browser-compute.js returned non-module content");
+  const blob=new Blob([source],{type:"text/javascript"});
+  return await import(URL.createObjectURL(blob));
+}
 async function runBrowserCompute(payload){
   let workerError="";
   try{
@@ -23,7 +32,7 @@ async function runBrowserCompute(payload){
   }catch(firstError){
     const first=String(firstError?.message||firstError||"Worker failed");
     try{
-      const mod=await import("./browser-compute.js?v=4");
+      const mod=await loadBrowserComputeModule();
       return await mod.runBrowserEvaluation(payload);
     }catch(secondError){
       throw new Error(first+"; direct browser fallback: "+String(secondError?.message||secondError||"failed"));
