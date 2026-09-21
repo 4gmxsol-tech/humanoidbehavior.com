@@ -3,7 +3,7 @@ const DOOR_XML = `<mujoco model="hb_door_task"><option timestep="0.002" integrat
 const FOLLOW_XML = `<mujoco model="hb_follow_task"><option timestep="0.002" integrator="RK4" gravity="0 0 -9.81"/><worldbody><geom name="floor" type="plane" size="10 10 .1"/><body name="robot" pos="0 0 .7"><joint name="slide_x" type="slide" axis="1 0 0" damping="1"/><geom type="cylinder" size=".25 .7" mass="20"/></body><body name="person" mocap="true" pos="1 0 .7"><geom type="sphere" size=".22" mass="5"/></body></worldbody><actuator><motor joint="slide_x" gear="80" ctrlrange="-1 1"/></actuator></mujoco>`;
 
 function seed01(seed){let h=0xcbf29ce484222325n;const s=String(seed);for(let i=0;i<s.length;i++){h^=BigInt(s.charCodeAt(i));h=BigInt.asUintN(64,h*0x100000001b3n)}return Number(h&0xffffffffffffffffn)/18446744073709551616}
-function ik(x,z){const sx=.20,sz=1.17,l1=.28,l2=.25,dx=x-sx,dz=z-sz,raw=Math.hypot(dx,dz),reachable=Math.abs(l1-l2)+.01<=raw&&raw<=l1+l2-.01,d=Math.min(l1+l2-.01,Math.max(Math.abs(l1-l2)+.01,raw)),c2=Math.max(-1,Math.min(1,(d*d-l1*l1-l2*l2)/(2*l1*l2))),t2=Math.acos(c2),s2=Math.sin(t2),t1=Math.atan2(dz,dx)-Math.atan2(l2*s2,l1+l2*c2);return[t1,t2,reachable]}
+function ik(x,z){const sx=.20,sz=1.17,l1=.28,l2=.25,dx=x-sx,dz=z-sz,raw=Math.hypot(dx,dz),reachable=Math.abs(l1-l2)+.01<=raw&&raw<=l1+l2-.01,d=Math.min(l1+l2-.01,Math.max(Math.abs(l1-l2)+.01,raw)),c2=Math.max(-1,Math.min(1,(d*d-l1*l1-l2*l2)/(2*l1*l2))),t2=Math.acos(c2),s2=Math.sin(t2),t1=Math.atan2(dz,dx)-Math.atan2(l2*s2,l1+l2*c2);return[-t1,-t2,reachable]}
 function dist3(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])}
 function pos(data,id){return[data.xpos[id*3],data.xpos[id*3+1],data.xpos[id*3+2]]}
 function jointId(mj,model,name){
@@ -23,7 +23,7 @@ async function load(){
     if(typeof mod.default!=="function")throw new Error("MuJoCo module has no default loader");
     return await mod.default();
   }catch(error){
-    throw new Error("MuJoCo WASM loader v11: "+String(error?.message||error));
+    throw new Error("MuJoCo WASM loader v12: "+String(error?.message||error));
   }
 }
 
@@ -37,8 +37,8 @@ function manipulation(mj,behavior,seed,seconds,policy,version){
  for(let i=0;i<steps;i++){
   const hp=pos(data,hand),op=pos(data,object),tp=pos(data,target),gx=grabbed?tp[0]:op[0],gz=grabbed?tp[2]:op[2];
   const[q1,q2,reach]=ik(gx,gz);reachability=reachability&&reach;
-  const kps=policy==="A"?72:58,kpe=policy==="A"?58:46,kds=policy==="A"?12:10,kde=policy==="A"?10:9;
-  let ramp=Math.min(1,Number(data.time)/.35);ramp=ramp*ramp*(3-2*ramp);
+  const kps=policy==="A"?220:170,kpe=policy==="A"?170:135,kds=policy==="A"?28:22,kde=policy==="A"?22:18;
+  let ramp=Math.min(1,Number(data.time)/.20);ramp=ramp*ramp*(3-2*ramp);
   data.ctrl[0]=Math.max(-80,Math.min(80,data.qfrc_bias[vs]+kps*(ramp*q1-data.qpos[qs])-kds*data.qvel[vs]));
   data.ctrl[1]=Math.max(-70,Math.min(70,data.qfrc_bias[ve]+kpe*(ramp*q2-data.qpos[qe])-kde*data.qvel[ve]));
   mj.mj_step(model,data);
