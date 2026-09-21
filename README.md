@@ -10,7 +10,7 @@ The current public MVP provides:
 - Authenticated workspaces
 - Persistent experiments and job status
 - Multi-seed evaluation configuration
-- Measured MuJoCo execution through a dedicated GitHub Actions worker
+- Measured MuJoCo execution through a dedicated local compute worker
 - Cloudflare D1 persistence for accounts, experiments, jobs and artifacts
 - Experiment reports with raw JSON/CSV export
 - API-key and usage foundations
@@ -36,7 +36,7 @@ Cloudflare D1
 experiments / jobs / artifacts
        |
        v
-Event-dispatched GitHub Actions MuJoCo worker
+Local MuJoCo compute worker
        |
        v
 MuJoCo task runner
@@ -54,13 +54,11 @@ The current MVP uses:
 - GitHub Pages for the static frontend
 - Cloudflare Workers for the API
 - Cloudflare D1 for durable application data
-- GitHub Actions for event-triggered MuJoCo compute
+- A local machine for on-demand MuJoCo compute
 
 No paid cloud database or always-on compute server is required for the current MVP architecture.
 
-The API now requests a `workflow_dispatch` run after queueing a MuJoCo evaluation. This requires a GitHub Actions write token stored as the Cloudflare Worker secret `GITHUB_ACTIONS_TOKEN`. Automatic scheduled polling remains disabled, so the system does not consume compute on a timer.
-
-If that secret is not configured, evaluations remain safely queued and can still be started manually from GitHub Actions.
+The API only queues the evaluation in D1. A local worker polls that queue and runs MuJoCo directly, so no GitHub token is required. The worker can be started only when compute is needed.
 
 ## Evaluation model
 
@@ -70,7 +68,7 @@ A typical evaluation flow is:
 2. Choose a version, engine, seeds and policy.
 3. Create a durable experiment.
 4. The experiment is stored as a queued job.
-5. The API requests a GitHub Actions `workflow_dispatch` run for the MuJoCo worker.
+5. The local compute worker polls D1, claims the queued job, and starts the MuJoCo task.
 6. The worker claims the job and executes the requested seeds/policies.
 7. Results and an experiment artifact are persisted to D1.
 8. The dashboard/report displays the measured output.
@@ -102,7 +100,8 @@ The public registry uses **Not measured** for specifications that do not have a 
 - `cloudflare-worker.js` — Worker API and D1 integration
 - `wrangler.jsonc` — Cloudflare Worker/D1 configuration
 - `simulation/` — MuJoCo worker and task execution code
-- `.github/workflows/mujoco-worker.yml` — event-triggered MuJoCo compute workflow
+- `simulation/local_worker.py` — no-token local MuJoCo queue worker
+- `.github/workflows/mujoco-worker.yml` — optional GitHub Actions compute workflow
 
 ## Development
 
@@ -120,6 +119,21 @@ Its core value is the integrated behavior-specification → durable experiment �
 
 See repository files for the current project/license terms.
 
-## Compute dispatch setup
+## Local compute worker
 
-For automatic execution, create a GitHub fine-grained token with Actions: Read and write permission for this repository, then store it in the Cloudflare Worker as the secret **GITHUB_ACTIONS_TOKEN**. The Worker uses it only to dispatch `mujoco-worker.yml` on the `main` branch. The token is never returned to the browser or persisted in D1.
+No GitHub token is required.
+
+Set these environment variables on the machine that will run MuJoCo:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `D1_DATABASE_ID`
+- `CLOUDFLARE_API_TOKEN` — a Cloudflare API token with D1 read/write access
+
+Then run:
+
+```bash
+cd simulation
+python local_worker.py
+```
+
+The worker polls the D1 queue, claims jobs atomically, executes the MuJoCo task runner, and writes progress/results back to D1. Keep the Cloudflare token local and never commit it to the repository.
