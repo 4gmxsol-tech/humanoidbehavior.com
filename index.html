@@ -218,27 +218,29 @@ status         queued
 (()=> {
   const el=document.getElementById("hb-secret-entry");
   if(!el)return;
-  let holdTimer=0;
-  let holding=false;
-  const start=(e)=>{
-    if(e.button!==undefined && e.button!==0)return;
-    holding=true;
-    clearTimeout(holdTimer);
-    holdTimer=setTimeout(()=>{
-      if(!holding)return;
-      holding=false;
+  let taps=0;
+  let resetTimer=0;
+  let lastTap=0;
+  const maxGap=2500;
+  const reset=()=>{
+    taps=0;
+    clearTimeout(resetTimer);
+    resetTimer=0;
+  };
+  el.addEventListener("click",(e)=>{
+    e.preventDefault();
+    const now=Date.now();
+    if(now-lastTap>maxGap) taps=0;
+    lastTap=now;
+    taps++;
+    clearTimeout(resetTimer);
+    if(taps>=5){
+      reset();
       window.location.href="/analytics.html";
-    },5000);
-  };
-  const cancel=()=>{
-    holding=false;
-    clearTimeout(holdTimer);
-  };
-  el.addEventListener("pointerdown",start);
-  el.addEventListener("pointerup",cancel);
-  el.addEventListener("pointercancel",cancel);
-  el.addEventListener("pointerleave",cancel);
-  el.addEventListener("click",e=>e.preventDefault());
+      return;
+    }
+    resetTimer=setTimeout(reset,maxGap);
+  });
 })();
 </script>
 </body>
