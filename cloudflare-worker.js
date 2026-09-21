@@ -1,4 +1,5 @@
-const VERSION = "cloudflare-d1-api-2";
+const VERSION = "cloudflare-d1-api-3";
+const ALLOWED_ORIGIN = "https://humanoidbehavior.com";
 const encoder = new TextEncoder();
 
 const PLANS = {
@@ -63,10 +64,11 @@ let schemaPromise;
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,Authorization",
-    "Cache-Control": "no-store"
+    "Cache-Control": "no-store",
+    "Vary": "Origin"
   }});
 }
 function id() { return crypto.randomUUID(); }
