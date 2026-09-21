@@ -403,3 +403,62 @@ pre,.code-block,.benchmark-card pre,.terminal-product pre{max-width:100%;overflo
   .button,.nav-cta,.status-pill,.auth-status{border:1px solid CanvasText}
   .primary{background:ButtonFace;color:ButtonText}
 }
+
+/* Cross-device layout hardening — fluid sizing, touch-safe controls, replay-safe canvas */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+.page{width:min(1080px,100%);padding-left:clamp(16px,5vw,72px);padding-right:clamp(16px,5vw,72px)}
+.section{padding-left:clamp(16px,7vw,120px);padding-right:clamp(16px,7vw,120px)}
+input,select,textarea,button,.button{max-width:100%;font:inherit}
+button,.button{min-height:44px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.toolbar{flex-wrap:wrap}
+.toolbar>*{min-width:0}
+.run-table{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.run-row{min-width:0;overflow-wrap:anywhere}
+pre,.code-block{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+.sim-card{min-width:0}
+#sim-canvas,#simulation-canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;max-height:460px;min-height:220px}
+@media(max-width:900px){
+ .page{padding-top:clamp(48px,8vw,70px);padding-bottom:80px}
+ .page h1{font-size:clamp(38px,8vw,62px);letter-spacing:clamp(-3px,-.7vw,-2px)}
+ .lead{font-size:clamp(16px,3vw,19px)}
+ .toolbar{align-items:stretch}
+ .toolbar>.button,.toolbar>a.button,.toolbar>button,.toolbar>input,.toolbar>select{flex:1 1 180px}
+ .sim-card{padding:clamp(16px,4vw,24px)}
+ .runner{padding:clamp(20px,4vw,32px)}
+}
+@media(max-width:640px){
+ .nav{padding-left:12px;padding-right:12px}
+ .brand{font-size:18px}
+ .nav-cta{padding:9px 12px}
+ .page{padding-left:14px;padding-right:14px}
+ .section{padding-left:16px;padding-right:16px}
+ .hero{padding-left:16px;padding-right:16px}
+ .hero h1,.hero-product h1{font-size:clamp(40px,12vw,54px);letter-spacing:-3px}
+ .hero-copy{font-size:17px}
+ .actions{flex-direction:column;align-items:stretch}
+ .actions .button{width:100%;text-align:center}
+ .toolbar{flex-direction:column}
+ .toolbar>*{width:100%;flex:1 1 auto}
+ .kpi-grid{grid-template-columns:1fr}
+ .workspace-grid,.pricing-grid{grid-template-columns:1fr}
+ .metric-grid{grid-template-columns:1fr}
+ .metric-grid div,.metric-grid div:nth-child(even){border-right:0}
+ .metric-grid div:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
+ .metric-grid div:last-child{border-bottom:0}
+ .run-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding:13px 12px}
+ .run-row.head{font-size:10px}
+ .run-row span,.run-row a,.run-row button{min-width:0;overflow-wrap:anywhere}
+ #sim-canvas,#simulation-canvas{min-height:200px}
+}
+@media(max-width:420px){
+ .nav{height:60px}
+ .brand{font-size:16px}
+ .nav-cta{font-size:12px;padding:8px 10px}
+ .page h1{font-size:clamp(34px,10vw,44px)}
+ .sim-card{border-radius:14px}
+ #sim-canvas,#simulation-canvas{min-height:180px}
+}
+@media(hover:none){
+ .button:hover,.card:hover,.feature-card:hover,.behavior-card:hover{transform:none;box-shadow:inherit}
+}

@@ -61,7 +61,7 @@ async function runBrowserCompute(payload,onProgress=()=>{}){
     if(!workerSourceResponse.ok)throw new Error("browser-compute-worker.js HTTP "+workerSourceResponse.status);
     const workerSource=await workerSourceResponse.text();
     const computeUrl=new URL("browser-compute.js?build="+encodeURIComponent(COMPUTE_BUILD+"-"+Date.now()),location.href).toString();
-    const workerBlobSource=workerSource.replace("from \"./browser-compute.js?v=21\"", "from \""+computeUrl+"\"");
+    const workerBlobSource=workerSource.replace("from \"./browser-compute.js?v=33\"", "from \""+computeUrl+"\"");
     if(workerBlobSource===workerSource)throw new Error("Worker source is not the expected build");
     const worker=new Worker(URL.createObjectURL(new Blob([workerBlobSource],{type:"text/javascript"})),{type:"module"});
     return await new Promise((resolve,reject)=>{
@@ -161,4 +161,4 @@ async function runEvaluation(){
 }
 $("run").onclick=runEvaluation;
 loadQuota();loadVersions();
-if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js?v=14").catch(()=>{});}</script></body></html>
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js?v=15").catch(()=>{});}</script></body></html>
