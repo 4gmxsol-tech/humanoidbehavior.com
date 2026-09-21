@@ -19,7 +19,11 @@ self.addEventListener("activate",event=>{
 
 self.addEventListener("fetch",event=>{
   const u=new URL(event.request.url);
-  if(u.origin!==location.origin || u.pathname.startsWith("/api/")) return;
+  if(u.origin!==location.origin) return;
+  if(u.pathname.startsWith("/api/")) return;
+  if(event.request.mode==="navigate"){
+    event.waitUntil(fetch("/api/analytics/event",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventType:"pageview",page:u.pathname+u.search,referrer:self.location.href,visitorId:(()=>{try{let id=sessionStorage.getItem("hb_visitor");if(!id){id=crypto.randomUUID();sessionStorage.setItem("hb_visitor",id)}return id}catch(_){return ""}})()})}).catch(()=>{}));
+  }
   if(["/","/index.html","/simulation.html","/experiment.html","/browser-compute.js","/browser-compute-worker.js"].includes(u.pathname)) return;
 
   event.respondWith(
