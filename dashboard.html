@@ -10,6 +10,26 @@ async function getJson(path,options={}){
  if(!r.ok) throw Error(x.error||x.message||("HTTP "+r.status+" from "+path));
  return x;
 }
+async function runBrowserCompute(payload){
+  let workerError="";
+  try{
+    const worker=new Worker("./browser-compute-worker.js?v=4",{type:"module"});
+    return await new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
+      worker.onmessage=event=>{const m=event.data||{};if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result)}if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"))}};
+      worker.onerror=event=>{workerError=event.message||"Worker module could not start";clearTimeout(timer);worker.terminate();reject(new Error(workerError))};
+      worker.postMessage(payload);
+    });
+  }catch(firstError){
+    const first=String(firstError?.message||firstError||"Worker failed");
+    try{
+      const mod=await import("./browser-compute.js?v=4");
+      return await mod.runBrowserEvaluation(payload);
+    }catch(secondError){
+      throw new Error(first+"; direct browser fallback: "+String(secondError?.message||secondError||"failed"));
+    }
+  }
+}
 const browserQueue=new Set();
 
 async function runQueuedBrowserEvaluation(x){
@@ -17,23 +37,7 @@ async function runQueuedBrowserEvaluation(x){
  browserQueue.add(x.id);
  try{
   const r=x.result||x;
-  const worker=new Worker("./browser-compute-worker.js",{type:"module"});
-  const browserResult=await new Promise((resolve,reject)=>{
-   const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
-   worker.onmessage=event=>{
-    const m=event.data||{};
-    if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result);}
-    if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"));}
-   };
-   worker.onerror=event=>{clearTimeout(timer);worker.terminate();reject(new Error(event.message||"Browser worker failed"));};
-   worker.postMessage({
-    behaviorId:r.behaviorId,
-    behaviorVersion:r.behaviorVersion,
-    seeds:r.seeds||[],
-    policies:r.policies||["policy-a"],
-    seconds:Number(r.seconds||5)
-   });
-  });
+  const browserResult=await runBrowserCompute({behaviorId:r.behaviorId,behaviorVersion:r.behaviorVersion,seeds:r.seeds||[],policies:r.policies||["policy-a"],seconds:Number(r.seconds||5)});
   await getJson("/api/experiments/"+encodeURIComponent(x.id)+"/browser-result",{
    method:"POST",
    headers:{"Content-Type":"application/json"},
@@ -41,7 +45,7 @@ async function runQueuedBrowserEvaluation(x){
   });
   await load();
  }catch(e){
-  console.warn("Browser evaluation unavailable for",x.id,e);
+  console.warn("Browser evaluation unavailable for",x.id,e); const row=document.querySelector(`.cancel-exp[data-id="${x.id}"]`)?.parentElement; if(row){const note=document.createElement("small");note.style.display="block";note.textContent="Browser compute: "+e.message;row.appendChild(note);}
  }finally{
   browserQueue.delete(x.id);
  }
