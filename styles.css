@@ -708,12 +708,141 @@ pre,.code-block{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:
 #hb-secret-entry:focus-visible{outline:2px solid var(--hb-primary);outline-offset:4px;border-radius:6px}
 
 
-/* Acquisition opportunity banner */
-.acquisition-banner{position:relative;z-index:90;border-bottom:1px solid rgba(91,84,204,.18);background:linear-gradient(90deg,#f7f5ff 0%,#fff 48%,#f5f8ff 100%);}
-.acquisition-banner-inner{max-width:1240px;margin:0 auto;min-height:48px;padding:8px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:12px;}
-.acquisition-badge{display:inline-flex;align-items:center;white-space:nowrap;padding:6px 9px;border-radius:999px;background:#10131a;color:#fff;font-size:9px;font-weight:850;letter-spacing:1.2px;}
-.acquisition-copy{color:#555c68;line-height:1.45;}
-.acquisition-copy strong{color:#20242b;}
-.acquisition-cta{white-space:nowrap;color:#5b54cc;text-decoration:none;font-weight:800;}
-.acquisition-cta:hover{text-decoration:underline;}
-@media(max-width:700px){.acquisition-banner-inner{padding:9px 14px;gap:8px;justify-content:flex-start;flex-wrap:wrap;}.acquisition-copy{flex:1 1 220px;font-size:11px;}.acquisition-cta{flex:0 0 auto;margin-left:auto;font-size:11px;}}
+
+/* Acquisition banner — premium buyer-facing treatment */
+.acquisition-banner{
+  position:relative;
+  z-index:90;
+  border-bottom:1px solid #24324a;
+  background:linear-gradient(105deg,#0b1020 0%,#111a2d 52%,#16233a 100%);
+  color:#fff;
+  box-shadow:0 8px 26px rgba(11,16,32,.16);
+}
+.acquisition-banner-inner{
+  max-width:1280px;
+  min-height:66px;
+  margin:0 auto;
+  padding:10px clamp(16px,4vw,42px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+}
+.acquisition-main{
+  min-width:0;
+  flex:1 1 auto;
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+.acquisition-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  flex:0 0 auto;
+  white-space:nowrap;
+  padding:7px 10px;
+  border:1px solid rgba(255,193,7,.35);
+  border-radius:999px;
+  background:rgba(255,193,7,.10);
+  color:#ffd166;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:1.15px;
+}
+.acquisition-badge-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#ffd166;
+  box-shadow:0 0 0 4px rgba(255,209,102,.10);
+}
+.acquisition-copy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  line-height:1.35;
+}
+.acquisition-copy strong{
+  color:#fff;
+  font-size:13px;
+  letter-spacing:-.1px;
+}
+.acquisition-copy span{
+  color:#9eabc0;
+  font-size:11px;
+}
+.acquisition-contact{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border:1px solid rgba(37,211,102,.22);
+  border-radius:11px;
+  background:rgba(37,211,102,.07);
+}
+.acquisition-whatsapp-label{
+  color:#7f8ca1;
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.acquisition-whatsapp{
+  color:#55e58a;
+  text-decoration:none;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.acquisition-whatsapp:hover{color:#8af5b0}
+.acquisition-cta{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:40px;
+  padding:0 15px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#ffb703,#ff8f00);
+  color:#111827;
+  text-decoration:none;
+  font-size:11px;
+  font-weight:900;
+  box-shadow:0 8px 20px rgba(255,167,0,.20);
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.acquisition-cta:hover{
+  transform:translateY(-1px);
+  box-shadow:0 11px 25px rgba(255,167,0,.30);
+}
+@media(max-width:900px){
+  .acquisition-banner-inner{gap:10px;justify-content:flex-start}
+  .acquisition-main{gap:9px}
+  .acquisition-copy span{display:none}
+  .acquisition-contact{padding:5px 8px}
+  .acquisition-whatsapp-label{display:none}
+}
+@media(max-width:680px){
+  .acquisition-banner-inner{
+    min-height:0;
+    padding:10px 12px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:9px;
+  }
+  .acquisition-main{grid-column:1/-1}
+  .acquisition-badge{font-size:8px;padding:6px 8px}
+  .acquisition-copy strong{font-size:11px}
+  .acquisition-contact{grid-column:1;justify-self:start}
+  .acquisition-whatsapp{font-size:11px}
+  .acquisition-cta{grid-column:2;grid-row:2;min-height:38px;padding:0 11px;font-size:10px}
+}
+@media(max-width:390px){
+  .acquisition-badge{display:none}
+  .acquisition-copy strong{font-size:10.5px}
+  .acquisition-whatsapp{font-size:10px}
+  .acquisition-cta{font-size:9.5px;padding:0 9px}
+}
