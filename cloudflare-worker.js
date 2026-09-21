@@ -1,30 +1,6 @@
-const VERSION = "cloudflare-d1-api-3";
+const VERSION = "cloudflare-d1-api-4-local-worker";
 const ALLOWED_ORIGIN = "https://humanoidbehavior.com";
 const encoder = new TextEncoder();
-
-async function dispatchMuJoCoWorker(env) {
-  const token = String(env.GITHUB_ACTIONS_TOKEN || "").trim();
-  if (!token) return { status: "not-configured" };
-  try {
-    const response = await fetch("https://api.github.com/repos/4gmxsol-tech/humanoidbehavior.com/actions/workflows/mujoco-worker.yml/dispatches", {
-      method: "POST",
-      headers: {
-        "Accept": "application/vnd.github+json",
-        "Authorization": "Bearer " + token,
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "HumanoidBehavior-Compute-Dispatcher"
-      },
-      body: JSON.stringify({ ref: "main" })
-    });
-    if (response.ok || response.status === 204) return { status: "requested" };
-    const detail = (await response.text()).slice(0, 300);
-    console.error("GitHub worker dispatch failed", response.status, detail);
-    return { status: "failed", httpStatus: response.status };
-  } catch (error) {
-    console.error("GitHub worker dispatch error", error);
-    return { status: "failed" };
-  }
-}
 
 const PLANS = {
   free: { id: "free", name: "Free", price: 0, currency: "USD", limits: { benchmarksPerMonth: 25, privateBehaviors: 5, apiKeys: 0 } },
@@ -443,15 +419,8 @@ export default {
           env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"experiment-run","queued",JSON.stringify({...x,seeds,policies,behaviorId,behaviorVersion,engine,seconds}))
         ]);
         result.jobId=jobId;
-        const dispatch = await dispatchMuJoCoWorker(env);
-        result.computeDispatch = dispatch.status;
-        if (dispatch.status === "requested") {
-          result.result.validation = {passed:false,message:"Evaluation queued; compute worker dispatch requested."};
-        } else if (dispatch.status === "not-configured") {
-          result.result.validation = {passed:false,message:"Evaluation queued; compute worker dispatch is not configured yet."};
-        } else {
-          result.result.validation = {passed:false,message:"Evaluation queued; compute worker dispatch failed and can be retried."};
-        }
+        result.computeDispatch = "local-worker";
+        result.result.validation = {passed:false,message:"Evaluation queued; start the local MuJoCo compute worker to process it."};
         await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
         return json(result,202);
       }
