@@ -177,7 +177,7 @@ status         queued
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js?v=4").catch(()=>{});}</script>
 <a class="whatsapp-float" href="https://wa.me/573196552559?text=Hello%20HumanoidBehavior%20team" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp">
   <span class="whatsapp-float-icon" aria-hidden="true">
-    <svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M20.5 3.5A11.7 11.7 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.3ZM12.2 21.6h-.1c-1.7 0-3.4-.5-4.8-1.4l-.3-.2-3.8 1 1-3.7-.2-.3a9.7 9.7 0 1 1 8.2 4.6Zm5.3-7.3c-.3-.2-1.7-.8-2-.9-.3-.1-.5-.2-.7.2-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.2-1.2-.4-2.3-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.7.1-.1.3-.4.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4 0-.6-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1 2.9 1.1 3.1c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.1-1.4-.1-.2-.3-.2-.6-.4Z"/></svg>
+    <svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M20.5 3.5A11.7 11.7 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.3ZM12.2 21.6h-.1c-1.7 0-3.4-.5-4.8-1.4l-.3-.2-3.8 1 1-3.7-.2-.3a9.7 9.7 0 1 1 8.2 4.6Zm5.3-7.3c-.3-.2-1.7-.8-2-.9-.3-.1-.5-.2-.7.2-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.2-1.2-.4-2.3-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.7.1-.1.3-.4.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4 0-.6-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1 2.9 1.1 3.1c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.1-1.4-.1-.2-.3-.2-.6-.4Z"/></svg>
   </span>
 </a>
 <script>
@@ -215,8 +215,51 @@ status         queued
 })();
 </script>
 <script src="/analytics.js?v=1"></script><script>
-(()=>{const el=document.getElementById("hb-secret-entry");if(!el)return;let count=0,timer=0;
-el.addEventListener("click",e=>{if(!e.detail)return;count++;clearTimeout(timer);timer=setTimeout(()=>{count=0},3000);if(count>=7){count=0;clearTimeout(timer);window.location.href="/analytics.html";}});
+(()=> {
+  const el=document.getElementById("hb-secret-entry");
+  if(!el)return;
+  let firstCount=0;
+  let secondCount=0;
+  let phase="first";
+  let resetTimer=0;
+  let pauseTimer=0;
+
+  const reset=()=>{
+    firstCount=0;
+    secondCount=0;
+    phase="first";
+    clearTimeout(resetTimer);
+    clearTimeout(pauseTimer);
+  };
+
+  el.addEventListener("click",()=>{
+    if(phase==="first"){
+      firstCount++;
+      clearTimeout(resetTimer);
+      resetTimer=setTimeout(reset,3000);
+      if(firstCount===3){
+        phase="pause";
+        clearTimeout(resetTimer);
+        pauseTimer=setTimeout(()=>{
+          phase="second";
+          secondCount=0;
+          resetTimer=setTimeout(reset,3000);
+        },2000);
+      }
+      return;
+    }
+
+    if(phase==="second"){
+      secondCount++;
+      clearTimeout(resetTimer);
+      resetTimer=setTimeout(reset,3000);
+      if(secondCount===3){
+        reset();
+        window.location.href="/analytics.html";
+      }
+    }
+  });
 })();
-</script>\n</body>
+</script>
+</body>
 </html>
