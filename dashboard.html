@@ -96,4 +96,4 @@ async function revokeKey(id){
  try{await getJson("/api/keys/"+encodeURIComponent(id),{method:"DELETE"});load()}catch(e){alert("✕ Failed — "+e.message)}
 }
 load();
-</script></body></html>
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js?v=3").catch(()=>{});}</script></body></html>
