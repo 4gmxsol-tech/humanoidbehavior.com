@@ -11,7 +11,7 @@ async function getJson(path,options={}){
  return x;
 }
 async function loadBrowserComputeModule(){
-  const url=new URL("browser-compute.js?v=11",location.href).toString();
+  const url=new URL("browser-compute.js?v=12",location.href).toString();
   const response=await fetch(url,{cache:"no-store",headers:{"Accept":"text/javascript"}});
   const source=await response.text();
   if(!response.ok)throw new Error("browser-compute.js HTTP "+response.status);
@@ -22,7 +22,7 @@ async function loadBrowserComputeModule(){
 async function runBrowserCompute(payload){
   let workerError="";
   try{
-    const worker=new Worker("./browser-compute-worker.js?v=11",{type:"module"});
+    const worker=new Worker("./browser-compute-worker.js?v=12",{type:"module"});
     return await new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
       worker.onmessage=event=>{const m=event.data||{};if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result)}if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"))}};
