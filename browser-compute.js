@@ -27,13 +27,17 @@ function manipulation(mj,behavior,seed,seconds,policy,version){
   const kps=policy==="A"?220:170,kpe=policy==="A"?170:135,kds=policy==="A"?28:22,kde=policy==="A"?22:18;
   let ramp=Math.min(1,Number(data.time)/.20);ramp=ramp*ramp*(3-2*ramp);
   const biasS=Number(data.qfrc_bias[vs]||0),biasE=Number(data.qfrc_bias[ve]||0);
-  const tauS=biasS+kps*(ramp*q1-data.qpos[qs])-kds*data.qvel[vs];
-  const tauE=biasE+kpe*(ramp*q2-data.qpos[qe])-kde*data.qvel[ve];
-  data.ctrl[0]=Math.max(-80,Math.min(80,tauS));
-  data.ctrl[1]=Math.max(-70,Math.min(70,tauE));
+  const targetS=ramp*q1,targetE=ramp*q2;
+  const pdS=kps*(targetS-data.qpos[qs])-kds*data.qvel[vs];
+  const pdE=kpe*(targetE-data.qpos[qe])-kde*data.qvel[ve];
+  const tauS=biasS+pdS,tauE=biasE+pdE;
+  const appliedS=Math.max(-80,Math.min(80,tauS));
+  const appliedE=Math.max(-70,Math.min(70,tauE));
+  data.ctrl[0]=appliedS;
+  data.ctrl[1]=appliedE;
   mj.mj_step(model,data);
   const h2=pos(data,hand),o2=pos(data,object),t2=pos(data,target),hd=dist3(h2,o2),td=dist3(o2,t2);
-  minHO=Math.min(minHO,hd);minOT=Math.min(minOT,td);maxHandDisplacement=Math.max(maxHandDisplacement,dist3(h2,hp));maxShoulderDisplacement=Math.max(maxShoulderDisplacement,Math.abs(data.qpos[qs]));maxElbowDisplacement=Math.max(maxElbowDisplacement,Math.abs(data.qpos[qe]));if(i%100===0)motionSamples.push({t:Number(data.time.toFixed(3)),handDistance:Number(hd.toFixed(5)),shoulder:Number(data.qpos[qs].toFixed(4)),elbow:Number(data.qpos[qe].toFixed(4))});cost+=(data.ctrl[0]**2+data.ctrl[1]**2)*Number(model.opt.timestep);
+  minHO=Math.min(minHO,hd);minOT=Math.min(minOT,td);maxHandDisplacement=Math.max(maxHandDisplacement,dist3(h2,hp));maxShoulderDisplacement=Math.max(maxShoulderDisplacement,Math.abs(data.qpos[qs]));maxElbowDisplacement=Math.max(maxElbowDisplacement,Math.abs(data.qpos[qe]));if(i%100===0)motionSamples.push({t:Number(data.time.toFixed(3)),handDistance:Number(hd.toFixed(5)),shoulder:Number(data.qpos[qs].toFixed(4)),elbow:Number(data.qpos[qe].toFixed(4)),targetShoulder:Number(targetS.toFixed(4)),targetElbow:Number(targetE.toFixed(4)),biasShoulder:Number(biasS.toFixed(4)),biasElbow:Number(biasE.toFixed(4)),pdShoulder:Number(pdS.toFixed(4)),pdElbow:Number(pdE.toFixed(4)),rawShoulderTorque:Number(tauS.toFixed(4)),rawElbowTorque:Number(tauE.toFixed(4)),appliedShoulderTorque:Number(appliedS.toFixed(4)),appliedElbowTorque:Number(appliedE.toFixed(4)),shoulderSaturated:Math.abs(tauS)>80,elbowSaturated:Math.abs(tauE)>70,shoulderVelocity:Number(data.qvel[vs].toFixed(4)),elbowVelocity:Number(data.qvel[ve].toFixed(4))});cost+=(data.ctrl[0]**2+data.ctrl[1]**2)*Number(model.opt.timestep);
   if(!grabbed&&hd<=.09){data.qpos[objq]=h2[0];data.qpos[objq+1]=h2[1];data.qpos[objq+2]=h2[2];const ov=model.jnt_dofadr[objj];for(let j=0;j<3;j++)data.qvel[ov+j]=0;model.eq_active[0]=1;mj.mj_forward(model,data);grabbed=true;graspTime=Number(data.time)}
   if(grabbed&&!released&&td<=.075){model.eq_active[0]=0;mj.mj_forward(model,data);released=true;settledSince=Number(data.time)}
   if(released){const ov=model.jnt_dofadr[objj],speed=Math.hypot(data.qvel[ov],data.qvel[ov+1],data.qvel[ov+2]);if(td<=.085&&speed<.08){if(settledSince==null)settledSince=Number(data.time);const req=version==="1.1.0" ? .15 : .05;if(Number(data.time)-settledSince>=req){success=true;complete=Number(data.time);break}}else settledSince=null}
