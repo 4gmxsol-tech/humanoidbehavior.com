@@ -1,5 +1,5 @@
-const CACHE="hb-shell-v11";
-const SHELL=["/","/index.html","/simulation.html","/experiment.html","/styles.css","/api-base.js","/browser-compute.js?v=18",/browser-compute-worker.js?v=18",/manifest.webmanifest","/icon.svg"];
+const CACHE="hb-shell-v12";
+const SHELL=["/","/index.html","/simulation.html","/experiment.html","/styles.css","/api-base.js","/browser-compute.js?v=20","/browser-compute-worker.js?v=20","/manifest.webmanifest","/icon.svg"];
 
 self.addEventListener("install",event=>{
   event.waitUntil(
@@ -21,8 +21,6 @@ self.addEventListener("fetch",event=>{
   const u=new URL(event.request.url);
   if(u.origin!==location.origin || u.pathname.startsWith("/api/")) return;
 
-  // Prefer the deployed version so GitHub Pages updates are not hidden
-  // indefinitely by an old service-worker cache. Fall back to cache offline.
   event.respondWith(
     fetch(event.request)
       .then(response=>{
