@@ -8,7 +8,7 @@ function seed01(seed){let h=0xcbf29ce484222325n;const s=String(seed);for(let i=0
 function ik(x,z){const sx=.20,sz=1.17,l1=.28,l2=.25,dx=x-sx,dz=z-sz,raw=Math.hypot(dx,dz),reachable=Math.abs(l1-l2)+.01<=raw&&raw<=l1+l2-.01,d=Math.min(l1+l2-.01,Math.max(Math.abs(l1-l2)+.01,raw)),c2=Math.max(-1,Math.min(1,(d*d-l1*l1-l2*l2)/(2*l1*l2))),t2=Math.acos(c2),s2=Math.sin(t2),t1=Math.atan2(dz,dx)-Math.atan2(l2*s2,l1+l2*c2);return[-t1,-t2,reachable]}
 function dist3(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])}
 function pos(data,id){return[data.xpos[id*3],data.xpos[id*3+1],data.xpos[id*3+2]]}
-async function load(){const mod=await import(MUJOCO_URL);return await mod.default()}
+async function load(){\n  try{\n    const mod=await import(MUJOCO_URL);\n    const base="https://cdn.jsdelivr.net/npm/@mujoco/mujoco@3.13.0/dist/";\n    return await mod.default({locateFile:(file)=>new URL(file,base).toString()});\n  }catch(error){\n    throw new Error("MuJoCo WASM load failed: "+String(error?.message||error));\n  }\n}
 
 function manipulation(mj,behavior,seed,seconds,policy,version){
  const model=mj.MjModel.from_xml_string(ARM_XML),data=new mj.MjData(model),rng=seed01(seed);
