@@ -10,6 +10,43 @@ async function getJson(path,options={}){
  if(!r.ok) throw Error(x.error||x.message||("HTTP "+r.status+" from "+path));
  return x;
 }
+const browserQueue=new Set();
+
+async function runQueuedBrowserEvaluation(x){
+ if(!token||!x?.id||x.status!=="queued"||x.computeDispatch!=="browser-wasm"||browserQueue.has(x.id))return;
+ browserQueue.add(x.id);
+ try{
+  const r=x.result||x;
+  const worker=new Worker("./browser-compute-worker.js",{type:"module"});
+  const browserResult=await new Promise((resolve,reject)=>{
+   const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
+   worker.onmessage=event=>{
+    const m=event.data||{};
+    if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result);}
+    if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"));}
+   };
+   worker.onerror=event=>{clearTimeout(timer);worker.terminate();reject(new Error(event.message||"Browser worker failed"));};
+   worker.postMessage({
+    behaviorId:r.behaviorId,
+    behaviorVersion:r.behaviorVersion,
+    seeds:r.seeds||[],
+    policies:r.policies||["policy-a"],
+    seconds:Number(r.seconds||5)
+   });
+  });
+  await getJson("/api/experiments/"+encodeURIComponent(x.id)+"/browser-result",{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({result:browserResult})
+  });
+  await load();
+ }catch(e){
+  console.warn("Browser evaluation unavailable for",x.id,e);
+ }finally{
+  browserQueue.delete(x.id);
+ }
+}
+
 async function load(){
  if(!token){location.href="login.html";return}
  try{
@@ -28,6 +65,8 @@ async function load(){
   document.getElementById("key-list").innerHTML=(k.data||[]).map(x=>`<div class="run-row"><span><b>${esc(x.name)}</b><br><small>${esc(x.prefix)}••••</small></span><span>${x.createdAt?new Date(x.createdAt).toLocaleString():""}</span><span>${x.revokedAt?"Revoked":"Active"}</span><button class="button revoke-key" data-id="${esc(x.id)}">Revoke</button></div>`).join("")||"<div class='empty'>No API keys yet.</div>";
   document.getElementById("experiments").innerHTML=(e.data||[]).map(x=>`<div class="run-row"><input type="checkbox" class="exp" value="${x.id}"><span><b>${esc(x.benchmark)}</b><br><small>${esc(x.engine)} · ${esc(x.status)}</small></span><span>${x.result?.runCount||0} runs</span><span>${x.createdAt?esc(new Date(x.createdAt).toLocaleString()):""}</span><span><a class="button" href="experiment.html?id=${encodeURIComponent(x.id)}">Open</a> ${["queued","running"].includes(x.status)?`<button class="button cancel-exp" data-id="${esc(x.id)}">Cancel</button>`:""}</span></div>`).join("")||"<div class='empty'>No experiments yet.</div>";
   document.getElementById("runs").innerHTML="<div class='empty'>Evaluation runs are available from Experiments.</div>";
+  const queued=(e.data||[]).filter(x=>x.status==="queued"&&x.computeDispatch==="browser-wasm");
+  if(queued.length) runQueuedBrowserEvaluation(queued[0]);
  }catch(e){
   authFail("✕ Workspace load failed — "+e.message);
  }
