@@ -10,14 +10,17 @@ function dist3(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])}
 function pos(data,id){return[data.xpos[id*3],data.xpos[id*3+1],data.xpos[id*3+2]]}
 async function load(){
   try{
-    const response=await fetch(MUJOCO_URL,{cache:"no-store",mode:"cors"});
+    const moduleUrl=new URL(MUJOCO_URL+"?v=1",location.href).toString();
+    const response=await fetch(moduleUrl,{cache:"no-store",mode:"cors"});
     if(!response.ok)throw new Error("MuJoCo module HTTP "+response.status);
     const source=await response.text();
-    if(!source.includes("default"))throw new Error("MuJoCo module response is not JavaScript");
-    const blob=new Blob([source],{type:"text/javascript"});
-    const mod=await import(URL.createObjectURL(blob));
-    if(typeof mod.default!=="function")throw new Error("MuJoCo module has no default loader");
-    return await mod.default();
+    if(!/WebAssembly|wasm|default/.test(source))throw new Error("MuJoCo module response is not a valid Emscripten module");
+    const blobUrl=URL.createObjectURL(new Blob([source],{type:"text/javascript"}));
+    try{
+      const mod=await import(blobUrl);
+      if(typeof mod.default!=="function")throw new Error("MuJoCo module has no default loader");
+      return await mod.default();
+    }finally{URL.revokeObjectURL(blobUrl)}
   }catch(error){
     throw new Error("MuJoCo WASM load failed: "+String(error?.message||error));
   }
