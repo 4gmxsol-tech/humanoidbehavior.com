@@ -92,12 +92,12 @@ function initLiveSimulation(result){
  if(!frames?.length){section.style.display="block";$("sim-time").textContent="Replay unavailable: this result contains no motion frames.";return;}
  section.style.display="block";
  const ctx=canvas.getContext("2d");let i=0,playing=false,last=0,speed=1,raf=0;
- const resize=()=>{const dpr=Math.min(2,window.devicePixelRatio||1),w=canvas.clientWidth||900,h=460;canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()};
+ const resize=()=>{const dpr=Math.min(2,window.devicePixelRatio||1),w=canvas.clientWidth||900,h=canvas.clientHeight||460;canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()};
  const project=(p,w,h)=>{const minX=.0,maxX=1.05,minZ=.70,maxZ=1.55;return[55+(p[0]-minX)/(maxX-minX)*(w-105),h-55-(p[2]-minZ)/(maxZ-minZ)*(h-95)]};
  const line=(a,b,w,h,l)=>{const A=project(a,w,h),B=project(b,w,h);ctx.lineWidth=l;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke()};
  const dot=(p,w,h,r,label)=>{const q=project(p,w,h);ctx.beginPath();ctx.arc(q[0],q[1],r,0,Math.PI*2);ctx.fill();if(label){ctx.font="12px sans-serif";ctx.fillText(label,q[0]+9,q[1]-8)}};
  function draw(){
-  const w=canvas.clientWidth||900,h=460,f=frames[Math.min(i,frames.length-1)];
+  const w=canvas.clientWidth||900,h=canvas.clientHeight||460,f=frames[Math.min(i,frames.length-1)];
   ctx.clearRect(0,0,w,h);
   ctx.fillStyle="#d1d5db";ctx.fillRect(40,project([0,0,.90],w,h)[1],w-80,3);
   ctx.fillStyle="#374151";ctx.font="14px sans-serif";ctx.fillText("MuJoCo · humanoid pick & place",48,28);

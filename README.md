@@ -18,7 +18,7 @@ The current public MVP provides:
 
 The supported measured execution path today is **MuJoCo**. Deterministic/specification validation is kept separate from physics-based measurement.
 
-## Architecture
+## Canonical production architecture
 
 ```
 HumanoidBehavior.com
@@ -32,20 +32,21 @@ Cloudflare Worker API
        v
 Cloudflare D1
        |
-       v
-experiments / jobs / artifacts
-       |
-       v
-Local MuJoCo compute worker
-       |
-       v
-MuJoCo task runner
-       |
-       v
-D1 result persistence
+       +-----------------------------+
+       |                             |
+       v                             v
+Browser MuJoCo compute        Optional local worker
+(official JS/WASM)             (fallback/dev path)
+       |                             |
+       +-------------+---------------+
+                     v
+              measured result
+                     |
+                     v
+                 D1 artifact
 ```
 
-The compute worker is intentionally separate from the Cloudflare Worker. Long-running MuJoCo simulation is not executed inside the request/response API.
+The browser MuJoCo worker is the primary measured execution path. The Cloudflare Worker handles API/authentication/persistence and does not run long-lived MuJoCo simulation inside the request/response handler.
 
 ## Free deployment model
 
@@ -54,12 +55,12 @@ The current MVP uses:
 - GitHub Pages for the static frontend
 - Cloudflare Workers for the API
 - Cloudflare D1 for durable application data
-- GitHub Pages for the phone-first browser app
-- A local machine is optional for fallback/extended compute
+- Browser-side MuJoCo for the primary measured compute path
+- A local machine only when the optional fallback/extended compute path is needed
 
 No paid cloud database or always-on compute server is required for the current MVP architecture.
 
-The API queues the evaluation in D1. The primary path now runs MuJoCo 3.13.0 through the official JavaScript/WASM bindings directly in the browser, so the same phone that opens the site can execute the benchmark. Results are then persisted to D1. If browser compute is unavailable, the queued job can still be processed by the optional local worker. No GitHub token is required.
+The API creates a durable experiment/job record. The primary path runs MuJoCo 3.13.0 through the official JavaScript/WASM bindings directly in the browser, so the same phone or desktop browser that opens the site can execute the measured benchmark. Results are then persisted to D1. If browser compute is unavailable, the optional local worker can process the queued job. No GitHub token is required.
 
 ## Evaluation model
 
@@ -71,7 +72,6 @@ A typical evaluation flow is:
 4. The experiment is stored as a queued job.
 5. The browser MuJoCo worker executes the requested runs on-device and submits the measured result to D1.
 6. If browser compute is unavailable, the optional local worker can claim the same queued job.
-6. The worker claims the job and executes the requested seeds/policies.
 7. Results and an experiment artifact are persisted to D1.
 8. The dashboard/report displays the measured output.
 
@@ -119,9 +119,13 @@ HumanoidBehavior is best understood today as an **early-stage robotics infrastru
 
 Its core value is the integrated behavior-specification → durable experiment → simulator worker → reproducible report workflow, with a clean path toward additional simulator and robot adapters.
 
+## Buyer handoff
+
+See **[BUYER_HANDOFF.md](BUYER_HANDOFF.md)** for the current acquisition-oriented technical handoff, verification checklist, commercial status, known limitations, and transfer checklist.
+
 ## License
 
-See repository files for the current project/license terms.
+See repository files for the current project/license terms. The repository currently uses the MIT License; any transaction should separately document the domains, brand assets, accounts, data, credentials, and rights being transferred.
 
 ## Phone-first browser compute
 
