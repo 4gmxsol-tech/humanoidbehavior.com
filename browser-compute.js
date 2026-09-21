@@ -1,5 +1,3 @@
-const MUJOCO_URL = "https://cdn.jsdelivr.net/npm/@mujoco/mujoco@3.13.0/dist/mujoco.js";
-
 const ARM_XML = `<mujoco model="hb_manipulation_task"><option timestep="0.002" integrator="RK4" gravity="0 0 -9.81"/><worldbody><geom name="floor" type="plane" size="5 5 .1"/><geom name="tabletop" type="box" pos=".60 0 .87" size=".42 .35 .03" mass="20"/><body name="torso" pos="0 0 1.05"><geom name="torso_geom" type="box" size=".22 .16 .32" mass="10"/><body name="upper" pos=".20 0 .12"><joint name="shoulder" type="hinge" axis="0 1 0" range="-2.8 2.8" damping=".8"/><geom name="upper_geom" type="capsule" fromto="0 0 0 .28 0 0" size=".06" mass="2"/><body name="fore" pos=".28 0 0"><joint name="elbow" type="hinge" axis="0 1 0" range="-2.8 2.8" damping=".6"/><geom name="fore_geom" type="capsule" fromto="0 0 0 .25 0 0" size=".05" mass="1.5"/><body name="hand" pos=".25 0 0"><geom name="hand" type="sphere" size=".07" mass=".4"/></body></body></body></body><body name="object" pos="0 0 0"><freejoint name="object_free"/><geom name="object_geom" type="sphere" size=".055" mass=".4"/></body><body name="target" pos=".62 0 .955"><geom name="target_geom" type="cylinder" size=".09 .01" mass=".01" contype="0" conaffinity="0"/></body></worldbody><equality><weld name="grasp" body1="hand" body2="object" active="false"/></equality><actuator><motor name="shoulder_motor" joint="shoulder" gear="1" ctrlrange="-80 80"/><motor name="elbow_motor" joint="elbow" gear="1" ctrlrange="-70 70"/></actuator></mujoco>`;
 const DOOR_XML = `<mujoco model="hb_door_task"><option timestep="0.002" integrator="RK4" gravity="0 0 -9.81"/><worldbody><geom name="floor" type="plane" size="5 5 .1"/><body name="robot" pos="0 0 1.05"><geom type="box" size=".22 .16 .32" mass="20"/></body><body name="door" pos=".85 0 1.05"><joint name="door_hinge" type="hinge" axis="0 0 1" range="-.1 1.5" damping=".5"/><geom name="door_panel" type="box" pos="0 .38 0" size=".035 .38 .9" mass="8"/><geom name="handle" type="sphere" pos="0 .08 0" size=".07" mass=".2"/></body></worldbody><actuator><motor joint="door_hinge" gear="20" ctrlrange="-1 1"/></actuator></mujoco>`;
 const FOLLOW_XML = `<mujoco model="hb_follow_task"><option timestep="0.002" integrator="RK4" gravity="0 0 -9.81"/><worldbody><geom name="floor" type="plane" size="10 10 .1"/><body name="robot" pos="0 0 .7"><joint name="slide_x" type="slide" axis="1 0 0" damping="1"/><geom type="cylinder" size=".25 .7" mass="20"/></body><body name="person" mocap="true" pos="1 0 .7"><geom type="sphere" size=".22" mass="5"/></body></worldbody><actuator><motor joint="slide_x" gear="80" ctrlrange="-1 1"/></actuator></mujoco>`;
@@ -8,6 +6,16 @@ function seed01(seed){let h=0xcbf29ce484222325n;const s=String(seed);for(let i=0
 function ik(x,z){const sx=.20,sz=1.17,l1=.28,l2=.25,dx=x-sx,dz=z-sz,raw=Math.hypot(dx,dz),reachable=Math.abs(l1-l2)+.01<=raw&&raw<=l1+l2-.01,d=Math.min(l1+l2-.01,Math.max(Math.abs(l1-l2)+.01,raw)),c2=Math.max(-1,Math.min(1,(d*d-l1*l1-l2*l2)/(2*l1*l2))),t2=Math.acos(c2),s2=Math.sin(t2),t1=Math.atan2(dz,dx)-Math.atan2(l2*s2,l1+l2*c2);return[-t1,-t2,reachable]}
 function dist3(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])}
 function pos(data,id){return[data.xpos[id*3],data.xpos[id*3+1],data.xpos[id*3+2]]}
+function jointId(mj,model,name){
+  const id=mj.mj_name2id(model,mj.mjtObj.mjOBJ_JOINT.value,name);
+  if(id<0)throw new Error("MuJoCo joint not found: "+name);
+  return id;
+}
+function bodyId(mj,model,name){
+  const id=mj.mj_name2id(model,mj.mjtObj.mjOBJ_BODY.value,name);
+  if(id<0)throw new Error("MuJoCo body not found: "+name);
+  return id;
+}
 async function load(){
   try{
     const moduleUrl="https://cdn.jsdelivr.net/npm/@mujoco/mujoco@3.13.0/mujoco.js";
@@ -15,14 +23,14 @@ async function load(){
     if(typeof mod.default!=="function")throw new Error("MuJoCo module has no default loader");
     return await mod.default();
   }catch(error){
-    throw new Error("MuJoCo WASM load failed: "+String(error?.message||error));
+    throw new Error("MuJoCo WASM loader v10: "+String(error?.message||error));
   }
 }
 
 function manipulation(mj,behavior,seed,seconds,policy,version){
  const model=mj.MjModel.from_xml_string(ARM_XML),data=new mj.MjData(model),rng=seed01(seed);
- const object=model.body("object").id,target=model.body("target").id,hand=model.body("hand").id,torso=model.body("torso").id;
- const objq=model.joint("object_free").qposadr[0],qs=model.joint("shoulder").qposadr[0],qe=model.joint("elbow").qposadr[0],vs=model.joint("shoulder").dofadr[0],ve=model.joint("elbow").dofadr[0];
+ const object=bodyId(mj,model,"object"),target=bodyId(mj,model,"target"),hand=bodyId(mj,model,"hand"),torso=bodyId(mj,model,"torso");
+ const objj=jointId(mj,model,"object_free"),sj=jointId(mj,model,"shoulder"),ej=jointId(mj,model,"elbow"),objq=model.jnt_qposadr[objj],qs=model.jnt_qposadr[sj],qe=model.jnt_qposadr[ej],vs=model.jnt_dofadr[sj],ve=model.jnt_dofadr[ej];
  data.qpos[objq]=.46+(rng-.5)*.01;data.qpos[objq+1]=0;data.qpos[objq+2]=.955;mj.mj_forward(model,data);
  let grabbed=false,released=false,success=false,complete=null,graspTime=null,settledSince=null,cost=0,minHO=Infinity,minOT=Infinity,reachability=true;
  const steps=Math.floor(seconds/Number(model.opt.timestep));
@@ -36,7 +44,7 @@ function manipulation(mj,behavior,seed,seconds,policy,version){
   mj.mj_step(model,data);
   const h2=pos(data,hand),o2=pos(data,object),t2=pos(data,target),hd=dist3(h2,o2),td=dist3(o2,t2);
   minHO=Math.min(minHO,hd);minOT=Math.min(minOT,td);cost+=(data.ctrl[0]**2+data.ctrl[1]**2)*Number(model.opt.timestep);
-  if(!grabbed&&hd<=.09){data.qpos[objq]=h2[0];data.qpos[objq+1]=h2[1];data.qpos[objq+2]=h2[2];const ov=model.joint("object_free").dofadr[0];for(let j=0;j<3;j++)data.qvel[ov+j]=0;model.eq_active[0]=1;grabbed=true;graspTime=Number(data.time)}
+  if(!grabbed&&hd<=.09){data.qpos[objq]=h2[0];data.qpos[objq+1]=h2[1];data.qpos[objq+2]=h2[2];const ov=model.jnt_dofadr[objj];for(let j=0;j<3;j++)data.qvel[ov+j]=0;model.eq_active[0]=1;grabbed=true;graspTime=Number(data.time)}
   if(grabbed&&!released&&td<=.075){model.eq_active[0]=0;released=true;settledSince=Number(data.time)}
   if(released){const ov=model.joint("object_free").dofadr[0],speed=Math.hypot(data.qvel[ov],data.qvel[ov+1],data.qvel[ov+2]);if(td<=.085&&speed<.08){if(settledSince==null)settledSince=Number(data.time);const req=version==="1.1.0" ? 0.15 : 0.05;if(Number(data.time)-settledSince>=req){success=true;complete=Number(data.time);break}}else settledSince=null}
  }
