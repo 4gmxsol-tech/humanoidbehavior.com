@@ -11,7 +11,7 @@ async function getJson(path,options={}){
  return x;
 }
 async function loadBrowserComputeModule(){
-  const url=new URL("browser-compute.js?v=5",location.href).toString();
+  const url=new URL("browser-compute.js?v=9",location.href).toString();
   const response=await fetch(url,{cache:"no-store",headers:{"Accept":"text/javascript"}});
   const source=await response.text();
   if(!response.ok)throw new Error("browser-compute.js HTTP "+response.status);
