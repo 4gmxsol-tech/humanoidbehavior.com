@@ -907,3 +907,15 @@ pre,.code-block{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:
 .pill,.tags span,.behavior-card .icon,.hero-tip>span{background:var(--hb-primary-soft)}
 .button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,
 .nav a:focus-visible{outline-color:rgba(154,103,0,.30)}
+
+
+/* WhatsApp acquisition contact — keep the number semantic green, never link-blue */
+.acquisition-whatsapp{
+  color:#25d366!important;
+  text-decoration:none!important;
+  font-weight:800;
+}
+.acquisition-whatsapp:hover{
+  color:#5ee58c!important;
+  text-decoration:none!important;
+}
