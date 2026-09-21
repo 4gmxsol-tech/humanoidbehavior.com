@@ -26,8 +26,10 @@ function manipulation(mj,behavior,seed,seconds,policy,version){
   const[q1,q2,reach]=ik(gx,gz);reachability=reachability&&reach;
   const kps=policy==="A"?220:170,kpe=policy==="A"?170:135,kds=policy==="A"?28:22,kde=policy==="A"?22:18;
   let ramp=Math.min(1,Number(data.time)/.20);ramp=ramp*ramp*(3-2*ramp);
-  data.ctrl[0]=Math.max(-80,Math.min(80,data.qfrc_bias[vs]+kps*(ramp*q1-data.qpos[qs])-kds*data.qvel[vs]));
-  data.ctrl[1]=Math.max(-70,Math.min(70,data.qfrc_bias[ve]+kpe*(ramp*q2-data.qpos[qe])-kde*data.qvel[ve]));
+  const tauS=kps*(ramp*q1-data.qpos[qs])-kds*data.qvel[vs];
+  const tauE=kpe*(ramp*q2-data.qpos[qe])-kde*data.qvel[ve];
+  data.ctrl[0]=Math.max(-80,Math.min(80,tauS));
+  data.ctrl[1]=Math.max(-70,Math.min(70,tauE));
   mj.mj_step(model,data);
   const h2=pos(data,hand),o2=pos(data,object),t2=pos(data,target),hd=dist3(h2,o2),td=dist3(o2,t2);
   minHO=Math.min(minHO,hd);minOT=Math.min(minOT,td);cost+=(data.ctrl[0]**2+data.ctrl[1]**2)*Number(model.opt.timestep);
