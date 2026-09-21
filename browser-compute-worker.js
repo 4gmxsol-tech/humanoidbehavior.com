@@ -1,4 +1,4 @@
-import { runBrowserEvaluation } from "./browser-compute.js";
+import { runBrowserEvaluation } from "./browser-compute.js?v=4";
 
 self.onmessage = async event => {
   try {
@@ -8,6 +8,6 @@ self.onmessage = async event => {
     });
     self.postMessage({type:"complete", result});
   } catch (error) {
-    self.postMessage({type:"error", message:String(error?.message || error)});
+    self.postMessage({type:"error", message:String(error?.message || error), stack:String(error?.stack || "")});
   }
 };
