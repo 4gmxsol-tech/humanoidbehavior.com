@@ -37,7 +37,7 @@ async function loadVersions(){
 $("behavior").onchange=loadVersions;
 function syncG1(){ $("g1config").style.display="none"; }
 $("robot").onchange=syncG1;syncG1();
-const COMPUTE_BUILD="HB-CONTROLLER-V25";
+const COMPUTE_BUILD="HB-CONTROLLER-V28";
 async function loadBrowserComputeModule(){
   const url=new URL("browser-compute.js?build="+encodeURIComponent(COMPUTE_BUILD),location.href).toString();
   const response=await fetch(url,{cache:"no-store",headers:{"Accept":"text/javascript"}});
