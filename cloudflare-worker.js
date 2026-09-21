@@ -425,6 +425,40 @@ export default {
         return json(result,202);
       }
 
+      const browserMatch = path.match(/^\/api\/experiments\/([^/]+)\/browser-result$/);
+      if (browserMatch && request.method === "POST") {
+        const user = await requireUser(request, env); if (!user) return json({error:"Authentication required"},401);
+        const experimentId = browserMatch[1];
+        const x = await body(request);
+        const result = x && x.result && typeof x.result === "object" ? x.result : null;
+        if (!result || result.engine !== "MuJoCo" || !Array.isArray(result.rawResults)) return json({error:"Invalid browser evaluation result"},400);
+        if (result.rawResults.length < 1 || result.rawResults.length > 20) return json({error:"Invalid run count"},400);
+        const exp = await env.DB.prepare("SELECT id,user_id,status,engine FROM experiments WHERE id=? AND user_id=?").bind(experimentId,user.id).first();
+        if (!exp) return json({error:"Experiment not found"},404);
+        if (exp.status === "completed") return json({id:experimentId,status:"completed",result});
+        const job = await env.DB.prepare("SELECT id,status FROM jobs WHERE experiment_id=? AND user_id=? ORDER BY created_at DESC LIMIT 1").bind(experimentId,user.id).first();
+        const stored = {
+          ...result,
+          id: experimentId,
+          userId: user.id,
+          status: "completed",
+          engine: "MuJoCo",
+          measured: true,
+          reproducible: true,
+          completedAt: result.completedAt || new Date().toISOString(),
+          provenance: {...(result.provenance || {}), worker:"browser-mujoco-wasm"}
+        };
+        await env.DB.prepare("UPDATE experiments SET status='completed',result_json=? WHERE id=? AND user_id=?")
+          .bind(JSON.stringify({...stored,result:stored}),experimentId,user.id).run();
+        if (job) {
+          await env.DB.prepare("UPDATE jobs SET status='completed',result_json=?,progress_json=?,finished_at=datetime('now'),error=NULL WHERE id=? AND user_id=?")
+            .bind(JSON.stringify(stored),JSON.stringify({completed:stored.runCount||result.rawResults.length,total:stored.expectedRunCount||result.rawResults.length,percentage:100}),job.id,user.id).run();
+        }
+        await env.DB.prepare("INSERT INTO artifacts(id,experiment_id,user_id,name,content_type,storage,payload_json) VALUES(?,?,?,?,?,?,?)")
+          .bind(id(),experimentId,user.id,"experiment.json","application/json","database",JSON.stringify(stored)).run();
+        return json({id:experimentId,status:"completed",result:stored},200);
+      }
+
       if (path === "/api/behaviors/compare/benchmark" && request.method === "POST") {
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
         return json({error:"Version comparison worker is being hardened; use a single-version evaluation for now."},501);
