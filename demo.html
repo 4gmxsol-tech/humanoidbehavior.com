@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="HumanoidBehavior technical demo — behavior definition, measured MuJoCo evaluation, replay and reproducible reporting.">
+<meta name="theme-color" content="#0b0d10">
+<title>Technical Demo — HumanoidBehavior</title>
+<link rel="stylesheet" href="styles.css">
+<script src="api-base.js"></script>
+<style>
+.demo-page{padding:76px 20px 110px;max-width:1180px;margin:auto}
+.demo-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:stretch}
+.demo-kicker{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--hb-line);border-radius:999px;background:#fff;font-size:10px;font-weight:850;letter-spacing:1.5px;color:#565d68}
+.demo-kicker i{width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block}
+.demo-hero h1{font-size:clamp(48px,7vw,82px);line-height:.98;letter-spacing:-4px;margin:22px 0 20px}
+.demo-hero h1 span{color:#747a84}
+.demo-lead{font-size:19px;color:var(--hb-muted);max-width:650px}
+.demo-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+.demo-panel{border:1px solid #dfe2e7;border-radius:22px;background:#10131a;color:#fff;padding:22px;box-shadow:0 24px 70px rgba(16,24,40,.16)}
+.demo-panel-top{display:flex;justify-content:space-between;gap:12px;align-items:center;color:#9da5b3;font-size:10px;letter-spacing:1.4px;font-weight:800}
+.demo-status{padding:5px 9px;border-radius:999px;background:#183622;color:#8ff0a8;font-size:9px}
+.demo-terminal{margin-top:20px;background:#080a0f;border:1px solid #252a35;border-radius:14px;padding:18px;font:12px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:#dce2eb}
+.demo-terminal .muted{color:#687181}.demo-terminal .ok{color:#8ff0a8}.demo-terminal .accent{color:#b7b0ff}
+.demo-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:34px 0 0}
+.demo-step{padding:20px;border:1px solid var(--hb-line);border-radius:16px;background:#fff}
+.demo-step b{display:block;color:#7a808a;font-size:10px;letter-spacing:1.5px;margin-bottom:14px}.demo-step strong{display:block;font-size:16px}.demo-step span{display:block;color:var(--hb-muted);font-size:12px;margin-top:7px}
+.demo-section{margin-top:82px}.demo-section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:28px}.demo-section h2{font-size:40px;letter-spacing:-2px;line-height:1.05;margin:0}.demo-section-head p{max-width:480px;color:var(--hb-muted);margin:0}
+.demo-run{display:grid;grid-template-columns:.8fr 1.2fr;gap:18px}
+.demo-card{border:1px solid var(--hb-line);border-radius:20px;background:#fff;padding:25px;box-shadow:var(--hb-shadow)}
+.demo-card h3{margin:8px 0;font-size:22px;letter-spacing:-.7px}.demo-card p{color:var(--hb-muted);font-size:13px}.demo-fields{display:grid;gap:9px;margin-top:20px}.demo-field{display:flex;justify-content:space-between;gap:15px;padding:12px 0;border-top:1px solid var(--hb-line);font-size:13px}.demo-field span{color:var(--hb-muted)}.demo-field b{text-align:right}
+.demo-result{background:#0d1118;color:#fff;border-color:#202633}.demo-result .eyebrow{color:#9ca6b7}.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.result-kpi{padding:16px;border:1px solid #272e3b;border-radius:12px;background:#131822}.result-kpi strong{display:block;font-size:23px}.result-kpi span{font-size:10px;color:#8f99aa}
+.result-bars{margin-top:22px}.bar-row{display:grid;grid-template-columns:100px 1fr 50px;gap:10px;align-items:center;margin:11px 0;font-size:11px;color:#aeb6c3}.bar{height:8px;background:#252c38;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;width:var(--w);background:#8f88ff;border-radius:99px}
+.demo-replay{display:grid;grid-template-columns:1fr .9fr;gap:18px}.replay-window{border-radius:18px;background:#f0f2f5;border:1px solid var(--hb-line);min-height:300px;position:relative;overflow:hidden}.replay-window:before{content:"";position:absolute;left:8%;right:8%;bottom:55px;height:7px;background:#c6cad1;border-radius:4px}.replay-floor{position:absolute;left:13%;bottom:62px;width:150px;height:2px;background:#aeb4be;transform:rotate(-16deg);transform-origin:left}.robot-arm{position:absolute;left:31%;bottom:68px;width:145px;height:12px;background:#343a46;border-radius:9px;transform:rotate(-25deg);transform-origin:left center}.robot-arm:before{content:"";position:absolute;left:82px;top:3px;width:85px;height:10px;background:#565e6d;border-radius:8px;transform:rotate(48deg);transform-origin:left}.robot-hand{position:absolute;left:64%;bottom:110px;width:28px;height:22px;border:4px solid #1f2937;border-radius:9px;transform:rotate(-8deg)}.demo-object{position:absolute;left:72%;bottom:71px;width:22px;height:22px;border-radius:5px;background:#635bff}.demo-target{position:absolute;left:24%;bottom:69px;width:30px;height:26px;border:3px dashed #22a35a;border-radius:5px}.replay-caption{position:absolute;left:18px;top:18px;font-size:10px;font-weight:800;letter-spacing:1.4px;color:#6c7480}.replay-controls{position:absolute;left:18px;right:18px;bottom:16px;display:flex;gap:8px}.replay-controls button{border:1px solid #cfd3da;background:#fff;border-radius:8px;padding:7px 11px;font-size:11px}.demo-list{display:grid;gap:12px}.demo-list-item{display:flex;gap:12px;padding:15px;border:1px solid var(--hb-line);border-radius:13px}.demo-list-item b{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:#f0efff;color:#5b54cc;font-size:11px;flex:0 0 auto}.demo-list-item strong{display:block;font-size:13px}.demo-list-item span{display:block;color:var(--hb-muted);font-size:12px;margin-top:3px}
+.demo-architecture{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.arch-card{padding:22px;border:1px solid var(--hb-line);border-radius:16px;background:#fff}.arch-card b{font-size:10px;letter-spacing:1.5px;color:#777e89}.arch-card strong{display:block;font-size:17px;margin:12px 0 5px}.arch-card span{color:var(--hb-muted);font-size:12px}
+.demo-cta{margin-top:80px;padding:54px 30px;border-radius:24px;background:#10131a;color:#fff;text-align:center}.demo-cta h2{font-size:40px;letter-spacing:-2px;margin:0 0 12px}.demo-cta p{color:#aeb6c3;max-width:600px;margin:0 auto 25px}
+@media(max-width:900px){.demo-hero,.demo-run,.demo-replay{grid-template-columns:1fr}.demo-steps{grid-template-columns:repeat(2,1fr)}.demo-architecture{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.demo-page{padding:55px 16px 80px}.demo-hero h1{font-size:48px;letter-spacing:-3px}.demo-section{margin-top:60px}.demo-section-head{display:block}.demo-section h2{font-size:32px}.demo-steps,.demo-architecture{grid-template-columns:1fr}.result-grid{grid-template-columns:1fr 1fr}.demo-cta h2{font-size:32px}.demo-actions .button{width:auto}.demo-field{font-size:12px}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
+  <nav>
+    <a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a class="active" href="demo.html">Demo</a><a href="docs.html">Docs</a><a href="pricing.html">Plans</a><a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-actions"><a class="nav-contact-cta" href="contact.html"><span class="nav-contact-icon" aria-hidden="true">✉</span><span>Contact us</span></a><a class="nav-cta" href="login.html">Start free <span aria-hidden="true">→</span></a></div>
+</header>
+
+<main class="demo-page">
+<section class="demo-hero">
+  <div>
+    <span class="demo-kicker"><i></i> TECHNICAL BUYER DEMO</span>
+    <h1>From behavior<br><span>to evidence.</span></h1>
+    <p class="demo-lead">A 60-second tour of the HumanoidBehavior workflow: define a behavior, run a measured MuJoCo evaluation, replay the motion, and keep the result reproducible.</p>
+    <div class="demo-actions">
+      <a class="button primary" href="simulation.html">Run the live Experiment Lab →</a>
+      <a class="button secondary" href="SALE_PACKAGE.md">Open Sale Package</a>
+    </div>
+  </div>
+  <div class="demo-panel">
+    <div class="demo-panel-top"><span>HUMANOIDBEHAVIOR / DEMO RUN</span><span class="demo-status">MEASURED PATH</span></div>
+    <div class="demo-terminal">
+      <div><span class="muted">$</span> behavior pick-place@1.1.0</div>
+      <div><span class="muted">$</span> engine MuJoCo</div>
+      <div><span class="muted">$</span> seeds 42, 1337, 2026, 7, 99</div>
+      <br>
+      <div><span class="accent">→</span> validate specification</div>
+      <div><span class="accent">→</span> execute browser physics</div>
+      <div><span class="accent">→</span> persist measured result</div>
+      <div><span class="ok">✓</span> reproducible report ready</div>
+    </div>
+  </div>
+</section>
+
+<section class="demo-steps" aria-label="Workflow">
+  <div class="demo-step"><b>01</b><strong>Define</strong><span>Reusable behavior contract</span></div>
+  <div class="demo-step"><b>02</b><strong>Version</strong><span>Explicit behavior revision</span></div>
+  <div class="demo-step"><b>03</b><strong>Measure</strong><span>MuJoCo physics execution</span></div>
+  <div class="demo-step"><b>04</b><strong>Replay</strong><span>Recorded motion frames</span></div>
+  <div class="demo-step"><b>05</b><strong>Report</strong><span>Metrics + validation + provenance</span></div>
+</section>
+
+<section class="demo-section">
+  <div class="demo-section-head"><div><div class="eyebrow">01 — THE RUN</div><h2>One configuration. One trace.</h2></div><p>The demo mirrors the product's actual evaluation model: explicit behavior version, engine and seeds are attached to the measured result.</p></div>
+  <div class="demo-run">
+    <div class="demo-card">
+      <div class="eyebrow">CONFIGURATION</div><h3>Pick &amp; Place</h3><p>Reference manipulation behavior used to demonstrate the measured execution path.</p>
+      <div class="demo-fields">
+        <div class="demo-field"><span>Behavior</span><b>pick-place</b></div><div class="demo-field"><span>Version</span><b>1.1.0</b></div><div class="demo-field"><span>Engine</span><b>MuJoCo</b></div><div class="demo-field"><span>Seeds</span><b>5 explicit seeds</b></div><div class="demo-field"><span>Execution</span><b>Browser / WebAssembly</b></div>
+      </div>
+    </div>
+    <div class="demo-card demo-result">
+      <div class="eyebrow">MEASURED RESULT · EXAMPLE VIEW</div>
+      <h3>Evidence, not a static claim.</h3>
+      <p>Each run keeps its configuration and measured output together. The values below are illustrative UI fields, not a claim of a live benchmark result.</p>
+      <div class="result-grid">
+        <div class="result-kpi"><strong>5</strong><span>runs</span></div><div class="result-kpi"><strong>1.1.0</strong><span>behavior version</span></div><div class="result-kpi"><strong>MuJoCo</strong><span>engine</span></div><div class="result-kpi"><strong>Replay</strong><span>motion frames</span></div>
+      </div>
+      <div class="result-bars">
+        <div class="bar-row"><span>success</span><div class="bar"><i style="--w:86%"></i></div><b>metric</b></div>
+        <div class="bar-row"><span>stability</span><div class="bar"><i style="--w:74%"></i></div><b>metric</b></div>
+        <div class="bar-row"><span>validation</span><div class="bar"><i style="--w:100%"></i></div><b>schema</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="demo-section">
+  <div class="demo-section-head"><div><div class="eyebrow">02 — REPLAY</div><h2>See what produced the result.</h2></div><p>Measured browser runs can preserve motion frames for inspection instead of ending at a number.</p></div>
+  <div class="demo-replay">
+    <div class="replay-window" aria-label="Illustrative MuJoCo replay">
+      <div class="replay-caption">MUJOCO · REPLAY FRAME 42 / 120</div><div class="robot-arm"></div><div class="robot-hand"></div><div class="demo-object"></div><div class="demo-target"></div><div class="replay-controls"><button type="button">▶ Play</button><button type="button">↺ Reset</button><button type="button">1×</button></div>
+    </div>
+    <div class="demo-list">
+      <div class="demo-list-item"><b>01</b><div><strong>Configuration is retained</strong><span>Behavior ID, version, engine and seeds travel with the experiment.</span></div></div>
+      <div class="demo-list-item"><b>02</b><div><strong>Validation is separate</strong><span>Schema checks are not presented as physics measurements.</span></div></div>
+      <div class="demo-list-item"><b>03</b><div><strong>Provenance is visible</strong><span>Browser compute build and execution path can be inspected.</span></div></div>
+      <div class="demo-list-item"><b>04</b><div><strong>Results persist</strong><span>Completed experiment data is stored with the workspace record.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="demo-section">
+  <div class="demo-section-head"><div><div class="eyebrow">03 — ARCHITECTURE</div><h2>A compact robotics infrastructure layer.</h2></div><p>The current MVP separates browser physics, API orchestration, persistence and the behavior contract.</p></div>
+  <div class="demo-architecture">
+    <div class="arch-card"><b>01</b><strong>Behavior layer</strong><span>Versioned task definitions, compatibility and success criteria.</span></div>
+    <div class="arch-card"><b>02</b><strong>Browser compute</strong><span>MuJoCo JavaScript/WASM execution for supported reference paths.</span></div>
+    <div class="arch-card"><b>03</b><strong>Worker API</strong><span>Cloudflare Worker orchestration with authenticated workspace access.</span></div>
+    <div class="arch-card"><b>04</b><strong>D1 persistence</strong><span>Experiments, results and product state retained for inspection.</span></div>
+  </div>
+</section>
+
+<section class="demo-cta">
+  <h2>Want to see the real run?</h2>
+  <p>Open the live Experiment Lab, launch a supported benchmark, and inspect the resulting report and replay.</p>
+  <div class="demo-actions" style="justify-content:center"><a class="button primary" href="simulation.html">Open Experiment Lab →</a><a class="button secondary" href="contact.html">Talk about the asset</a></div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-main">
+    <div class="footer-brand"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><p>Robotics behavior infrastructure for measured, reproducible simulation.</p></div>
+    <div class="footer-links">
+      <div><strong>Product</strong><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a href="simulation.html">Experiment Lab</a><a href="demo.html">Technical Demo</a></div>
+      <div><strong>Resources</strong><a href="docs.html">Docs</a><a href="dashboard.html">Dashboard</a><a href="https://github.com/4gmxsol-tech/humanoidbehavior.com">GitHub</a></div>
+      <div><strong>Company</strong><a href="contact.html">Contact</a><a href="BUYER_HANDOFF.md">Buyer Handoff</a><a href="SALE_PACKAGE.md">Sale Package</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 HumanoidBehavior</span><span>Built for robotics teams · MuJoCo measured execution</span></div>
+</footer>
+</body>
+</html>
