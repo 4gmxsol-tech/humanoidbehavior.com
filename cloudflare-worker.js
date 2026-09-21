@@ -325,8 +325,26 @@ export default {
       const expMatch=path.match(/^\/api\/experiments\/([^/]+)$/);
       if(expMatch && request.method==="GET"){
         const user=await requireUser(request,env); if(!user)return json({error:"Authentication required"},401);
-        const row=await env.DB.prepare("SELECT result_json FROM experiments WHERE id=? AND user_id=?").bind(decodeURIComponent(expMatch[1]),user.id).first();
-        return row?json(JSON.parse(row.result_json)):json({error:"Experiment not found"},404);
+        const expId=decodeURIComponent(expMatch[1]);
+        const row=await env.DB.prepare("SELECT result_json FROM experiments WHERE id=? AND user_id=?").bind(expId,user.id).first();
+        if(!row)return json({error:"Experiment not found"},404);
+        const result=JSON.parse(row.result_json);
+        const job=await env.DB.prepare("SELECT status,error,attempts,started_at,finished_at,progress_json FROM jobs WHERE experiment_id=? AND user_id=? ORDER BY created_at DESC LIMIT 1").bind(expId,user.id).first();
+        if(job){
+          result.jobStatus=job.status;
+          result.jobError=job.error || null;
+          result.jobAttempts=Number(job.attempts || 0);
+          result.jobStartedAt=job.started_at || null;
+          result.jobFinishedAt=job.finished_at || null;
+          try { result.jobProgress=job.progress_json ? JSON.parse(job.progress_json) : null; } catch { result.jobProgress=null; }
+          if(result.status==="queued" && job.status==="queued"){
+            result.result.validation={passed:false,message:"Evaluation queued; waiting for the manual MuJoCo compute worker to start."};
+          }
+          if(result.status==="failed" && job.error){
+            result.result.validation={passed:false,message:job.error};
+          }
+        }
+        return json(result);
       }
 
       const cancelMatch=path.match(/^\/api\/experiments\/([^/]+)\/cancel$/);
