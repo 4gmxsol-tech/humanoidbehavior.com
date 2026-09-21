@@ -928,3 +928,118 @@ pre,.code-block{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:
 @media(max-width:420px){
 .dashboard-page{padding-left:12px;padding-right:12px}.dashboard-page>h1{font-size:32px;letter-spacing:-1.7px}.dashboard-page .builder-result{padding:15px}.dashboard-page .toolbar .button,.dashboard-page .toolbar button{max-width:165px}
 }
+
+/* Cross-browser + interaction polish */
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+  overflow-x:hidden;
+}
+body{
+  min-width:0;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img,svg,video,canvas,iframe{
+  max-width:100%;
+}
+button,
+input,
+select,
+textarea{
+  font:inherit;
+  max-width:100%;
+}
+button,
+.button,
+.nav-cta,
+.nav-contact-cta,
+.acquisition-cta{
+  -webkit-appearance:none;
+  appearance:none;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;
+  user-select:none;
+}
+button{
+  border:0;
+  cursor:pointer;
+}
+button::-moz-focus-inner{
+  border:0;
+  padding:0;
+}
+button:disabled,
+.button[aria-disabled="true"]{
+  cursor:not-allowed;
+  opacity:.55;
+  transform:none!important;
+  box-shadow:none!important;
+}
+input,
+select,
+textarea{
+  min-width:0;
+}
+select{
+  -webkit-appearance:none;
+  appearance:none;
+}
+a{
+  -webkit-tap-highlight-color:transparent;
+}
+@supports not ((backdrop-filter:blur(1px))){
+  .nav{
+    background:#f8f9fa;
+  }
+}
+@supports (-webkit-touch-callout:none){
+  input,select,textarea,button{
+    font-size:16px;
+  }
+}
+@media (hover:hover) and (pointer:fine){
+  .button:hover,
+  .nav-cta:hover,
+  .nav-contact-cta:hover,
+  .acquisition-cta:hover{
+    transform:translateY(-1px);
+  }
+}
+@media (hover:none){
+  .button:hover,
+  .nav-cta:hover,
+  .nav-contact-cta:hover,
+  .acquisition-cta:hover{
+    transform:none;
+  }
+}
+@media(max-width:700px){
+  .button{
+    min-height:42px;
+    padding:0 14px;
+  }
+  .nav-contact-cta{
+    min-height:40px;
+  }
+  .acquisition-cta{
+    min-height:36px;
+  }
+}
+@media(max-width:430px){
+  .button{
+    min-height:40px;
+    padding:0 12px;
+    font-size:12px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}
