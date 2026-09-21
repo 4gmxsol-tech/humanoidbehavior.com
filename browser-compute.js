@@ -15,10 +15,10 @@ function manipulation(mj,behavior,seed,seconds,policy,version){
  const object=bodyId(mj,model,"object"),target=bodyId(mj,model,"target"),hand=bodyId(mj,model,"hand"),torso=bodyId(mj,model,"torso");
  const objj=jointId(mj,model,"object_free"),sj=jointId(mj,model,"shoulder"),ej=jointId(mj,model,"elbow"),objq=model.jnt_qposadr[objj],qs=model.jnt_qposadr[sj],qe=model.jnt_qposadr[ej],vs=model.jnt_dofadr[sj],ve=model.jnt_dofadr[ej];
  data.qpos[objq]=.46+(rng-.5)*.01;data.qpos[objq+1]=0;data.qpos[objq+2]=.955;mj.mj_forward(model,data);
- let grabbed=false,released=false,success=false,complete=null,graspTime=null,settledSince=null,cost=0,minHO=Infinity,minOT=Infinity,reachability=true;
+ let grabbed=false,released=false,success=false,complete=null,graspTime=null,settledSince=null,cost=0,minHO=Infinity,minOT=Infinity,reachability=true,initialHandDistance=null,maxHandDisplacement=0,maxShoulderDisplacement=0,maxElbowDisplacement=0,motionSamples=[];
  const steps=Math.floor(seconds/Number(model.opt.timestep));
  for(let i=0;i<steps;i++){
-  const hp=pos(data,hand),op=pos(data,object),tp=pos(data,target);
+  const hp=pos(data,hand),op=pos(data,object),tp=pos(data,target); if(initialHandDistance===null) initialHandDistance=dist3(hp,op);
   let gx,gz;
   if(grabbed){gx=tp[0];gz=tp[2]}
   else if(dist3(hp,op)>.14){gx=op[0];gz=op[2]+.095}
@@ -26,19 +26,20 @@ function manipulation(mj,behavior,seed,seconds,policy,version){
   const[q1,q2,reach]=ik(gx,gz);reachability=reachability&&reach;
   const kps=policy==="A"?220:170,kpe=policy==="A"?170:135,kds=policy==="A"?28:22,kde=policy==="A"?22:18;
   let ramp=Math.min(1,Number(data.time)/.20);ramp=ramp*ramp*(3-2*ramp);
-  const tauS=kps*(ramp*q1-data.qpos[qs])-kds*data.qvel[vs];
-  const tauE=kpe*(ramp*q2-data.qpos[qe])-kde*data.qvel[ve];
+  const biasS=Number(data.qfrc_bias[vs]||0),biasE=Number(data.qfrc_bias[ve]||0);
+  const tauS=biasS+kps*(ramp*q1-data.qpos[qs])-kds*data.qvel[vs];
+  const tauE=biasE+kpe*(ramp*q2-data.qpos[qe])-kde*data.qvel[ve];
   data.ctrl[0]=Math.max(-80,Math.min(80,tauS));
   data.ctrl[1]=Math.max(-70,Math.min(70,tauE));
   mj.mj_step(model,data);
   const h2=pos(data,hand),o2=pos(data,object),t2=pos(data,target),hd=dist3(h2,o2),td=dist3(o2,t2);
-  minHO=Math.min(minHO,hd);minOT=Math.min(minOT,td);cost+=(data.ctrl[0]**2+data.ctrl[1]**2)*Number(model.opt.timestep);
+  minHO=Math.min(minHO,hd);minOT=Math.min(minOT,td);maxHandDisplacement=Math.max(maxHandDisplacement,dist3(h2,hp));maxShoulderDisplacement=Math.max(maxShoulderDisplacement,Math.abs(data.qpos[qs]));maxElbowDisplacement=Math.max(maxElbowDisplacement,Math.abs(data.qpos[qe]));if(i%100===0)motionSamples.push({t:Number(data.time.toFixed(3)),handDistance:Number(hd.toFixed(5)),shoulder:Number(data.qpos[qs].toFixed(4)),elbow:Number(data.qpos[qe].toFixed(4))});cost+=(data.ctrl[0]**2+data.ctrl[1]**2)*Number(model.opt.timestep);
   if(!grabbed&&hd<=.09){data.qpos[objq]=h2[0];data.qpos[objq+1]=h2[1];data.qpos[objq+2]=h2[2];const ov=model.jnt_dofadr[objj];for(let j=0;j<3;j++)data.qvel[ov+j]=0;model.eq_active[0]=1;mj.mj_forward(model,data);grabbed=true;graspTime=Number(data.time)}
   if(grabbed&&!released&&td<=.075){model.eq_active[0]=0;mj.mj_forward(model,data);released=true;settledSince=Number(data.time)}
   if(released){const ov=model.jnt_dofadr[objj],speed=Math.hypot(data.qvel[ov],data.qvel[ov+1],data.qvel[ov+2]);if(td<=.085&&speed<.08){if(settledSince==null)settledSince=Number(data.time);const req=version==="1.1.0" ? .15 : .05;if(Number(data.time)-settledSince>=req){success=true;complete=Number(data.time);break}}else settledSince=null}
  }
  const graspDuration=graspTime!=null ? (complete??Number(data.time))-graspTime : null;
- const out={behaviorId:behavior,seed:String(seed),policy,engine:"MuJoCo",measured:true,simulation:true,benchmark:"humanoid-pick-place-v1",environment:"hb-pick-place-v1",behaviorVersion:version,metrics:{taskSuccess:success,completionTime:complete,simulatedSeconds:Number(data.time),survivalRate:1,minTorsoHeightM:Number(data.xpos[torso*3+2].toFixed(4)),maxTiltRad:0,controlCost:Number(cost.toFixed(5)),collisionCount:0,grasped:grabbed,released,reachability,minimumHandObjectDistanceM:Number(minHO.toFixed(5)),minimumObjectTargetDistanceM:Number(minOT.toFixed(5)),graspDurationS:graspDuration==null?null:Number(graspDuration.toFixed(4)),finalShoulderRad:Number(data.qpos[qs].toFixed(4)),finalElbowRad:Number(data.qpos[qe].toFixed(4))}};
+ const out={behaviorId:behavior,seed:String(seed),policy,engine:"MuJoCo",measured:true,simulation:true,benchmark:"humanoid-pick-place-v1",environment:"hb-pick-place-v1",behaviorVersion:version,metrics:{taskSuccess:success,completionTime:complete,simulatedSeconds:Number(data.time),survivalRate:1,minTorsoHeightM:Number(data.xpos[torso*3+2].toFixed(4)),maxTiltRad:0,controlCost:Number(cost.toFixed(5)),collisionCount:0,grasped:grabbed,released,reachability,minimumHandObjectDistanceM:Number(minHO.toFixed(5)),minimumObjectTargetDistanceM:Number(minOT.toFixed(5)),graspDurationS:graspDuration==null?null:Number(graspDuration.toFixed(4)),initialHandObjectDistanceM:Number(initialHandDistance?.toFixed(5)||0),maxHandDisplacementM:Number(maxHandDisplacement.toFixed(5)),maxShoulderDisplacementRad:Number(maxShoulderDisplacement.toFixed(4)),maxElbowDisplacementRad:Number(maxElbowDisplacement.toFixed(4)),armMoved:Boolean(maxHandDisplacement>0.005 || maxShoulderDisplacement>0.02 || maxElbowDisplacement>0.02),motionSamples,finalShoulderRad:Number(data.qpos[qs].toFixed(4)),finalElbowRad:Number(data.qpos[qe].toFixed(4))}};
  data.delete();model.delete();return out;
 }
 function door(mj,seed,seconds,policy){const model=mj.MjModel.from_xml_string(DOOR_XML),data=new mj.MjData(model),rng=seed01(seed),dj=jointId(mj,model,"door_hinge"),jid=model.jnt_qposadr[dj],vid=model.jnt_dofadr[dj];data.qpos[jid]=(rng-.5)*.03;mj.mj_forward(model,data);let cost=0,success=false,complete=null;for(let i=0;i<Math.floor(seconds/Number(model.opt.timestep));i++){const target=policy==="A"?.95:.8,tau=35*(target-data.qpos[jid])-7*data.qvel[vid];data.ctrl[0]=Math.max(-1,Math.min(1,tau/20));mj.mj_step(model,data);cost+=data.ctrl[0]**2*Number(model.opt.timestep);if(data.qpos[jid]>.7){success=true;complete=Number(data.time);break}}const out={behaviorId:"open-door",seed:String(seed),policy,engine:"MuJoCo",measured:true,simulation:true,benchmark:"humanoid-open-door-v1",environment:"hb-open-door-v1",metrics:{taskSuccess:success,completionTime:complete,simulatedSeconds:Number(data.time),survivalRate:1,controlCost:Number(cost.toFixed(5)),collisionCount:0,doorAngleRad:Number(data.qpos[jid].toFixed(4))}};data.delete();model.delete();return out}
