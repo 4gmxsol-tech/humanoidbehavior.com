@@ -2,7 +2,7 @@
 </head><body><a class="skip-link" href="#main-content">Skip to content</a><header class="nav"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><nav><a href="behaviors.html">Behaviors</a><a class="active" href="benchmark.html">Benchmark</a><a href="simulation.html">Simulation</a><a href="dashboard.html">Workspace</a></nav></header><main id="main-content" class="page"><div class="report-header"><div><div class="report-kicker">EXPERIMENT REPORT</div><h1 id="title">Loading experiment…</h1><p class="lead" id="meta"></p></div><span id="report-status" class="report-status running">Loading</span></div><div id="summary" class="metric-grid"></div><div id="statusbar" class="builder-result"><strong id="status-label">Loading…</strong><span id="status-detail"></span><div id="live-progress" style="width:100%"></div></div><div id="comparison" class="builder-result"></div><div class="toolbar" id="result-actions"></div><div class="builder-result report-section"><h2>Policy comparison</h2><div id="policy"></div><canvas id="chart" height="180"></canvas></div><div class="builder-result report-section"><h2>Run matrix</h2><div id="runs"></div></div><details class="builder-result"><summary>Raw experiment JSON</summary><pre id="raw" style="overflow:auto"></pre></details></main><script>
 const token=localStorage.getItem("hb_token"),id=new URLSearchParams(location.search).get("id");const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));const api=async u=>{const r=await fetch(u,{headers:token?{Authorization:"Bearer "+token}:{}});const x=await r.json();if(!r.ok)throw Error(x.error||"Request failed");return x};const n=v=>typeof v==="number"?v.toFixed(4):"—";function drawChart(r){const c=document.getElementById("chart"),ctx=c.getContext("2d"),w=c.width=c.clientWidth*2,h=c.height=360;ctx.clearRect(0,0,w,h);const vals=(r.policies||[]).map(p=>Number(r.summary?.[p]?.survival_rate?.mean??0));const max=Math.max(.001,...vals);ctx.font="28px sans-serif";vals.forEach((v,i)=>{const x=80+i*(w-160)/Math.max(1,vals.length),bar=(h-100)*v/max;ctx.fillRect(x,h-70-bar,Math.min(160,w/3),bar);ctx.fillText(r.policies[i],x,h-30);ctx.fillText(v.toFixed(4),x,h-85-bar)})}
 async function loadBrowserComputeModule(){
-  const url=new URL("browser-compute.js?v=10",location.href).toString();
+  const url=new URL("browser-compute.js?v=11",location.href).toString();
   const response=await fetch(url,{cache:"no-store",headers:{"Accept":"text/javascript"}});
   const source=await response.text();
   if(!response.ok)throw new Error("browser-compute.js HTTP "+response.status);
@@ -13,7 +13,7 @@ async function loadBrowserComputeModule(){
 async function runBrowserCompute(payload){
   let workerError="";
   try{
-    const worker=new Worker("./browser-compute-worker.js?v=10",{type:"module"});
+    const worker=new Worker("./browser-compute-worker.js?v=11",{type:"module"});
     return await new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
       worker.onmessage=event=>{const m=event.data||{};if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result)}if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"))}};
