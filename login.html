@@ -1,15 +1,134 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Developer Access — HumanoidBehavior</title><link rel="stylesheet" href="styles.css"><script src="api-base.js"></script></head><body><main class="auth-page"><div class="auth-card"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><div class="eyebrow">DEVELOPER ACCESS</div><h1>Enter the workspace.</h1><p>Create an account or sign in to run experiments and manage API keys.</p><form id="authForm" novalidate><input id="email" name="email" type="email" autocomplete="email" placeholder="Email" required style="width:100%;padding:12px;margin:6px 0;border:1px solid #d5d8dd;border-radius:8px"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password (8+ characters)" minlength="8" required style="width:100%;padding:12px;margin:6px 0 14px;border:1px solid #d5d8dd;border-radius:8px"><div class="actions"><button id="login" type="submit" class="button primary">Sign in</button><button id="signup" type="button" class="button secondary">Create account</button></div></form><button id="demo" type="button" class="button" style="margin-top:12px">Use demo (if enabled)</button><div id="status" aria-live="polite" style="min-height:24px;margin-top:12px;font-size:14px;font-weight:600"></div></div></main><script>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Secure developer access to HumanoidBehavior robotics evaluation workspace.">
+<meta name="theme-color" content="#0b1020">
+<title>Sign in — HumanoidBehavior</title>
+<link rel="stylesheet" href="styles.css">
+<script src="api-base.js"></script>
+</head>
+<body>
+<main class="auth-page">
+  <div class="auth-shell">
+    <section class="auth-showcase" aria-label="HumanoidBehavior platform">
+      <a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
+      <h2>Run evidence.<br>Not guesses.</h2>
+      <p>Access your robotics workspace, launch reproducible MuJoCo evaluations, inspect experiment reports and manage developer API keys.</p>
+      <div class="auth-points">
+        <div class="auth-point"><i>✓</i><span>Versioned behavior specifications</span></div>
+        <div class="auth-point"><i>✓</i><span>Measured browser-based MuJoCo execution</span></div>
+        <div class="auth-point"><i>✓</i><span>Persistent experiments and reproducible runs</span></div>
+        <div class="auth-point"><i>✓</i><span>Developer API access with revocable keys</span></div>
+      </div>
+    </section>
+
+    <section class="auth-card">
+      <a class="brand auth-brand-mobile" href="index.html">Humanoid<span>Behavior</span></a>
+      <div class="eyebrow" id="auth-eyebrow">DEVELOPER ACCESS</div>
+      <h1 id="auth-title">Welcome back.</h1>
+      <p id="auth-copy">Sign in to continue to your robotics workspace.</p>
+
+      <form id="authForm" class="auth-form" novalidate>
+        <div class="auth-field">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@company.com" required>
+        </div>
+
+        <div class="auth-field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" minlength="8" required>
+            <button class="password-toggle" id="togglePassword" type="button">Show</button>
+          </div>
+          <div class="password-meter" id="passwordMeter" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div class="auth-meta"><span id="passwordHint">Use 12+ characters for a stronger account password.</span><span id="passwordCount"></span></div>
+        </div>
+
+        <div class="auth-field" id="confirmField" hidden>
+          <label for="confirmPassword">Confirm password</label>
+          <div class="password-wrap">
+            <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Repeat your password">
+          </div>
+        </div>
+
+        <div class="auth-actions">
+          <button id="login" type="submit" class="button primary">Sign in <span>→</span></button>
+          <button id="signup" type="button" class="button secondary">Create free account</button>
+        </div>
+      </form>
+
+      <div class="auth-divider">secure workspace access</div>
+      <button id="demo" type="button" class="button secondary">Try demo workspace</button>
+      <div id="status" class="auth-status" role="status" aria-live="polite">Your workspace session is verified before access is granted.</div>
+      <div class="security-badge">HTTPS transport · server-side password hashing · revocable sessions/API keys</div>
+      <div class="auth-foot">By continuing, you agree to use the platform for authorized robotics research, development and evaluation.</div>
+    </section>
+  </div>
+</main>
+
+<script>
 const API_ORIGIN=window.HB_API_ORIGIN||"https://humanoidbehavior-com.4gmxsol.workers.dev";
 const emailInput=document.getElementById("email");
 const passwordInput=document.getElementById("password");
+const confirmInput=document.getElementById("confirmPassword");
+const confirmField=document.getElementById("confirmField");
 const statusEl=document.getElementById("status");
 const authForm=document.getElementById("authForm");
 const signupButton=document.getElementById("signup");
 const loginButton=document.getElementById("login");
 const demoButton=document.getElementById("demo");
+const togglePassword=document.getElementById("togglePassword");
+const meter=[...document.querySelectorAll("#passwordMeter span")];
+const count=document.getElementById("passwordCount");
+let mode="login";
 
-function showStatus(message,ok=false){statusEl.textContent=message;statusEl.style.color=ok?"#16794c":"#b42318";}
-function setBusy(busy){signupButton.disabled=busy;loginButton.disabled=busy;demoButton.disabled=busy;}
+function showStatus(message,type=""){
+  statusEl.textContent=message;
+  statusEl.className="auth-status"+(type?" "+type:"");
+}
+function setBusy(busy){
+  signupButton.disabled=busy; loginButton.disabled=busy; demoButton.disabled=busy;
+  togglePassword.disabled=busy;
+}
+function setMode(next){
+  mode=next;
+  const signup=mode==="signup";
+  document.getElementById("auth-eyebrow").textContent=signup?"CREATE WORKSPACE":"DEVELOPER ACCESS";
+  document.getElementById("auth-title").textContent=signup?"Create your workspace.":"Welcome back.";
+  document.getElementById("auth-copy").textContent=signup
+    ?"Create a free workspace for reproducible robotics evaluations."
+    :"Sign in to continue to your robotics workspace.";
+  loginButton.hidden=signup;
+  signupButton.textContent=signup?"Back to sign in":"Create free account";
+  confirmField.hidden=!signup;
+  confirmInput.required=signup;
+  passwordInput.autocomplete=signup?"new-password":"current-password";
+  passwordInput.placeholder=signup?"Create a strong password":"Your password";
+  showStatus(signup?"Use at least 12 characters with a mix of letters, numbers and symbols.":"Your workspace session is verified before access is granted.");
+}
+function passwordScore(v){
+  let s=0;
+  if(v.length>=8)s++;
+  if(v.length>=12)s++;
+  if(/[A-Z]/.test(v)&&/[a-z]/.test(v))s++;
+  if(/\d/.test(v)&&/[^A-Za-z0-9]/.test(v))s++;
+  return Math.min(4,s);
+}
+function updateMeter(){
+  const v=passwordInput.value, s=passwordScore(v);
+  meter.forEach((el,i)=>el.classList.toggle("on",i<s));
+  count.textContent=v?String(v.length)+" chars":"";
+}
+togglePassword.onclick=()=>{
+  const hidden=passwordInput.type==="password";
+  passwordInput.type=hidden?"text":"password";
+  togglePassword.textContent=hidden?"Hide":"Show";
+};
+passwordInput.addEventListener("input",updateMeter);
 
 async function requestJson(path,options={}){
   const controller=new AbortController();
@@ -17,48 +136,46 @@ async function requestJson(path,options={}){
   try{
     const response=await fetch(API_ORIGIN+path,{...options,signal:controller.signal,cache:"no-store"});
     const text=await response.text();
-    let data={};
-    try{data=text?JSON.parse(text):{};}catch{throw Error("Server returned invalid JSON (HTTP "+response.status+")");}
-    if(!response.ok) throw Error([data.error,data.stage].filter(Boolean).join(" · ")||("Request failed (HTTP "+response.status+")"));
+    let data={}; try{data=text?JSON.parse(text):{};}catch{throw Error("Server returned invalid JSON.");}
+    if(!response.ok) throw Error(data.error||"Authentication request failed.");
     return data;
   }catch(e){
-    if(e.name==="AbortError") throw Error("Request timed out. Please try again.");
+    if(e.name==="AbortError")throw Error("Request timed out. Please try again.");
     throw e;
   }finally{clearTimeout(timer);}
 }
-
 async function finishAuth(data){
-  if(!data?.token) throw Error("Authentication succeeded but no session token was returned.");
+  if(!data?.token)throw Error("No session token was returned.");
   localStorage.setItem("hb_token",data.token);
-  if(data.user) localStorage.setItem("hb_user",JSON.stringify(data.user));
-  showStatus("✓ Sign-in successful — verifying session…",true);
+  if(data.user)localStorage.setItem("hb_user",JSON.stringify(data.user));
+  showStatus("✓ Session created. Verifying access…","ok");
   const me=await requestJson("/api/me",{headers:{Authorization:"Bearer "+data.token}});
-  if(!me?.user) throw Error("Session was created but could not be verified.");
+  if(!me?.user)throw Error("Session verification failed.");
   window.location.assign("dashboard.html");
 }
-
-async function authenticate(path,successMessage){
-  setBusy(true);
-  showStatus("Connecting to HumanoidBehavior…");
+async function authenticate(path){
+  setBusy(true);showStatus(mode==="signup"?"Creating secure workspace…":"Verifying credentials…");
   try{
-    const email=emailInput.value.trim().toLowerCase();
-    const password=passwordInput.value;
-    if(!email||!password) throw Error("Enter your email and password.");
-    if(password.length<8) throw Error("Password must be at least 8 characters.");
-    const data=await requestJson(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})});
-    await finishAuth(data);
-  }catch(e){
-    showStatus("✕ "+(e.message||"Authentication failed."));
-  }finally{setBusy(false);}
+    const email=emailInput.value.trim().toLowerCase(), password=passwordInput.value;
+    if(!email||!emailInput.validity.valid)throw Error("Enter a valid email address.");
+    if(!password||password.length<8)throw Error("Password must be at least 8 characters.");
+    if(mode==="signup"){
+      if(password.length<12)throw Error("For a new account, use at least 12 characters.");
+      if(password!==confirmInput.value)throw Error("Passwords do not match.");
+    }
+    await finishAuth(await requestJson(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})}));
+  }catch(e){showStatus("✕ "+(e.message||"Authentication failed."),"error");}
+  finally{setBusy(false);}
 }
-
-authForm.addEventListener("submit",event=>{event.preventDefault();authenticate("/api/auth/login","Sign-in successful");});
-signupButton.onclick=()=>authenticate("/api/auth/signup","Account created");
-
+authForm.addEventListener("submit",e=>{e.preventDefault();if(mode==="login")authenticate("/api/auth/login");else authenticate("/api/auth/signup");});
+signupButton.onclick=()=>{if(mode==="login")setMode("signup");else setMode("login");};
 demoButton.onclick=async()=>{
-  setBusy(true);showStatus("Connecting to demo account…");
+  setBusy(true);showStatus("Opening demo workspace…");
   try{await finishAuth(await requestJson("/api/auth/demo",{method:"POST"}));}
-  catch(e){showStatus("✕ "+(e.message||"Demo sign-in failed."));}
+  catch(e){showStatus("✕ "+(e.message||"Demo sign-in failed."),"error");}
   finally{setBusy(false);}
 };
-</script></body></html>
+updateMeter();
+</script>
+</body>
+</html>
