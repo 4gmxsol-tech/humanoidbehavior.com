@@ -146,15 +146,22 @@ def manipulation(behavior, seed, seconds, policy, behavior_version="1.0.0"):
         q1, q2, reachable = ik(gx, gz)
         reachability = reachability and reachable
 
-        # Explicit torque-PD control with enough authority to reach the
-        # manipulation workspace. The previous position-actuator configuration
-        # left the arm effectively stationary on the free runner.
+        # Gravity-compensated joint-space PD with a short target ramp.
+        # This keeps the fixed-base arm from saturating/oscillating while it
+        # moves from the neutral pose into the manipulation workspace.
         if policy == "A":
-            kp_s, kp_e, kd = 75.0, 65.0, 12.0
+            kp_s, kp_e, kd_s, kd_e = 36.0, 30.0, 8.0, 7.0
         else:
-            kp_s, kp_e, kd = 58.0, 50.0, 10.0
-        tau_s = kp_s * (q1 - data.qpos[qs]) - kd * data.qvel[vs]
-        tau_e = kp_e * (q2 - data.qpos[qe]) - kd * data.qvel[ve]
+            kp_s, kp_e, kd_s, kd_e = 30.0, 25.0, 7.0, 6.0
+        ramp = min(1.0, float(data.time) / 0.8)
+        ramp = ramp * ramp * (3.0 - 2.0 * ramp)
+        target_s = ramp * q1
+        target_e = ramp * q2
+        # qfrc_bias supplies gravity/Coriolis compensation for the two joints.
+        bias_s = float(data.qfrc_bias[vs])
+        bias_e = float(data.qfrc_bias[ve])
+        tau_s = bias_s + kp_s * (target_s - data.qpos[qs]) - kd_s * data.qvel[vs]
+        tau_e = bias_e + kp_e * (target_e - data.qpos[qe]) - kd_e * data.qvel[ve]
         data.ctrl[0] = max(-80.0, min(80.0, tau_s))
         data.ctrl[1] = max(-70.0, min(70.0, tau_e))
 
