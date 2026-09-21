@@ -37,6 +37,30 @@ async function loadVersions(){
 $("behavior").onchange=loadVersions;
 function syncG1(){ $("g1config").style.display="none"; }
 $("robot").onchange=syncG1;syncG1();
+async function runBrowserCompute(payload,onProgress=()=>{}){
+  try{
+    const worker=new Worker("./browser-compute-worker.js?v=4",{type:"module"});
+    return await new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
+      worker.onmessage=event=>{
+        const m=event.data||{};
+        if(m.type==="progress") onProgress(m.done,m.total);
+        if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result);}
+        if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"));}
+      };
+      worker.onerror=event=>{clearTimeout(timer);worker.terminate();reject(new Error(event.message||"Worker module could not start"));};
+      worker.postMessage(payload);
+    });
+  }catch(firstError){
+    const first=String(firstError?.message||firstError||"Worker failed");
+    try{
+      const mod=await import("./browser-compute.js?v=4");
+      return await mod.runBrowserEvaluation({...payload,onProgress});
+    }catch(secondError){
+      throw new Error(first+"; direct browser fallback: "+String(secondError?.message||secondError||"failed"));
+    }
+  }
+}
 async function runEvaluation(){
   const out=$("out"),link=$("link"),progress=$("progress"),button=$("run");
   if(!token){out.textContent="Please sign in to run an experiment.";progress.textContent="Authentication required.";return}
@@ -53,18 +77,7 @@ async function runEvaluation(){
     if($("engine").value==="MuJoCo"){
       try{
         progress.innerHTML="<span class=\"spinner\"></span> Browser MuJoCo loading…";
-        const worker=new Worker("./browser-compute-worker.js",{type:"module"});
-        const browserResult=await new Promise((resolve,reject)=>{
-          const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
-          worker.onmessage=event=>{
-            const m=event.data||{};
-            if(m.type==="progress"){progress.innerHTML="<b>Browser MuJoCo running</b> · "+m.done+"/"+m.total+" runs · "+Math.round(m.done/m.total*100)+"%";}
-            if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result);}
-            if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"));}
-          };
-          worker.onerror=event=>{clearTimeout(timer);worker.terminate();reject(new Error(event.message||"Browser worker failed"));};
-          worker.postMessage({behaviorId:body.behaviorId,behaviorVersion:body.behaviorVersion,seeds:body.seeds,policies:body.policies||["policy-a"],seconds:body.seconds});
-        });
+        const browserResult=await runBrowserCompute({behaviorId:body.behaviorId,behaviorVersion:body.behaviorVersion,seeds:body.seeds,policies:body.policies||["policy-a"],seconds:body.seconds},(done,total)=>{progress.innerHTML="<b>Browser MuJoCo running</b> · "+done+"/"+total+" runs · "+Math.round(done/total*100)+"%";});
         await api("/api/experiments/"+encodeURIComponent(exp)+"/browser-result",{
           method:"POST",
           headers:{Authorization:"Bearer "+token},
