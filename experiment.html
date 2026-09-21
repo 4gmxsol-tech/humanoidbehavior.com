@@ -13,7 +13,7 @@ async function loadBrowserComputeModule(){
 async function runBrowserCompute(payload){
   let workerError="";
   try{
-    const worker=new Worker("./browser-compute-worker.js?v=4",{type:"module"});
+    const worker=new Worker("./browser-compute-worker.js?v=9",{type:"module"});
     return await new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>{worker.terminate();reject(new Error("Browser compute timed out after 2 minutes"));},120000);
       worker.onmessage=event=>{const m=event.data||{};if(m.type==="complete"){clearTimeout(timer);worker.terminate();resolve(m.result)}if(m.type==="error"){clearTimeout(timer);worker.terminate();reject(new Error(m.message||"Browser compute failed"))}};
