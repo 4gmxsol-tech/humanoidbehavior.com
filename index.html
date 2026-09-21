@@ -12,7 +12,7 @@
 </head>
 <body>
 <header class="nav">
-  <a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
+  <a class="brand" href="index.html" id="hb-secret-entry" aria-label="HumanoidBehavior">Humanoid<span>Behavior</span></a>
   <nav>
     <a href="behaviors.html">Behaviors</a>
     <a href="benchmark.html">Benchmark</a>
@@ -214,5 +214,9 @@ status         queued
   });
 })();
 </script>
-<script src="/analytics.js?v=1"></script>\n</body>
+<script src="/analytics.js?v=1"></script><script>
+(()=>{const el=document.getElementById("hb-secret-entry");if(!el)return;let count=0,timer=0;
+el.addEventListener("click",e=>{if(!e.detail)return;count++;clearTimeout(timer);timer=setTimeout(()=>{count=0},3000);if(count>=7){count=0;clearTimeout(timer);window.location.href="/analytics.html";}});
+})();
+</script>\n</body>
 </html>
