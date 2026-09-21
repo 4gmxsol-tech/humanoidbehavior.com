@@ -174,35 +174,48 @@ def fail_job(job, message):
     d1("UPDATE jobs SET status=?, error=?, finished_at=datetime('now') WHERE id=?", ["failed", message[:2000], job["id"]])
 
 def main():
+    # A scheduled GitHub runner is the free compute queue consumer. Keep one
+    # invocation useful for several queued evaluations instead of processing
+    # only the first job and leaving the queue idle until the next schedule.
+    import time
+    deadline = time.time() + 8 * 60
+    processed = 0
+
     d1("UPDATE jobs SET status='queued', started_at=NULL WHERE status='running' AND started_at < datetime('now','-15 minutes')")
-    jobs = d1("SELECT id,experiment_id,user_id,type,status,attempts,payload_json FROM jobs WHERE status='queued' ORDER BY created_at LIMIT 1")
-    if not jobs:
-        print("No queued jobs.")
-        return
-    job = jobs[0]
-    claimed = d1(
-        "UPDATE jobs SET status='running', started_at=datetime('now'), attempts=COALESCE(attempts,0)+1 WHERE id=? AND status='queued' RETURNING id",
-        [job["id"]],
-    )
-    if not claimed:
-        print("Job was claimed by another runner.")
-        return
-    job["status"] = "running"
-    try:
-        if job["type"] != "experiment-run":
-            raise RuntimeError("Unsupported job type for GitHub Actions runner: " + str(job["type"]))
-        execute_job(job)
-        print("Completed job", job["id"])
-    except EvaluationCancelled as exc:
-        print("Job cancelled:", exc)
-        d1("UPDATE jobs SET status='cancelled', error=?, finished_at=datetime('now') WHERE id=? AND status='running'", [str(exc)[:2000], job["id"]])
-    except Exception as exc:
-        print("Job failed:", exc, file=sys.stderr)
-        if is_cancelled(job["id"]):
-            d1("UPDATE jobs SET status='cancelled', error=?, finished_at=datetime('now') WHERE id=? AND status IN ('running','queued')", ["Cancelled by user", job["id"]])
-        else:
-            fail_job(job, str(exc))
-            raise
+
+    while time.time() < deadline:
+        jobs = d1("SELECT id,experiment_id,user_id,type,status,attempts,payload_json FROM jobs WHERE status='queued' ORDER BY created_at LIMIT 1")
+        if not jobs:
+            print(f"No queued jobs. Processed {processed} evaluation(s).")
+            return
+
+        job = jobs[0]
+        claimed = d1(
+            "UPDATE jobs SET status='running', started_at=datetime('now'), attempts=COALESCE(attempts,0)+1 WHERE id=? AND status='queued' RETURNING id",
+            [job["id"]],
+        )
+        if not claimed:
+            continue
+
+        job["status"] = "running"
+        try:
+            if job["type"] != "experiment-run":
+                raise RuntimeError("Unsupported job type for GitHub Actions runner: " + str(job["type"]))
+            execute_job(job)
+            processed += 1
+            print("Completed job", job["id"])
+        except EvaluationCancelled as exc:
+            print("Job cancelled:", exc)
+            d1("UPDATE jobs SET status='cancelled', error=?, finished_at=datetime('now') WHERE id=? AND status='running'", [str(exc)[:2000], job["id"]])
+        except Exception as exc:
+            print("Job failed:", exc, file=sys.stderr)
+            if is_cancelled(job["id"]):
+                d1("UPDATE jobs SET status='cancelled', error=?, finished_at=datetime('now') WHERE id=? AND status IN ('running','queued')", ["Cancelled by user", job["id"]])
+            else:
+                fail_job(job, str(exc))
+                raise
+
+    print(f"Runner time budget reached after processing {processed} evaluation(s).")
 
 if __name__ == "__main__":
     main()
