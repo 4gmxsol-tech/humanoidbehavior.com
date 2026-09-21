@@ -1058,3 +1058,153 @@ pre,.code-block{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:
     font-size:9px;
   }
 }
+
+
+/* Dashboard — mobile-first workspace layout */
+.dashboard-page{
+  max-width:1120px;
+}
+.dashboard-page>h1{
+  max-width:900px;
+}
+.dashboard-page .lead{
+  max-width:760px;
+}
+.dashboard-page .builder-result{
+  margin-top:18px;
+  padding:24px;
+}
+.dashboard-page .builder-result h2{
+  margin-top:0;
+}
+.dashboard-page .toolbar{
+  flex-wrap:wrap;
+}
+.dashboard-page .run-row{
+  align-items:center;
+}
+.dashboard-page #experiments .run-row{
+  grid-template-columns:28px minmax(180px,2fr) .8fr 1.3fr auto;
+}
+.dashboard-page #key-list .run-row{
+  grid-template-columns:2fr 1.3fr .8fr auto;
+}
+.dashboard-page .run-row .button{
+  white-space:nowrap;
+}
+.dashboard-page #key-output .builder-result{
+  margin-top:12px;
+}
+
+@media(max-width:700px){
+  .dashboard-page{
+    padding:48px 14px 80px;
+  }
+  .dashboard-page .eyebrow{
+    font-size:9px;
+    letter-spacing:1.8px;
+  }
+  .dashboard-page>h1{
+    font-size:clamp(34px,9.5vw,48px);
+    line-height:1.02;
+    letter-spacing:-2.2px;
+    margin-bottom:12px;
+  }
+  .dashboard-page .lead{
+    font-size:14px;
+    line-height:1.55;
+    margin-bottom:26px;
+  }
+  .dashboard-page .workspace-grid{
+    grid-template-columns:1fr;
+    gap:10px;
+    margin:24px 0 24px;
+  }
+  .dashboard-page .workspace-card{
+    padding:18px;
+    min-height:0;
+    border-radius:14px;
+  }
+  .dashboard-page .workspace-card strong{
+    font-size:30px;
+    margin:10px 0 2px;
+  }
+  .dashboard-page .workspace-card small{
+    font-size:11px;
+  }
+  .dashboard-page .builder-result{
+    margin-top:12px;
+    padding:18px;
+    border-radius:14px;
+  }
+  .dashboard-page .builder-result h2{
+    font-size:22px;
+    letter-spacing:-.8px;
+  }
+  .dashboard-page .toolbar{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+    margin:20px 0 16px;
+  }
+  .dashboard-page .toolbar input,
+  .dashboard-page .toolbar .button,
+  .dashboard-page .toolbar button{
+    width:100%;
+    min-height:42px;
+    margin:0;
+  }
+  .dashboard-page #experiments .run-row,
+  .dashboard-page #key-list .run-row{
+    display:grid;
+    grid-template-columns:1fr!important;
+    gap:9px;
+    padding:15px;
+    margin:8px 0;
+    border:1px solid var(--hb-line);
+    border-radius:12px;
+    background:#fafbfc;
+  }
+  .dashboard-page #experiments .run-row .exp{
+    position:absolute;
+    margin-top:2px;
+  }
+  .dashboard-page #experiments .run-row span:nth-of-type(1){
+    padding-left:28px;
+  }
+  .dashboard-page #experiments .run-row .button,
+  .dashboard-page #key-list .run-row .button{
+    width:100%;
+    justify-content:center;
+    min-height:38px;
+  }
+  .dashboard-page #experiments .run-row .button + .button{
+    margin-top:7px;
+  }
+  .dashboard-page #experiments .run-row br+small{
+    color:var(--hb-muted);
+  }
+  .dashboard-page #key-list .run-row{
+    grid-template-columns:1fr!important;
+  }
+  .dashboard-page #runs .empty{
+    padding:24px 14px;
+  }
+  .dashboard-page .empty{
+    font-size:12px;
+  }
+}
+
+@media(max-width:420px){
+  .dashboard-page{
+    padding-left:10px;
+    padding-right:10px;
+  }
+  .dashboard-page>h1{
+    font-size:32px;
+    letter-spacing:-1.8px;
+  }
+  .dashboard-page .builder-result{
+    padding:15px;
+  }
+}
