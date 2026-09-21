@@ -10,9 +10,14 @@ function dist3(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])}
 function pos(data,id){return[data.xpos[id*3],data.xpos[id*3+1],data.xpos[id*3+2]]}
 async function load(){
   try{
-    const mod=await import(MUJOCO_URL);
-    const base="https://cdn.jsdelivr.net/npm/@mujoco/mujoco@3.13.0/dist/";
-    return await mod.default({locateFile:(file)=>new URL(file,base).toString()});
+    const response=await fetch(MUJOCO_URL,{cache:"no-store",mode:"cors"});
+    if(!response.ok)throw new Error("MuJoCo module HTTP "+response.status);
+    const source=await response.text();
+    if(!source.includes("default"))throw new Error("MuJoCo module response is not JavaScript");
+    const blob=new Blob([source],{type:"text/javascript"});
+    const mod=await import(URL.createObjectURL(blob));
+    if(typeof mod.default!=="function")throw new Error("MuJoCo module has no default loader");
+    return await mod.default();
   }catch(error){
     throw new Error("MuJoCo WASM load failed: "+String(error?.message||error));
   }
