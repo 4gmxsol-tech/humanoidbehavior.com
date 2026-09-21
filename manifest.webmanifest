@@ -1,0 +1,11 @@
+{
+  "name": "HumanoidBehavior",
+  "short_name": "HumanoidBehavior",
+  "description": "Browser-first humanoid robot behavior evaluation.",
+  "start_url": "/simulation.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "icons": []
+}
