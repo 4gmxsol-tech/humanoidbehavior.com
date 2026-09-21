@@ -779,3 +779,112 @@ pre,.code-block{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:
 @media(max-width:390px){
   .acquisition-banner{width:calc(100% - 16px)}
 }
+
+
+/* Acquisition UX refinement — product-first hierarchy */
+.acquisition-quiet{
+  width:min(1080px,calc(100% - 32px));
+  margin:12px auto 0;
+  border-radius:14px;
+  border-color:rgba(148,163,184,.24);
+  background:linear-gradient(105deg,rgba(11,16,32,.97),rgba(20,30,49,.96));
+  box-shadow:0 8px 24px rgba(11,16,32,.09);
+}
+.acquisition-quiet:before{
+  width:3px;
+  background:linear-gradient(180deg,#ffd166,#25d366);
+}
+.acquisition-quiet .acquisition-banner-inner{
+  min-height:58px;
+  padding:8px 12px 8px 18px;
+  gap:12px;
+}
+.acquisition-quiet .acquisition-main{gap:10px;min-width:0}
+.acquisition-quiet .acquisition-badge{
+  padding:6px 9px;
+  font-size:9px;
+  letter-spacing:1.1px;
+  white-space:nowrap;
+  background:rgba(255,193,7,.08);
+  border-color:rgba(255,209,102,.28);
+}
+.acquisition-quiet .acquisition-copy{
+  min-width:0;
+}
+.acquisition-quiet .acquisition-copy strong{
+  display:block;
+  font-size:12px;
+  line-height:1.35;
+  letter-spacing:0;
+}
+.acquisition-quiet .acquisition-copy span{
+  display:none;
+}
+.acquisition-quiet .acquisition-contact{
+  flex:0 0 auto;
+  padding:6px 9px;
+  border-radius:9px;
+  background:rgba(37,211,102,.055);
+  border-color:rgba(37,211,102,.20);
+}
+.acquisition-quiet .acquisition-whatsapp-label{
+  display:none;
+}
+.acquisition-quiet .acquisition-whatsapp{
+  font-size:11px;
+  white-space:nowrap;
+}
+.acquisition-quiet .acquisition-cta{
+  flex:0 0 auto;
+  min-height:36px;
+  padding:0 12px;
+  border-radius:9px;
+  font-size:10px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+}
+.acquisition-quiet .acquisition-cta:hover{
+  background:rgba(255,255,255,.12);
+  border-color:rgba(255,209,102,.32);
+}
+@media(max-width:760px){
+  .acquisition-quiet{
+    width:calc(100% - 24px);
+  }
+  .acquisition-quiet .acquisition-banner-inner{
+    flex-wrap:wrap;
+    min-height:0;
+    padding:9px 10px 9px 15px;
+  }
+  .acquisition-quiet .acquisition-main{
+    flex:1 1 100%;
+  }
+  .acquisition-quiet .acquisition-contact{
+    margin-left:auto;
+  }
+}
+@media(max-width:430px){
+  .acquisition-quiet{
+    width:calc(100% - 16px);
+    border-radius:12px;
+  }
+  .acquisition-quiet .acquisition-banner-inner{
+    gap:8px;
+  }
+  .acquisition-quiet .acquisition-copy strong{
+    font-size:11px;
+  }
+  .acquisition-quiet .acquisition-contact{
+    order:3;
+    margin-left:0;
+  }
+  .acquisition-quiet .acquisition-cta{
+    margin-left:auto;
+  }
+  .acquisition-quiet .acquisition-whatsapp{
+    font-size:10px;
+  }
+}
+
+/* Homepage/contact remain intentionally prominent; interior pages stay product-first. */
