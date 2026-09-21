@@ -36,6 +36,13 @@
 .demo-cta{margin-top:80px;padding:54px 30px;border-radius:24px;background:#10131a;color:#fff;text-align:center}.demo-cta h2{font-size:40px;letter-spacing:-2px;margin:0 0 12px}.demo-cta p{color:#aeb6c3;max-width:600px;margin:0 auto 25px}
 @media(max-width:900px){.demo-hero,.demo-run,.demo-replay{grid-template-columns:1fr}.demo-steps{grid-template-columns:repeat(2,1fr)}.demo-architecture{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.demo-page{padding:55px 16px 80px}.demo-hero h1{font-size:48px;letter-spacing:-3px}.demo-section{margin-top:60px}.demo-section-head{display:block}.demo-section h2{font-size:32px}.demo-steps,.demo-architecture{grid-template-columns:1fr}.result-grid{grid-template-columns:1fr 1fr}.demo-cta h2{font-size:32px}.demo-actions .button{width:auto}.demo-field{font-size:12px}}
+
+.demo-package-link{display:inline-flex;align-items:center;padding:10px 4px;color:#5b54cc;text-decoration:none;font-weight:750;font-size:13px}
+.demo-buyer-strip{margin-top:58px;padding:28px 30px;border:1px solid #dfe2e7;border-radius:20px;background:#fff;display:grid;grid-template-columns:.8fr 1.2fr;gap:28px;align-items:center;box-shadow:0 14px 45px rgba(16,24,40,.06)}
+.demo-buyer-strip h2{font-size:27px;letter-spacing:-1px;margin:4px 0 7px}.demo-buyer-strip p{margin:0;color:var(--hb-muted);font-size:13px;max-width:470px}
+.buyer-path{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}.buyer-path span{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#444a54}.buyer-path b{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:#f0efff;color:#5b54cc;font-size:10px}.buyer-path i{font-style:normal;color:#a0a5ad}
+@media(max-width:900px){.demo-buyer-strip{grid-template-columns:1fr}.buyer-path{justify-content:flex-start}}
+@media(max-width:600px){.demo-package-link{width:100%;justify-content:center}.demo-buyer-strip{padding:22px}.buyer-path{display:grid;grid-template-columns:1fr;gap:9px}.buyer-path i{display:none}.buyer-path span{padding:8px 0;border-bottom:1px solid var(--hb-line)}}
 </style>
 </head>
 <body>
@@ -55,7 +62,8 @@
     <p class="demo-lead">A 60-second tour of the HumanoidBehavior workflow: define a behavior, run a measured MuJoCo evaluation, replay the motion, and keep the result reproducible.</p>
     <div class="demo-actions">
       <a class="button primary" href="simulation.html">Run the live Experiment Lab →</a>
-      <a class="button secondary" href="SALE_PACKAGE.md">Open Sale Package</a>
+      <a class="button secondary" href="#buyer-path">See the acquisition path</a>
+      <a class="demo-package-link" href="SALE_PACKAGE.md">Open Sale Package ↗</a>
     </div>
   </div>
   <div class="demo-panel">
@@ -80,6 +88,8 @@
   <div class="demo-step"><b>04</b><strong>Replay</strong><span>Recorded motion frames</span></div>
   <div class="demo-step"><b>05</b><strong>Report</strong><span>Metrics + validation + provenance</span></div>
 </section>
+
+<section class="demo-buyer-strip" id="buyer-path"><div><div class="eyebrow">BUILT FOR A FAST TECHNICAL REVIEW</div><h2>Demo → Evidence → Handoff</h2><p>A buyer can validate the core workflow, inspect the architecture, and move directly to the technical sale package.</p></div><div class="buyer-path"><span><b>01</b>See the workflow</span><i>→</i><span><b>02</b>Run the lab</span><i>→</i><span><b>03</b>Review the package</span><i>→</i><span><b>04</b>Talk to the owner</span></div></section>
 
 <section class="demo-section">
   <div class="demo-section-head"><div><div class="eyebrow">01 — THE RUN</div><h2>One configuration. One trace.</h2></div><p>The demo mirrors the product's actual evaluation model: explicit behavior version, engine and seeds are attached to the measured result.</p></div>
