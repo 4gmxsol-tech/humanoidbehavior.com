@@ -90,4 +90,4 @@ async function runEvaluation(){
 }
 $("run").onclick=runEvaluation;
 loadQuota();loadVersions();
-</script></body></html>
+if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(()=>{});}</script></body></html>
