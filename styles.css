@@ -920,291 +920,38 @@ pre,.code-block{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:
   text-decoration:none!important;
 }
 
-
-/* Acquisition card — mobile layout repair */
-.acquisition-main{
-  display:flex;
-  align-items:center;
-  min-width:0;
-}
-.acquisition-copy{
-  min-width:0;
-}
-.acquisition-copy strong,
-.acquisition-copy span{
-  display:block;
-}
-.acquisition-contact{
-  flex:0 0 auto;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  justify-content:center;
-  gap:2px;
-  min-width:0;
-}
-.acquisition-cta{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  white-space:nowrap;
-  text-decoration:none!important;
-  color:#17120a!important;
-  background:linear-gradient(135deg,#ffd166,#c58a1b)!important;
-  border:1px solid rgba(255,209,102,.65)!important;
-  box-shadow:0 8px 18px rgba(154,103,0,.18);
-}
-.acquisition-cta:hover{
-  color:#17120a!important;
-  background:linear-gradient(135deg,#ffe08a,#d39a25)!important;
-}
-
+/* Responsive acquisition card repair */
+.acquisition-main{display:flex;align-items:center;min-width:0}
+.acquisition-copy{min-width:0}
+.acquisition-copy strong,.acquisition-copy span{display:block}
+.acquisition-contact{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-width:0}
+.acquisition-cta{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none!important}
 @media(max-width:680px){
-  .acquisition-banner-inner{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
-    align-items:center;
-    gap:10px 12px;
-    min-height:0;
-    padding:12px 12px 12px 16px;
-  }
-  .acquisition-main{
-    grid-column:1 / -1;
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    min-width:0;
-  }
-  .acquisition-badge{
-    flex:0 0 auto;
-    white-space:nowrap;
-    font-size:8.5px;
-    letter-spacing:.9px;
-    line-height:1.1;
-    padding:7px 8px;
-  }
-  .acquisition-copy{
-    flex:1 1 auto;
-    min-width:0;
-  }
-  .acquisition-copy strong{
-    font-size:12px;
-    line-height:1.35;
-    letter-spacing:0;
-  }
-  .acquisition-copy span{
-    margin-top:2px;
-    font-size:10px;
-    line-height:1.35;
-    color:rgba(255,255,255,.72);
-  }
-  .acquisition-contact{
-    grid-column:1;
-    grid-row:2;
-    margin:0!important;
-    padding:7px 9px;
-    border-radius:9px;
-  }
-  .acquisition-whatsapp-label{
-    display:none;
-  }
-  .acquisition-whatsapp{
-    font-size:10.5px;
-    line-height:1.2;
-    white-space:nowrap;
-  }
-  .acquisition-cta{
-    grid-column:2;
-    grid-row:2;
-    min-height:36px;
-    padding:0 11px;
-    border-radius:9px;
-    font-size:10px;
-  }
+.acquisition-banner-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 12px;min-height:0;padding:12px 12px 12px 16px}
+.acquisition-main{grid-column:1/-1;align-items:flex-start;gap:10px}
+.acquisition-badge{flex:0 0 auto;white-space:nowrap;font-size:8.5px;letter-spacing:.9px;line-height:1.1;padding:7px 8px}
+.acquisition-copy{flex:1 1 auto}.acquisition-copy strong{font-size:12px;line-height:1.35;letter-spacing:0}.acquisition-copy span{margin-top:2px;font-size:10px;line-height:1.35}
+.acquisition-contact{grid-column:1;grid-row:2;margin:0!important;padding:7px 9px;border-radius:9px}.acquisition-whatsapp-label{display:none}.acquisition-whatsapp{font-size:10.5px;line-height:1.2;white-space:nowrap}
+.acquisition-cta{grid-column:2;grid-row:2;min-height:36px;padding:0 11px;border-radius:9px;font-size:10px}
 }
-
 @media(max-width:430px){
-  .acquisition-banner{
-    width:calc(100% - 16px);
-    border-radius:14px;
-  }
-  .acquisition-banner-inner{
-    padding:10px 10px 10px 14px;
-    gap:9px 10px;
-  }
-  .acquisition-main{
-    gap:8px;
-  }
-  .acquisition-badge{
-    font-size:7.5px;
-    letter-spacing:.65px;
-    padding:6px 7px;
-  }
-  .acquisition-copy strong{
-    font-size:11px;
-  }
-  .acquisition-copy span{
-    font-size:9px;
-  }
-  .acquisition-contact{
-    padding:6px 8px;
-  }
-  .acquisition-whatsapp{
-    font-size:9.5px;
-  }
-  .acquisition-cta{
-    min-height:34px;
-    padding:0 9px;
-    font-size:9px;
-  }
+.acquisition-banner{width:calc(100% - 16px);border-radius:14px}.acquisition-banner-inner{padding:10px 10px 10px 14px;gap:9px 10px}.acquisition-main{gap:8px}
+.acquisition-badge{font-size:7.5px;letter-spacing:.65px;padding:6px 7px}.acquisition-copy strong{font-size:11px}.acquisition-copy span{font-size:9px}.acquisition-contact{padding:6px 8px}.acquisition-whatsapp{font-size:9.5px}.acquisition-cta{min-height:34px;padding:0 9px;font-size:9px}
 }
 
-
-/* Dashboard — mobile-first workspace layout */
-.dashboard-page{
-  max-width:1120px;
-}
-.dashboard-page>h1{
-  max-width:900px;
-}
-.dashboard-page .lead{
-  max-width:760px;
-}
-.dashboard-page .builder-result{
-  margin-top:18px;
-  padding:24px;
-}
-.dashboard-page .builder-result h2{
-  margin-top:0;
-}
-.dashboard-page .toolbar{
-  flex-wrap:wrap;
-}
-.dashboard-page .run-row{
-  align-items:center;
-}
-.dashboard-page #experiments .run-row{
-  grid-template-columns:28px minmax(180px,2fr) .8fr 1.3fr auto;
-}
-.dashboard-page #key-list .run-row{
-  grid-template-columns:2fr 1.3fr .8fr auto;
-}
-.dashboard-page .run-row .button{
-  white-space:nowrap;
-}
-.dashboard-page #key-output .builder-result{
-  margin-top:12px;
-}
-
+/* Dashboard — restrained responsive controls */
+.dashboard-page{max-width:1120px}.dashboard-page>h1{max-width:900px}.dashboard-page .lead{max-width:760px}.dashboard-page .builder-result{margin-top:18px;padding:24px}.dashboard-page .builder-result h2{margin-top:0}
+.dashboard-page .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:9px}.dashboard-page .toolbar .button,.dashboard-page .toolbar button{width:auto;min-height:38px;max-width:190px;padding:0 13px;font-size:12px;flex:0 0 auto}.dashboard-page .toolbar input{min-height:38px}
+.dashboard-page #experiments .run-row{grid-template-columns:28px minmax(180px,2fr) .8fr 1.3fr auto}.dashboard-page #key-list .run-row{grid-template-columns:2fr 1.3fr .8fr auto}.dashboard-page .run-row .button{white-space:nowrap}
 @media(max-width:700px){
-  .dashboard-page{
-    padding:48px 14px 80px;
-  }
-  .dashboard-page .eyebrow{
-    font-size:9px;
-    letter-spacing:1.8px;
-  }
-  .dashboard-page>h1{
-    font-size:clamp(34px,9.5vw,48px);
-    line-height:1.02;
-    letter-spacing:-2.2px;
-    margin-bottom:12px;
-  }
-  .dashboard-page .lead{
-    font-size:14px;
-    line-height:1.55;
-    margin-bottom:26px;
-  }
-  .dashboard-page .workspace-grid{
-    grid-template-columns:1fr;
-    gap:10px;
-    margin:24px 0 24px;
-  }
-  .dashboard-page .workspace-card{
-    padding:18px;
-    min-height:0;
-    border-radius:14px;
-  }
-  .dashboard-page .workspace-card strong{
-    font-size:30px;
-    margin:10px 0 2px;
-  }
-  .dashboard-page .workspace-card small{
-    font-size:11px;
-  }
-  .dashboard-page .builder-result{
-    margin-top:12px;
-    padding:18px;
-    border-radius:14px;
-  }
-  .dashboard-page .builder-result h2{
-    font-size:22px;
-    letter-spacing:-.8px;
-  }
-  .dashboard-page .toolbar{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:8px;
-    margin:20px 0 16px;
-  }
-  .dashboard-page .toolbar input,
-  .dashboard-page .toolbar .button,
-  .dashboard-page .toolbar button{
-    width:100%;
-    min-height:42px;
-    margin:0;
-  }
-  .dashboard-page #experiments .run-row,
-  .dashboard-page #key-list .run-row{
-    display:grid;
-    grid-template-columns:1fr!important;
-    gap:9px;
-    padding:15px;
-    margin:8px 0;
-    border:1px solid var(--hb-line);
-    border-radius:12px;
-    background:#fafbfc;
-  }
-  .dashboard-page #experiments .run-row .exp{
-    position:absolute;
-    margin-top:2px;
-  }
-  .dashboard-page #experiments .run-row span:nth-of-type(1){
-    padding-left:28px;
-  }
-  .dashboard-page #experiments .run-row .button,
-  .dashboard-page #key-list .run-row .button{
-    width:100%;
-    justify-content:center;
-    min-height:38px;
-  }
-  .dashboard-page #experiments .run-row .button + .button{
-    margin-top:7px;
-  }
-  .dashboard-page #experiments .run-row br+small{
-    color:var(--hb-muted);
-  }
-  .dashboard-page #key-list .run-row{
-    grid-template-columns:1fr!important;
-  }
-  .dashboard-page #runs .empty{
-    padding:24px 14px;
-  }
-  .dashboard-page .empty{
-    font-size:12px;
-  }
+.dashboard-page{padding:48px 16px 80px}.dashboard-page>h1{font-size:clamp(34px,9vw,46px);line-height:1.03;letter-spacing:-2px;margin-bottom:12px}.dashboard-page .lead{font-size:14px;line-height:1.5;margin-bottom:24px}
+.dashboard-page .workspace-grid{grid-template-columns:1fr;gap:10px;margin:22px 0}.dashboard-page .workspace-card{padding:18px;min-height:0}.dashboard-page .workspace-card strong{font-size:30px;margin:9px 0 2px}
+.dashboard-page .builder-result{margin-top:12px;padding:18px}.dashboard-page .builder-result h2{font-size:22px}
+.dashboard-page .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 14px}.dashboard-page .toolbar input{width:100%;flex:1 1 100%}.dashboard-page .toolbar .button,.dashboard-page .toolbar button{width:auto;max-width:180px;min-height:38px;padding:0 12px;font-size:11px}
+.dashboard-page #experiments .run-row,.dashboard-page #key-list .run-row{display:grid;grid-template-columns:1fr!important;gap:8px;padding:14px;margin:8px 0;border:1px solid var(--hb-line);border-radius:12px;background:#fafbfc}
+.dashboard-page #experiments .run-row .exp{position:absolute;margin-top:2px}.dashboard-page #experiments .run-row span:nth-of-type(1){padding-left:26px}
+.dashboard-page #experiments .run-row .button,.dashboard-page #key-list .run-row .button{width:auto;max-width:170px;min-height:36px;padding:0 12px}.dashboard-page #experiments .run-row .button + .button{margin-top:6px}
 }
-
 @media(max-width:420px){
-  .dashboard-page{
-    padding-left:10px;
-    padding-right:10px;
-  }
-  .dashboard-page>h1{
-    font-size:32px;
-    letter-spacing:-1.8px;
-  }
-  .dashboard-page .builder-result{
-    padding:15px;
-  }
+.dashboard-page{padding-left:12px;padding-right:12px}.dashboard-page>h1{font-size:32px;letter-spacing:-1.7px}.dashboard-page .builder-result{padding:15px}.dashboard-page .toolbar .button,.dashboard-page .toolbar button{max-width:165px}
 }
