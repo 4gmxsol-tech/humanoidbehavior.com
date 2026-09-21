@@ -18,9 +18,10 @@
     <a href="benchmark.html">Benchmark</a>
     <a href="docs.html">Docs</a>
     <a href="pricing.html">Plans</a>
+    <a href="contact.html">Contact</a>
     <a href="dashboard.html">Dashboard</a>
   </nav>
-  <a class="nav-cta" href="login.html">Start free</a>
+  <div class="nav-actions"><a class="nav-contact-cta" href="contact.html">Contact us</a><a class="nav-cta" href="login.html">Start free</a></div>
 </header>
 
 <main>
@@ -151,9 +152,16 @@ status         queued
 </section>
 </main>
 
-<footer>
-  <span>© 2026 HumanoidBehavior</span>
-  <span><a href="docs.html">Docs</a> · <a href="pricing.html">Plans</a> · <a href="dashboard.html">Dashboard</a></span>
+<footer class="site-footer">
+  <div class="footer-main">
+    <div class="footer-brand"><a class="brand" href="index.html">Humanoid<span>Behavior</span></a><p>Robotics behavior infrastructure for measured, reproducible simulation.</p></div>
+    <div class="footer-links">
+      <div><strong>Product</strong><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a href="simulation.html">Experiment Lab</a><a href="pricing.html">Plans</a></div>
+      <div><strong>Resources</strong><a href="docs.html">Docs</a><a href="dashboard.html">Dashboard</a><a href="https://github.com/4gmxsol-tech/humanoidbehavior.com">GitHub</a></div>
+      <div><strong>Company</strong><a href="contact.html">Contact</a><a href="BUYER_HANDOFF.md">Buyer Handoff</a><a href="SALE_PACKAGE.md">Sale Package</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 HumanoidBehavior</span><span>Built for robotics teams · MuJoCo measured execution</span></div>
 </footer>
 
 <script>
@@ -167,5 +175,6 @@ status         queued
 })();
 </script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js?v=4").catch(()=>{});}</script>
+<a class="contact-float" href="contact.html" aria-label="Contact us">Contact us →</a>
 </body>
 </html>
