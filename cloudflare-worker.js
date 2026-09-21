@@ -419,8 +419,8 @@ export default {
           env.DB.prepare("INSERT INTO jobs(id,experiment_id,user_id,type,status,payload_json) VALUES(?,?,?,?,?,?)").bind(jobId,expId,user.id,"experiment-run","queued",JSON.stringify({...x,seeds,policies,behaviorId,behaviorVersion,engine,seconds}))
         ]);
         result.jobId=jobId;
-        result.computeDispatch = "local-worker";
-        result.result.validation = {passed:false,message:"Evaluation queued; start the local MuJoCo compute worker to process it."};
+        result.computeDispatch = "browser-wasm";
+        result.result.validation = {passed:false,message:"Evaluation queued; browser MuJoCo WASM will attempt to process it on this device."};
         await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
         return json(result,202);
       }
