@@ -1,4 +1,4 @@
-const CACHE="hb-shell-v16";
+const CACHE="hb-shell-v17";
 const SHELL=["/","/index.html","/simulation.html","/experiment.html","/styles.css","/api-base.js","/browser-compute.js?v=33","/browser-compute-worker.js?v=33","/manifest.webmanifest","/icon.svg"];
 
 self.addEventListener("install",event=>{
@@ -22,7 +22,7 @@ self.addEventListener("fetch",event=>{
   if(u.origin!==location.origin) return;
   if(u.pathname.startsWith("/api/")) return;
   if(event.request.mode==="navigate"){
-    event.waitUntil(fetch("/api/analytics/event",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventType:"pageview",page:u.pathname+u.search,referrer:self.location.href,visitorId:(()=>{try{let id=sessionStorage.getItem("hb_visitor");if(!id){id=crypto.randomUUID();sessionStorage.setItem("hb_visitor",id)}return id}catch(_){return ""}})()})}).catch(()=>{}));
+    event.waitUntil(fetch("/api/analytics/event",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventType:"pageview",page:u.pathname+u.search,referrer:self.location.href,visitorId:""})}).catch(()=>{}));
   }
   if(["/","/index.html","/simulation.html","/experiment.html","/browser-compute.js","/browser-compute-worker.js"].includes(u.pathname)) return;
 
