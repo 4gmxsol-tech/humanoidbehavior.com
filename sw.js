@@ -1,4 +1,4 @@
-const CACHE="hb-shell-v13";
+const CACHE="hb-shell-v14";
 const SHELL=["/","/index.html","/simulation.html","/experiment.html","/styles.css","/api-base.js","/browser-compute.js?v=21","/browser-compute-worker.js?v=21","/manifest.webmanifest","/icon.svg"];
 
 self.addEventListener("install",event=>{
@@ -20,6 +20,7 @@ self.addEventListener("activate",event=>{
 self.addEventListener("fetch",event=>{
   const u=new URL(event.request.url);
   if(u.origin!==location.origin || u.pathname.startsWith("/api/")) return;
+  if(["/","/index.html","/simulation.html","/experiment.html","/browser-compute.js","/browser-compute-worker.js"].includes(u.pathname)) return;
 
   event.respondWith(
     fetch(event.request)
