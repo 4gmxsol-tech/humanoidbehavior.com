@@ -45,7 +45,7 @@ async function loadVersions(){
 $("behavior").onchange=loadVersions;
 function syncG1(){ $("g1config").style.display="none"; }
 $("robot").onchange=syncG1;syncG1();
-const COMPUTE_BUILD="HB-CONTROLLER-V32";
+const COMPUTE_BUILD="HB-CONTROLLER-V33";
 async function loadBrowserComputeModule(){
   const url=new URL("browser-compute.js?build="+encodeURIComponent(COMPUTE_BUILD),location.href).toString();
   const response=await fetch(url,{cache:"no-store",headers:{"Accept":"text/javascript"}});
@@ -88,7 +88,8 @@ async function runBrowserCompute(payload,onProgress=()=>{}){
 function initLiveSimulation(result){
  const frames=result?.rawResults?.[0]?.metrics?.motionFrames;
  const section=$("live-simulation"),canvas=$("sim-canvas");
- if(!frames?.length||!section||!canvas)return;
+ if(!section||!canvas)return;
+ if(!frames?.length){section.style.display="block";$("sim-time").textContent="Replay unavailable: this result contains no motion frames.";return;}
  section.style.display="block";
  const ctx=canvas.getContext("2d");let i=0,playing=false,last=0,speed=1,raf=0;
  const resize=()=>{const dpr=Math.min(2,window.devicePixelRatio||1),w=canvas.clientWidth||900,h=460;canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()};
@@ -138,6 +139,7 @@ async function runEvaluation(){
         progress.innerHTML="<b>Browser evaluation complete.</b> · Results saved to D1.";
         out.textContent="Measured evaluation complete on this device · "+(browserResult.provenance?.computeBuild||"unknown build");
         initLiveSimulation(browserResult);
+        if(!$("live-simulation").offsetParent) { $("live-simulation").style.display="block"; }
       }catch(browserError){
         progress.innerHTML="<b>Browser compute unavailable.</b> · "+browserError.message+" · Job remains queued for the local worker.";
       }
