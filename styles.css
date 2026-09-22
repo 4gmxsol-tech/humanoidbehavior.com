@@ -703,7 +703,6 @@ pre,.code-block{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:
   .whatsapp-float-icon{width:22px;height:22px}
 }
 @media(prefers-reduced-motion:reduce){.whatsapp-float{transition:none}}
-.analytics-page{padding-bottom:100px}.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.analytics-page .card{padding:26px}.analytics-page .card h3{margin-top:0}.analytics-row{display:flex;justify-content:space-between;gap:20px;padding:11px 0;border-top:1px solid var(--hb-line);font-size:13px}.analytics-row:first-child{border-top:0}.analytics-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.analytics-row b{color:var(--hb-primary)}.analytics-recent{margin-top:18px}.analytics-table-wrap{overflow:auto}.analytics-page table{width:100%;border-collapse:collapse;font-size:12px}.analytics-page th,.analytics-page td{padding:11px 10px;text-align:left;border-top:1px solid var(--hb-line);white-space:nowrap}.analytics-page th{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--hb-muted)}@media(max-width:700px){.analytics-grid{grid-template-columns:1fr}.analytics-page table{min-width:760px}}
 #hb-secret-entry{user-select:none}
 #hb-secret-entry:focus-visible{outline:2px solid var(--hb-primary);outline-offset:4px;border-radius:6px}
 
