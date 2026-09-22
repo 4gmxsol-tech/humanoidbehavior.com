@@ -119,6 +119,22 @@ HumanoidBehavior is best understood today as an **early-stage robotics infrastru
 
 Its core value is the integrated behavior-specification → durable experiment → simulator worker → reproducible report workflow, with a clean path toward additional simulator and robot adapters.
 
+## Discovery & technical references
+
+For developers, researchers, and robotics teams discovering the project through GitHub, the main technical surfaces are:
+
+- **[Live Technical Demo](https://humanoidbehavior.com/demo.html)** — buyer-facing walkthrough of the behavior → measurement → replay → report flow
+- **[Experiment Lab](https://humanoidbehavior.com/simulation.html)** — browser-first measured MuJoCo experiment launcher
+- **[Developer Docs](https://humanoidbehavior.com/docs.html)** — public API and workflow documentation
+- **[Behavior Evaluation](https://humanoidbehavior.com/robot-behavior-evaluation.html)** — technical overview of robot behavior evaluation
+- **[Embodied AI Evaluation](https://humanoidbehavior.com/embodied-ai-evaluation.html)** — evaluation framing for embodied AI systems
+- **[Humanoid Robot Behavior](https://humanoidbehavior.com/humanoid-robot-behavior.html)** — behavior specification and measurement context
+- **[Robot Policy Evaluation](https://humanoidbehavior.com/robot-policy-evaluation.html)** — policy-to-measured-behavior evaluation context
+
+### Core discovery terms
+
+The repository is intentionally centered on a narrow technical vocabulary: **robotics behavior evaluation, humanoid robot behavior, embodied AI evaluation, robot policy evaluation, MuJoCo robotics, reproducible robotics experiments, behavior benchmarking, and simulation-based evaluation**. These terms describe the actual product surface rather than serving as a generic keyword list.
+
 ## Buyer handoff
 
 See **[BUYER_HANDOFF.md](BUYER_HANDOFF.md)** for the current acquisition-oriented technical handoff, verification checklist, commercial status, known limitations, and transfer checklist.
