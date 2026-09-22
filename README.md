@@ -123,6 +123,7 @@ Its core value is the integrated behavior-specification → durable experiment �
 
 For developers, researchers, and robotics teams discovering the project through GitHub, the main technical surfaces are:
 
+- **[Hugging Face Space](https://huggingface.co/spaces/DomainZax/humanoidbehavior)** — free static technical showcase for robotics/AI discovery
 - **[Live Technical Demo](https://humanoidbehavior.com/demo.html)** — buyer-facing walkthrough of the behavior → measurement → replay → report flow
 - **[Experiment Lab](https://humanoidbehavior.com/simulation.html)** — browser-first measured MuJoCo experiment launcher
 - **[Developer Docs](https://humanoidbehavior.com/docs.html)** — public API and workflow documentation
@@ -134,6 +135,10 @@ For developers, researchers, and robotics teams discovering the project through 
 ### Core discovery terms
 
 The repository is intentionally centered on a narrow technical vocabulary: **robotics behavior evaluation, humanoid robot behavior, embodied AI evaluation, robot policy evaluation, MuJoCo robotics, reproducible robotics experiments, behavior benchmarking, and simulation-based evaluation**. These terms describe the actual product surface rather than serving as a generic keyword list.
+
+## Discovery surfaces
+
+The project is also available as a public static technical showcase on Hugging Face: **[DomainZax/humanoidbehavior](https://huggingface.co/spaces/DomainZax/humanoidbehavior)**. The Space is intentionally lightweight and browser-based; it does not claim to provide independent benchmark measurements.
 
 ## Buyer handoff
 
