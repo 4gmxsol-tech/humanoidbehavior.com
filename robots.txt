@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /analytics.html
 
 Sitemap: https://humanoidbehavior.com/sitemap.xml
