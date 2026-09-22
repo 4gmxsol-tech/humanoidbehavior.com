@@ -1,4 +1,4 @@
-const VERSION = "cloudflare-d1-api-5-visitor-intelligence";
+const VERSION = "cloudflare-d1-api-6-visitor-intelligence";
 const ALLOWED_ORIGIN = "https://humanoidbehavior.com";
 const encoder = new TextEncoder();
 
@@ -166,13 +166,13 @@ function analyticsAdminAuthorized(request, env) {
 
 async function analyticsSummary(env) {
   const cutoff = "datetime('now','-30 days')";
-  const pageviews = await env.DB.prepare("SELECT COUNT(*) AS n FROM analytics_events WHERE event_type='pageview' AND created_at>=${cutoff}").first();
-  const visitors = await env.DB.prepare("SELECT COUNT(DISTINCT COALESCE(NULLIF(visitor_id,''), NULLIF(ip_hash,''), id)) AS n FROM analytics_events WHERE created_at>=${cutoff}").first();
-  const pages = await env.DB.prepare("SELECT page, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=${cutoff} GROUP BY page ORDER BY views DESC LIMIT 20").all();
-  const countries = await env.DB.prepare("SELECT COALESCE(NULLIF(country,''),'Unknown') AS country, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=${cutoff} GROUP BY country ORDER BY views DESC LIMIT 20").all();
-  const sources = await env.DB.prepare("SELECT source, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=${cutoff} GROUP BY source ORDER BY views DESC LIMIT 20").all();
-  const events = await env.DB.prepare("SELECT event_type AS eventType, COUNT(*) AS count FROM analytics_events WHERE created_at>=${cutoff} GROUP BY event_type ORDER BY count DESC").all();
-  const productHunt = await env.DB.prepare("SELECT COUNT(*) AS n FROM analytics_events WHERE source='producthunt' AND event_type='pageview' AND created_at>=${cutoff}").first();
+  const pageviews = await env.DB.prepare("SELECT COUNT(*) AS n FROM analytics_events WHERE event_type='pageview' AND created_at>=datetime('now','-30 days')").first();
+  const visitors = await env.DB.prepare("SELECT COUNT(DISTINCT COALESCE(NULLIF(visitor_id,''), NULLIF(ip_hash,''), id)) AS n FROM analytics_events WHERE created_at>=datetime('now','-30 days')").first();
+  const pages = await env.DB.prepare("SELECT page, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=datetime('now','-30 days') GROUP BY page ORDER BY views DESC LIMIT 20").all();
+  const countries = await env.DB.prepare("SELECT COALESCE(NULLIF(country,''),'Unknown') AS country, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=datetime('now','-30 days') GROUP BY country ORDER BY views DESC LIMIT 20").all();
+  const sources = await env.DB.prepare("SELECT source, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=datetime('now','-30 days') GROUP BY source ORDER BY views DESC LIMIT 20").all();
+  const events = await env.DB.prepare("SELECT event_type AS eventType, COUNT(*) AS count FROM analytics_events WHERE created_at>=datetime('now','-30 days') GROUP BY event_type ORDER BY count DESC").all();
+  const productHunt = await env.DB.prepare("SELECT COUNT(*) AS n FROM analytics_events WHERE source='producthunt' AND event_type='pageview' AND created_at>=datetime('now','-30 days')").first();
   const recent = await env.DB.prepare("SELECT id,event_type AS eventType,page,referrer,source,country,city,user_agent AS userAgent,visitor_id AS visitorId,metadata_json AS metadata,created_at AS createdAt FROM analytics_events ORDER BY created_at DESC LIMIT 100").all();
   return {
     windowDays: 30,
