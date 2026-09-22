@@ -1,4 +1,4 @@
-const CACHE="hb-shell-v19";
+const CACHE="hb-shell-v18";
 const SHELL=["/","/index.html","/simulation.html","/experiment.html","/styles.css","/api-base.js","/browser-compute.js?v=33","/browser-compute-worker.js?v=33","/manifest.webmanifest","/icon.svg"];
 
 self.addEventListener("install",event=>{
@@ -21,8 +21,9 @@ self.addEventListener("fetch",event=>{
   const u=new URL(event.request.url);
   if(u.origin!==location.origin) return;
   if(u.pathname.startsWith("/api/")) return;
-  // Pageview analytics is handled by analytics.js against the production Worker.
-  // Avoid duplicate navigation events from the service worker.
+  if(event.request.mode==="navigate"){
+    event.waitUntil(fetch("/api/analytics/event",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventType:"pageview",page:u.pathname+u.search,referrer:self.location.href,visitorId:""})}).catch(()=>{}));
+  }
   if(["/","/index.html","/simulation.html","/experiment.html","/browser-compute.js","/browser-compute-worker.js"].includes(u.pathname)) return;
 
   event.respondWith(
