@@ -1,4 +1,4 @@
-const VERSION = "cloudflare-d1-api-4-local-worker";
+const VERSION = "cloudflare-d1-api-5-visitor-intelligence";
 const ALLOWED_ORIGIN = "https://humanoidbehavior.com";
 const encoder = new TextEncoder();
 
@@ -102,7 +102,12 @@ async function ensureSchema(env) {
       env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash)"),
       env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id)"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS auth_attempts (id TEXT PRIMARY KEY, email TEXT NOT NULL, ip_hash TEXT NOT NULL, success INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
-      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_auth_attempts_window ON auth_attempts(email,ip_hash,created_at)")
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_auth_attempts_window ON auth_attempts(email,ip_hash,created_at)"),
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS analytics_events (id TEXT PRIMARY KEY, event_type TEXT NOT NULL, page TEXT NOT NULL, referrer TEXT NOT NULL DEFAULT '', source TEXT NOT NULL DEFAULT 'direct', country TEXT NOT NULL DEFAULT '', city TEXT NOT NULL DEFAULT '', user_agent TEXT NOT NULL DEFAULT '', ip_hash TEXT, visitor_id TEXT NOT NULL DEFAULT '', metadata_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_analytics_events_created ON analytics_events(created_at)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_analytics_events_type_created ON analytics_events(event_type,created_at)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_analytics_events_visitor_created ON analytics_events(visitor_id,created_at)"),
+      env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_analytics_events_source_created ON analytics_events(source,created_at)")
     ]);
     const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM behaviors WHERE user_id='system'").first();
     if (!Number(row?.n || 0)) {
@@ -124,6 +129,67 @@ function validEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && 
 function behaviorSpec(id, version) { return BEHAVIORS.find(b => b.id === id && b.version === version) || null; }
 function sanitizeName(value, fallback="Untitled") { const s=String(value||"").trim().replace(/\s+/g," "); return s.slice(0,160)||fallback; }
 function sanitizeSteps(value) { return Array.isArray(value) ? value.map(v=>String(v||"").trim().slice(0,300)).filter(Boolean).slice(0,20) : []; }
+
+const ANALYTICS_EVENTS = new Set(["pageview","click","signup","benchmark","contact","whatsapp"]);
+
+function analyticsSource(referrer, page, metadata = {}) {
+  const explicit = String(metadata.source || "").trim().toLowerCase();
+  if (explicit) return explicit.slice(0,40);
+  const utm = String(metadata.utm_source || "").trim().toLowerCase();
+  if (utm) return utm.slice(0,40);
+  try {
+    const ref = new URL(String(referrer || ""));
+    const host = ref.hostname.toLowerCase().replace(/^www\./,"");
+    if (host === "producthunt.com" || host.endsWith(".producthunt.com")) return "producthunt";
+    if (host === "google.com" || host.endsWith(".google.com")) return "google";
+    if (host === "github.com" || host.endsWith(".github.com")) return "github";
+    if (host === "huggingface.co" || host.endsWith(".huggingface.co")) return "huggingface";
+    if (host === "linkedin.com" || host.endsWith(".linkedin.com")) return "linkedin";
+    if (host === "x.com" || host === "twitter.com") return "social";
+    return host.slice(0,80) || "direct";
+  } catch {
+    return String(page || "").includes("utm_source=producthunt") ? "producthunt" : "direct";
+  }
+}
+
+async function analyticsIpHash(request, env) {
+  const ip = String(request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For") || "").split(",")[0].trim();
+  if (!ip || !env.ANALYTICS_HASH_SECRET) return null;
+  return (await sha256(String(env.ANALYTICS_HASH_SECRET) + ":" + ip)).slice(0,32);
+}
+
+function analyticsAdminAuthorized(request, env) {
+  const token = String(env.ANALYTICS_ADMIN_TOKEN || "");
+  const header = String(request.headers.get("Authorization") || "");
+  return !!token && header === "Bearer " + token;
+}
+
+async function analyticsSummary(env) {
+  const cutoff = "datetime('now','-30 days')";
+  const pageviews = await env.DB.prepare("SELECT COUNT(*) AS n FROM analytics_events WHERE event_type='pageview' AND created_at>=${cutoff}").first();
+  const visitors = await env.DB.prepare("SELECT COUNT(DISTINCT COALESCE(NULLIF(visitor_id,''), NULLIF(ip_hash,''), id)) AS n FROM analytics_events WHERE created_at>=${cutoff}").first();
+  const pages = await env.DB.prepare("SELECT page, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=${cutoff} GROUP BY page ORDER BY views DESC LIMIT 20").all();
+  const countries = await env.DB.prepare("SELECT COALESCE(NULLIF(country,''),'Unknown') AS country, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=${cutoff} GROUP BY country ORDER BY views DESC LIMIT 20").all();
+  const sources = await env.DB.prepare("SELECT source, COUNT(*) AS views FROM analytics_events WHERE event_type='pageview' AND created_at>=${cutoff} GROUP BY source ORDER BY views DESC LIMIT 20").all();
+  const events = await env.DB.prepare("SELECT event_type AS eventType, COUNT(*) AS count FROM analytics_events WHERE created_at>=${cutoff} GROUP BY event_type ORDER BY count DESC").all();
+  const productHunt = await env.DB.prepare("SELECT COUNT(*) AS n FROM analytics_events WHERE source='producthunt' AND event_type='pageview' AND created_at>=${cutoff}").first();
+  const recent = await env.DB.prepare("SELECT id,event_type AS eventType,page,referrer,source,country,city,user_agent AS userAgent,visitor_id AS visitorId,metadata_json AS metadata,created_at AS createdAt FROM analytics_events ORDER BY created_at DESC LIMIT 100").all();
+  return {
+    windowDays: 30,
+    pageviews: Number(pageviews?.n || 0),
+    visitors: Number(visitors?.n || 0),
+    productHuntPageviews: Number(productHunt?.n || 0),
+    pages: pages.results || [],
+    countries: countries.results || [],
+    sources: sources.results || [],
+    events: events.results || [],
+    recent: (recent.results || []).map(row => {
+      let metadata = {};
+      try { metadata = JSON.parse(row.metadata || "{}"); } catch {}
+      return {...row, metadata};
+    })
+  };
+}
 
 async function authUser(request, env) {
   const h = request.headers.get("Authorization") || "";
@@ -180,6 +246,29 @@ export default {
       const u = new URL(request.url);
       const path = u.pathname;
       stage = path;
+
+      if (path === "/api/analytics/event" && request.method === "POST") {
+        const x = await body(request);
+        const eventType = String(x.eventType || "").trim().toLowerCase();
+        if (!ANALYTICS_EVENTS.has(eventType)) return json({error:"Unsupported analytics event"},400);
+        const page = String(x.page || "/").slice(0,300);
+        const referrer = String(x.referrer || request.headers.get("Referer") || "").slice(0,500);
+        const visitorId = String(x.visitorId || "").slice(0,100);
+        const metadata = x.metadata && typeof x.metadata === "object" && !Array.isArray(x.metadata) ? x.metadata : {};
+        const source = analyticsSource(referrer,page,metadata);
+        const ipHash = await analyticsIpHash(request,env);
+        const country = String(request.headers.get("CF-IPCountry") || "").slice(0,80);
+        const city = String(request.headers.get("CF-IPCity") || "").slice(0,120);
+        const userAgent = String(request.headers.get("User-Agent") || "").slice(0,500);
+        await env.DB.prepare("INSERT INTO analytics_events(id,event_type,page,referrer,source,country,city,user_agent,ip_hash,visitor_id,metadata_json) VALUES(?,?,?,?,?,?,?,?,?,?,?)")
+          .bind(id(),eventType,page,referrer,source,country,city,userAgent,ipHash,visitorId,JSON.stringify(metadata).slice(0,4000)).run();
+        return new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":ALLOWED_ORIGIN,"Cache-Control":"no-store"}});
+      }
+
+      if (path === "/api/analytics/summary" && request.method === "GET") {
+        if (!analyticsAdminAuthorized(request,env)) return json({error:"Analytics admin token required"},401);
+        return json(await analyticsSummary(env));
+      }
 
       if (path === "/api/health") {
         const d1 = await env.DB.prepare("SELECT 1 AS ok").first();
