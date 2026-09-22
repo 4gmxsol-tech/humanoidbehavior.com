@@ -22,7 +22,8 @@ self.addEventListener("fetch",event=>{
   if(u.origin!==location.origin) return;
   if(u.pathname.startsWith("/api/")) return;
   // Pageview analytics is handled by analytics.js against the production Worker.
-  // Avoid duplicate navigation events from the service worker.  if(["/","/index.html","/simulation.html","/experiment.html","/browser-compute.js","/browser-compute-worker.js"].includes(u.pathname)) return;
+  // Avoid duplicate navigation events from the service worker.
+  if(["/","/index.html","/simulation.html","/experiment.html","/browser-compute.js","/browser-compute-worker.js"].includes(u.pathname)) return;
 
   event.respondWith(
     fetch(event.request)
