@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reproducible Embodied AI Experiments — Seeds, Policies, Tasks and Reports | HumanoidBehavior</title>
+<meta name="description" content="How to structure reproducible embodied AI experiments by linking task definitions, policy versions, seeds, environments, metrics and reports.">
+<link rel="canonical" href="https://humanoidbehavior.com/reproducible-embodied-ai-experiments.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Reproducible Embodied AI Experiments — Seeds, Policies, Tasks and Reports">
+<meta property="og:description" content="A practical framework for keeping embodied AI evaluation records reproducible and comparable.">
+<meta property="og:url" content="https://humanoidbehavior.com/reproducible-embodied-ai-experiments.html">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"Reproducible Embodied AI Experiments — Seeds, Policies, Tasks and Reports","description":"A practical guide to reproducible embodied AI experiments.","datePublished":"2026-09-23","dateModified":"2026-09-23","author":{"@type":"Organization","name":"HumanoidBehavior","url":"https://humanoidbehavior.com/"},"publisher":{"@type":"Organization","name":"HumanoidBehavior","url":"https://humanoidbehavior.com/"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://humanoidbehavior.com/reproducible-embodied-ai-experiments.html"}}
+</script>
+</head>
+<body>
+<header class="nav">
+<a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
+<nav><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a href="demo.html">Demo</a><a href="docs.html">Docs</a><a href="pricing.html">Plans</a><a href="contact.html">Contact</a></nav>
+<div class="nav-actions"><a class="nav-cta" href="login.html">Start free →</a></div>
+</header>
+<main class="page">
+<div class="eyebrow">EMBODIED AI / REPRODUCIBILITY</div>
+<h1>Reproducible embodied AI experiments</h1>
+<p class="lead">Reproducibility is a record-keeping problem as much as a simulation problem: the experiment needs to preserve enough context to explain what actually ran.</p>
+<section class="builder-result">
+<h2>Keep five layers connected</h2>
+<p><strong>Task:</strong> what behavior is being evaluated and what counts as success.</p>
+<p><strong>Version:</strong> which task specification was used.</p>
+<p><strong>Policy:</strong> which policy or controller was evaluated.</p>
+<p><strong>Environment:</strong> which simulation engine and configuration executed the task.</p>
+<p><strong>Evidence:</strong> which seeds, status and measured metrics were produced.</p>
+<h2>Why explicit provenance matters</h2>
+<p>Two runs can have the same headline metric while representing different task definitions or configurations. Recording provenance alongside measurements makes later comparisons more defensible.</p>
+<h2>Make failed runs useful</h2>
+<p>A failed or incomplete experiment can still reveal configuration and execution information. Preserve its status and context instead of treating it as if no experiment happened.</p>
+<h2>Build toward replay</h2>
+<p>Replay is most useful when the stored artifact contains the information needed to reconstruct the run context. It should remain distinct from a claim that a new physical-world trial was performed.</p>
+<p><a class="button primary" href="demo.html">See the workflow →</a> <a class="button secondary" href="docs.html">Read the docs →</a></p>
+</section>
+<section class="builder-result">
+<h2>Related resources</h2>
+<p><a href="embodied-ai-evaluation.html">Embodied AI evaluation</a> · <a href="robot-behavior-evaluation.html">Robot behavior evaluation</a> · <a href="mujoco-robotics-simulation-guide.html">MuJoCo simulation guide</a></p>
+</section>
+</main>
+<footer>HumanoidBehavior · Reproducible embodied AI evaluation</footer>
+</body>
+</html>
