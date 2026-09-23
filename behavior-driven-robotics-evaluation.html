@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Behavior-Driven Robotics Evaluation — From Task Specification to Evidence | HumanoidBehavior</title>
+<meta name="description" content="A practical guide to behavior-driven robotics evaluation: define a task, version the behavior, control seeds, run simulation, and preserve measurable evidence.">
+<link rel="canonical" href="https://humanoidbehavior.com/behavior-driven-robotics-evaluation.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Behavior-Driven Robotics Evaluation — From Task Specification to Evidence">
+<meta property="og:description" content="How to structure robot behavior evaluations so task definitions, versions, simulation settings and measured results stay connected.">
+<meta property="og:url" content="https://humanoidbehavior.com/behavior-driven-robotics-evaluation.html">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"Behavior-Driven Robotics Evaluation — From Task Specification to Evidence","description":"A practical guide to behavior-driven robotics evaluation.","datePublished":"2026-09-23","dateModified":"2026-09-23","author":{"@type":"Organization","name":"HumanoidBehavior","url":"https://humanoidbehavior.com/"},"publisher":{"@type":"Organization","name":"HumanoidBehavior","url":"https://humanoidbehavior.com/"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://humanoidbehavior.com/behavior-driven-robotics-evaluation.html"}}
+</script>
+</head>
+<body>
+<header class="nav">
+<a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
+<nav><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a href="demo.html">Demo</a><a href="docs.html">Docs</a><a href="pricing.html">Plans</a><a href="contact.html">Contact</a></nav>
+<div class="nav-actions"><a class="nav-cta" href="login.html">Start free →</a></div>
+</header>
+<main class="page">
+<div class="eyebrow">ROBOTICS EVALUATION</div>
+<h1>Behavior-driven robotics evaluation</h1>
+<p class="lead">A useful robot evaluation starts with a precise behavior contract, then keeps the task definition connected to the exact configuration and evidence produced by execution.</p>
+<section class="builder-result">
+<h2>1. Define the behavior before the run</h2>
+<p>Start with the task objective, constraints, observations, action sequence and success criteria. A structured behavior gives the evaluation a stable object to reference instead of relying on an ad-hoc script.</p>
+<h2>2. Version the task contract</h2>
+<p>Behavior specifications change. Store an explicit version so a policy regression can be separated from a change in the task itself. This also makes historical experiment records easier to interpret.</p>
+<h2>3. Control the experiment</h2>
+<p>Keep the engine, policy identifier, seeds and evaluation settings explicit. The goal is not to remove variability, but to make the sources of variability visible and repeatable.</p>
+<h2>4. Separate validation from measurement</h2>
+<p>A configuration can be syntactically valid without producing a successful physical outcome. Treat schema or deterministic checks as validation, then report measured simulation results as a separate stage.</p>
+<h2>5. Preserve the evidence</h2>
+<p>An experiment is more useful when its measured output stays attached to the behavior version and execution configuration that produced it. That record supports comparison, debugging and later replay.</p>
+<h2>A compact evaluation loop</h2>
+<p><strong>Behavior → Version → Experiment → Simulation → Measured Result → Replay → Report</strong></p>
+<p><a class="button primary" href="simulation.html">Open Experiment Lab →</a> <a class="button secondary" href="demo.html">See the technical demo →</a></p>
+</section>
+<section class="builder-result">
+<h2>Related resources</h2>
+<p><a href="humanoid-robot-behavior.html">Humanoid robot behavior</a> · <a href="robot-behavior-evaluation.html">Robot behavior evaluation</a> · <a href="embodied-ai-evaluation.html">Embodied AI evaluation</a> · <a href="robot-policy-evaluation.html">Robot policy evaluation</a></p>
+</section>
+</main>
+<footer>HumanoidBehavior · Robotics behavior evaluation infrastructure</footer>
+</body>
+</html>
