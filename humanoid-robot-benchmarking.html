@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Humanoid Robot Benchmarking — Designing Comparable Behavior Evaluations | HumanoidBehavior</title>
+<meta name="description" content="A practical guide to humanoid robot benchmarking: stable task contracts, explicit seeds, policy versions, measurable outcomes and clear reporting.">
+<link rel="canonical" href="https://humanoidbehavior.com/humanoid-robot-benchmarking.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Humanoid Robot Benchmarking — Designing Comparable Behavior Evaluations">
+<meta property="og:description" content="How to design behavior benchmarks that preserve task, configuration and measurement context.">
+<meta property="og:url" content="https://humanoidbehavior.com/humanoid-robot-benchmarking.html">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"Humanoid Robot Benchmarking — Designing Comparable Behavior Evaluations","description":"A practical guide to humanoid robot benchmarking.","datePublished":"2026-09-23","dateModified":"2026-09-23","author":{"@type":"Organization","name":"HumanoidBehavior","url":"https://humanoidbehavior.com/"},"publisher":{"@type":"Organization","name":"HumanoidBehavior","url":"https://humanoidbehavior.com/"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://humanoidbehavior.com/humanoid-robot-benchmarking.html"}}
+</script>
+</head>
+<body>
+<header class="nav">
+<a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
+<nav><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a href="demo.html">Demo</a><a href="docs.html">Docs</a><a href="pricing.html">Plans</a><a href="contact.html">Contact</a></nav>
+<div class="nav-actions"><a class="nav-cta" href="login.html">Start free →</a></div>
+</header>
+<main class="page">
+<div class="eyebrow">HUMANOID ROBOTICS / BENCHMARKING</div>
+<h1>Humanoid robot benchmarking</h1>
+<p class="lead">A benchmark is easier to interpret when the task contract remains stable and the execution variables are visible.</p>
+<section class="builder-result">
+<h2>Start with a benchmarkable behavior</h2>
+<p>Define one task with clear success criteria, constraints and observable outcomes. Avoid changing the behavior definition and the policy at the same time when the goal is to attribute a performance change.</p>
+<h2>Fix the comparison variables</h2>
+<p>Record the behavior version, policy version, engine and selected seeds. Stable comparison variables make differences easier to attribute.</p>
+<h2>Choose metrics that answer the task</h2>
+<p>Metrics should describe the behavior being evaluated. Depending on the task, that may include success, contacts, cost, completion state or other task-specific measurements.</p>
+<h2>Report the context with the number</h2>
+<p>A metric without provenance is difficult to interpret. Store the configuration and execution status alongside the measured output.</p>
+<h2>Benchmarking is a workflow, not a single score</h2>
+<p>Good evaluation includes definition, setup, execution, inspection and replay. The number is one part of the evidence, not the entire record.</p>
+<p><a class="button primary" href="benchmark.html">Open benchmark →</a> <a class="button secondary" href="simulation.html">Run an experiment →</a></p>
+</section>
+<section class="builder-result">
+<h2>Related resources</h2>
+<p><a href="humanoid-robot-behavior.html">Humanoid robot behavior</a> · <a href="robot-policy-evaluation.html">Robot policy evaluation</a> · <a href="behavior-driven-robotics-evaluation.html">Behavior-driven evaluation</a></p>
+</section>
+</main>
+<footer>HumanoidBehavior · Humanoid robotics benchmarking</footer>
+</body>
+</html>
