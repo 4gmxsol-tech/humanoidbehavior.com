@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MuJoCo for Robotics Evaluation — A Practical Simulation Workflow | HumanoidBehavior</title>
+<meta name="description" content="A practical guide to using MuJoCo as a controlled simulation layer for robot behavior evaluation, including reproducibility, metrics and result persistence.">
+<link rel="canonical" href="https://humanoidbehavior.com/mujoco-robotics-simulation-guide.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MuJoCo for Robotics Evaluation — A Practical Simulation Workflow">
+<meta property="og:description" content="How to use MuJoCo as a controlled simulation layer for evaluating supported robot behaviors and policies.">
+<meta property="og:url" content="https://humanoidbehavior.com/mujoco-robotics-simulation-guide.html">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"MuJoCo for Robotics Evaluation — A Practical Simulation Workflow","description":"A practical guide to MuJoCo for robot behavior evaluation.","datePublished":"2026-09-23","dateModified":"2026-09-23","author":{"@type":"Organization","name":"HumanoidBehavior","url":"https://humanoidbehavior.com/"},"publisher":{"@type":"Organization","name":"HumanoidBehavior","url":"https://humanoidbehavior.com/"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://humanoidbehavior.com/mujoco-robotics-simulation-guide.html"}}
+</script>
+</head>
+<body>
+<header class="nav">
+<a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
+<nav><a href="behaviors.html">Behaviors</a><a href="benchmark.html">Benchmark</a><a href="demo.html">Demo</a><a href="docs.html">Docs</a><a href="pricing.html">Plans</a><a href="contact.html">Contact</a></nav>
+<div class="nav-actions"><a class="nav-cta" href="login.html">Start free →</a></div>
+</header>
+<main class="page">
+<div class="eyebrow">SIMULATION / MUJOCO</div>
+<h1>MuJoCo for robotics evaluation</h1>
+<p class="lead">Simulation is most useful for evaluation when the environment and experiment configuration are explicit enough to compare runs without guessing what changed.</p>
+<section class="builder-result">
+<h2>Why use a physics simulator in the evaluation loop?</h2>
+<p>A physics engine provides a controlled execution environment for supported behaviors. It lets teams test policies against the same task definition and inspect measurable outcomes before a behavior is considered for hardware execution.</p>
+<h2>Keep the simulation configuration explicit</h2>
+<p>Record the behavior version, engine, policy identifier, random seeds and evaluation settings. These fields form the context for the measured result.</p>
+<h2>Use seeds for repeatable comparisons</h2>
+<p>When comparing policy iterations, repeating the same selected seeds helps reduce accidental differences in the experimental setup. Seed control does not guarantee identical outcomes across every software or hardware stack, but it makes the intended comparison clearer.</p>
+<h2>Do not confuse a replay with a benchmark claim</h2>
+<p>A replay can demonstrate that a stored experiment artifact is inspectable. A benchmark result is a measured observation from an actual execution. Keep illustrative UI values and measured results clearly separated.</p>
+<h2>Store the result with its provenance</h2>
+<p>The useful artifact is not only a metric. It is the metric plus the behavior version, configuration and execution state that explain where it came from.</p>
+<p><a class="button primary" href="simulation.html">Open Experiment Lab →</a> <a class="button secondary" href="benchmark.html">Explore benchmarking →</a></p>
+</section>
+<section class="builder-result">
+<h2>Related resources</h2>
+<p><a href="robot-behavior-evaluation.html">Robot behavior evaluation</a> · <a href="robot-policy-evaluation.html">Robot policy evaluation</a> · <a href="embodied-ai-evaluation.html">Embodied AI evaluation</a> · <a href="docs.html">Developer docs</a></p>
+</section>
+</main>
+<footer>HumanoidBehavior · MuJoCo evaluation workflow</footer>
+</body>
+</html>
