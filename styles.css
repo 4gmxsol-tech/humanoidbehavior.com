@@ -1042,3 +1042,40 @@ a{
     scroll-behavior:auto!important;
   }
 }
+
+
+/* LaunchBuff attribution — compact footer placement */
+.launchbuff-badge-wrap{
+  max-width:1250px;
+  margin:14px auto 0;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  opacity:.62;
+}
+.launchbuff-badge-wrap a{
+  display:inline-flex;
+  align-items:center;
+  line-height:0;
+  text-decoration:none;
+}
+.launchbuff-badge-wrap img{
+  width:128px;
+  height:40px;
+  display:block;
+  object-fit:contain;
+}
+.launchbuff-badge-wrap a:hover,
+.launchbuff-badge-wrap a:focus-visible{
+  opacity:1;
+}
+@media(max-width:560px){
+  .launchbuff-badge-wrap{
+    justify-content:center;
+    margin-top:12px;
+  }
+  .launchbuff-badge-wrap img{
+    width:112px;
+    height:auto;
+  }
+}
