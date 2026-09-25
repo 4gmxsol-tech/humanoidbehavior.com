@@ -1276,3 +1276,86 @@ a{
 .hero-ambient{z-index:0}.hero-product>*:not(.hero-ambient){position:relative;z-index:1}
 .auth-ambient{z-index:0}.auth-shell{z-index:2}
 .auth-ambient span:nth-child(1){left:8%;top:18%}.auth-ambient span:nth-child(2){left:88%;top:36%}.auth-ambient span:nth-child(3){left:74%;top:84%}
+
+
+/* Responsive design system v4 — spatial rhythm, icon containment, adaptive navigation */
+:root{
+  --hb-space-1:4px;--hb-space-2:8px;--hb-space-3:12px;--hb-space-4:16px;
+  --hb-space-5:20px;--hb-space-6:24px;--hb-space-7:32px;--hb-space-8:40px;
+  --hb-control-h:44px;--hb-icon-box:36px;
+}
+.nav{min-width:0}
+.nav nav{
+  min-width:0;align-items:center;justify-content:center;flex:1 1 auto;
+  gap:clamp(12px,1.7vw,24px);
+}
+.nav nav a{
+  display:inline-flex;align-items:center;justify-content:center;min-height:36px;
+  white-space:nowrap;line-height:1;padding:0 2px;
+}
+.nav-actions{
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  flex:0 0 auto;min-width:max-content;
+}
+.nav-contact-cta,.nav-cta,.acquisition-cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  white-space:nowrap;line-height:1;
+}
+.nav-contact-icon{
+  width:var(--hb-icon-box);height:var(--hb-icon-box);min-width:var(--hb-icon-box);
+  display:grid;place-items:center;border-radius:10px;
+  background:rgba(109,93,252,.08);color:var(--hb-violet,#6d5dfc);
+  font-size:14px;line-height:1;
+}
+.nav-cta{gap:7px}
+.nav-cta span[aria-hidden="true"]{display:inline-grid;place-items:center;width:16px;min-width:16px;height:16px}
+.actions,.demo-actions,.center-actions,.tags,.hero-trust{align-items:center;gap:clamp(8px,1.2vw,14px)}
+.tags{flex-wrap:wrap}
+.hero-trust span,.hero-trust b{white-space:nowrap}
+.icon{
+  width:var(--hb-icon-box);height:var(--hb-icon-box);min-width:var(--hb-icon-box);
+  display:grid;place-items:center;margin-bottom:var(--hb-space-6);line-height:1;
+}
+.feature-number{
+  display:inline-flex;align-items:center;justify-content:center;min-width:32px;min-height:28px;
+  padding:0 8px;border-radius:8px;background:rgba(109,93,252,.07);
+}
+.card-top,.card-bottom,.product-card-top,.hero-proof-head{gap:var(--hb-space-3)}
+.card-top>*,.card-bottom>*{min-width:0}
+.card-top .pill,.card-top .status-pill{flex:0 0 auto}
+.acquisition-banner-inner{gap:var(--hb-space-5)}
+.acquisition-main{min-width:0;display:flex;align-items:center;gap:var(--hb-space-3)}
+.acquisition-copy{min-width:0}
+.acquisition-copy strong,.acquisition-copy span{overflow:hidden;text-overflow:ellipsis}
+@media(max-width:1180px){
+  .nav{padding-left:clamp(16px,3vw,36px);padding-right:clamp(16px,3vw,36px)}
+  .nav nav{gap:12px}.nav nav a{font-size:13px}
+  .nav-contact-cta span:not(.nav-contact-icon){display:none}
+  .nav-contact-cta{padding:4px}.nav-actions{gap:7px}
+}
+@media(max-width:900px){
+  .nav{height:auto;min-height:68px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap;gap:10px}
+  .nav nav{
+    order:3;flex:1 0 100%;justify-content:flex-start;overflow-x:auto;overflow-y:hidden;
+    scrollbar-width:none;padding:2px 0 3px;gap:18px;-webkit-overflow-scrolling:touch;
+  }
+  .nav nav::-webkit-scrollbar{display:none}
+  .nav nav a{flex:0 0 auto;min-height:34px}.nav-actions{margin-left:auto}
+  .hero-trust{align-items:flex-start}
+}
+@media(max-width:700px){
+  .actions,.demo-actions,.center-actions{display:grid;grid-template-columns:1fr;width:100%}
+  .actions .button,.demo-actions .button,.center-actions .button{width:100%;text-align:center}
+  .hero-trust{display:grid;grid-template-columns:auto 1fr;gap:8px 9px}
+  .hero-trust .live-dot{grid-row:1}.hero-trust b{grid-column:2}
+  .hero-trust span:not(.live-dot){grid-column:2;white-space:normal}
+  .acquisition-banner-inner{align-items:flex-start;flex-direction:column;gap:10px;padding-top:10px!important;padding-bottom:10px!important}
+  .acquisition-main{align-items:flex-start}
+  .acquisition-copy strong,.acquisition-copy span{white-space:normal;overflow:visible}
+  .acquisition-cta{align-self:flex-start}
+}
+@media(max-width:430px){
+  .nav-actions{gap:5px}.nav-contact-cta{display:none}
+  .nav-cta{padding-left:12px;padding-right:12px}.nav nav{gap:16px}
+}
+@media(prefers-reduced-motion:reduce){.nav nav,.nav-actions{scroll-behavior:auto}}
