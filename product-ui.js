@@ -35,6 +35,13 @@ function evaluationLab(){
  const seeds=document.querySelector("#seeds");const engine=document.querySelector("#engine");const sync=()=>{const s=document.getElementById("hb-telemetry-seeds");if(s)s.textContent=(seeds?.value.split(",").map(x=>x.trim()).filter(Boolean).length||0);const e=document.getElementById("hb-telemetry-engine");if(e)e.textContent=engine?.value||"—"};seeds?.addEventListener("input",sync);engine?.addEventListener("change",sync);sync();
  const api=document.getElementById("hb-telemetry-api");if(api){fetch((window.HB_API_ORIGIN||"https://humanoidbehavior-com.4gmxsol.workers.dev")+"/api/behaviors",{headers:{Accept:"application/json"}}).then(r=>{api.textContent=r.ok?"Operational":"Unavailable"}).catch(()=>api.textContent="Offline");}
 }
-function init(){palette();workspace();evaluationLab()}
+function refreshWorkspaceRail(){
+ const rail=document.querySelector(".workspace-status-rail");if(!rail)return;
+ const api=window.HB_API_ORIGIN||"https://humanoidbehavior-com.4gmxsol.workers.dev";
+ const nodes=[...rail.querySelectorAll("div")];
+ fetch(api+"/api/health",{headers:{Accept:"application/json"}}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(x=>{const n=nodes[3];if(n){n.querySelector("span")?.classList.add("live");const s=n.querySelector("small");if(s)s.textContent=x.ok?"Operational":"Degraded"}}).catch(()=>{const n=nodes[3];if(n){n.querySelector("span")?.classList.remove("live");const s=n.querySelector("small");if(s)s.textContent="Unavailable"}});
+ fetch(api+"/api/experiments",{headers:{Accept:"application/json",...(localStorage.getItem("hb_token")?{Authorization:"Bearer "+localStorage.getItem("hb_token")}: {})}}).then(r=>r.ok?r.json():Promise.reject()).then(x=>{const items=x.data||[],running=items.some(e=>["queued","running"].includes(e.status)),n=nodes[1];if(n){n.querySelector("span")?.classList.toggle("live",running);const s=n.querySelector("small");if(s)s.textContent=running?"Active evaluation":"Browser MuJoCo ready"}}).catch(()=>{});
+}
+function init(){palette();workspace();evaluationLab();refreshWorkspaceRail()}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
