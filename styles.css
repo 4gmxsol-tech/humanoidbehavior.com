@@ -1372,3 +1372,147 @@ a{
 .acquisition-whatsapp:hover{transform:translateY(-1px);background:rgba(18,183,106,.11);border-color:rgba(18,183,106,.3)}
 @media(max-width:900px){.acquisition-contact{align-self:flex-start}.acquisition-whatsapp-label{display:none}}
 @media(max-width:700px){.acquisition-contact{width:100%}.acquisition-whatsapp{width:auto;min-height:36px}}
+
+
+/* Adaptive layout system v5 — layout changes by available width, not device labels */
+.nav{
+  container-type:inline-size;
+  container-name:hb-nav;
+}
+.hero-product{
+  container-type:inline-size;
+  container-name:hb-hero;
+}
+@media(max-width:1100px){
+  .nav{
+    height:auto;
+    min-height:68px;
+    padding-top:11px;
+    padding-bottom:10px;
+    flex-wrap:wrap;
+    gap:8px 14px;
+  }
+  .nav nav{
+    order:3;
+    flex:1 0 100%;
+    justify-content:flex-start;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+    padding:3px 1px 5px;
+    gap:18px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .nav nav::-webkit-scrollbar{display:none}
+  .nav nav a{flex:0 0 auto;min-height:34px;font-size:12px}
+  .nav-actions{margin-left:auto}
+  .nav-contact-cta span:not(.nav-contact-icon){display:none}
+  .nav-contact-cta{padding:4px}
+  .hero-product{
+    grid-template-columns:minmax(0,1fr);
+    gap:32px;
+    min-height:auto;
+    padding-top:72px;
+  }
+  .hero-product-card{
+    width:min(100%,620px);
+    margin:0 auto;
+  }
+  .hero-product .hero-copy-wrap{max-width:760px}
+  .hero h1{
+    font-size:clamp(48px,7vw,76px);
+    letter-spacing:-4.5px;
+  }
+  .acquisition-banner-inner{
+    flex-wrap:wrap;
+    gap:10px 16px;
+  }
+  .acquisition-main{flex:1 1 420px}
+  .acquisition-contact{flex:0 0 auto}
+  .acquisition-cta{flex:0 0 auto}
+}
+@media(max-width:760px){
+  .nav{
+    padding-left:16px;
+    padding-right:16px;
+  }
+  .nav nav{gap:16px}
+  .nav nav a{font-size:11px}
+  .nav-cta{
+    min-height:40px;
+    padding:0 12px;
+  }
+  .hero-product{
+    padding:58px 20px 64px;
+    gap:26px;
+  }
+  .hero h1{
+    font-size:clamp(42px,12vw,58px);
+    line-height:.98;
+    letter-spacing:-3.2px;
+  }
+  .hero-copy{
+    font-size:17px;
+    line-height:1.65;
+    margin:22px 0;
+  }
+  .hero-product-card{
+    padding:19px;
+    border-radius:17px;
+  }
+  .product-flow>div{padding:13px 0}
+  .hero-proof{margin-top:18px}
+  .hero-proof-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .acquisition-banner-inner{
+    padding:10px 16px!important;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .acquisition-main{
+    width:100%;
+    align-items:flex-start;
+  }
+  .acquisition-contact{
+    width:100%;
+  }
+  .acquisition-whatsapp{
+    min-height:36px;
+  }
+  .acquisition-cta{
+    align-self:flex-start;
+  }
+}
+@media(max-width:480px){
+  .nav{
+    padding-left:12px;
+    padding-right:12px;
+  }
+  .brand{font-size:18px}
+  .nav-actions{gap:5px}
+  .nav-contact-cta{display:none}
+  .nav-cta{font-size:11px}
+  .nav nav{gap:14px}
+  .nav nav a{font-size:10.5px}
+  .hero-product{
+    padding-left:16px;
+    padding-right:16px;
+  }
+  .hero-trust{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:7px 8px;
+  }
+  .hero-trust .live-dot{grid-row:1}
+  .hero-trust b{grid-column:2}
+  .hero-trust span:not(.live-dot){grid-column:2;white-space:normal}
+  .actions{
+    grid-template-columns:1fr;
+  }
+  .hero-proof-grid{gap:7px}
+  .hero-proof-grid>div{min-width:0}
+  .hero-proof-grid strong{overflow-wrap:anywhere}
+  .product-flow strong{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-product-card{animation:none!important}
+}
