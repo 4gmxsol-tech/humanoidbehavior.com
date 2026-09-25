@@ -25,6 +25,16 @@ function workspace(){
  page.insertBefore(rail,grid);
  document.getElementById("workspace-command")?.addEventListener("click",()=>window.HBCommand?.open());
 }
-function init(){palette();workspace()}
+function evaluationLab(){
+ const run=document.querySelector("#run"),progress=document.querySelector("#progress");if(!run||!progress||document.querySelector(".hb-eval-rail"))return;
+ const wrap=document.createElement("div");wrap.className="hb-eval-rail";wrap.innerHTML=["Queued","Running","Measured","Persisted"].map((s,i)=>`<div class="hb-eval-step ${i===0?"active":""}" data-eval-step="${i}"><b><span class="hb-eval-dot"></span>${s}</b><small>${["Awaiting compute","Browser physics / worker","Verified metrics","Report + artifacts"][i]}</small></div>`).join("");run.parentNode.insertBefore(wrap,run);
+ const tele=document.createElement("div");tele.className="hb-telemetry";tele.innerHTML="<div><strong id="hb-telemetry-state">Ready</strong><span>Execution state</span></div><div><strong id="hb-telemetry-engine">MuJoCo</strong><span>Engine target</span></div><div><strong id="hb-telemetry-seeds">5</strong><span>Seed set</span></div><div><strong id="hb-telemetry-api">Checking</strong><span>API persistence</span></div>";progress.parentNode.insertBefore(tele,progress);
+ const setState=(n,label)=>{wrap.querySelectorAll(".hb-eval-step").forEach((el,i)=>el.classList.toggle("active",i===n));wrap.querySelectorAll(".hb-eval-step").forEach((el,i)=>el.classList.toggle("done",i<n));const state=document.getElementById("hb-telemetry-state");if(state)state.textContent=label};
+ run.addEventListener("click",()=>{setState(0,"Queued");setTimeout(()=>setState(1,"Running"),120);});
+ const observer=new MutationObserver(()=>{const t=progress.textContent.toLowerCase();if(/persist|saved|report|complete|success/.test(t))setState(3,"Persisted");else if(/measur|result|evaluat/.test(t))setState(2,"Measured");else if(/run|comput|initial|loading/.test(t))setState(1,"Running")});observer.observe(progress,{childList:true,subtree:true,characterData:true});
+ const seeds=document.querySelector("#seeds");const engine=document.querySelector("#engine");const sync=()=>{const s=document.getElementById("hb-telemetry-seeds");if(s)s.textContent=(seeds?.value.split(",").map(x=>x.trim()).filter(Boolean).length||0);const e=document.getElementById("hb-telemetry-engine");if(e)e.textContent=engine?.value||"—"};seeds?.addEventListener("input",sync);engine?.addEventListener("change",sync);sync();
+ const api=document.getElementById("hb-telemetry-api");if(api){fetch((window.HB_API_ORIGIN||"https://humanoidbehavior-com.4gmxsol.workers.dev")+"/api/behaviors",{headers:{Accept:"application/json"}}).then(r=>{api.textContent=r.ok?"Operational":"Unavailable"}).catch(()=>api.textContent="Offline");}
+}
+function init(){palette();workspace();evaluationLab()}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
