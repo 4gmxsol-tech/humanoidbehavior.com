@@ -167,7 +167,6 @@ async function authenticate(path){
 }
 authForm.addEventListener("submit",e=>{e.preventDefault();if(mode==="login")authenticate("/api/auth/login");else authenticate("/api/auth/signup");});
 signupButton.onclick=()=>{if(mode==="login")setMode("signup");else setMode("login");};
-demoButton.onclick=async()=>{
 updateMeter();
 </script>
 </body>
