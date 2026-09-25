@@ -62,10 +62,9 @@
       </form>
 
       <div class="auth-divider">secure workspace access</div>
-      <button id="demo" type="button" class="button secondary">Try demo workspace</button>
       <div id="status" class="auth-status" role="status" aria-live="polite">Your workspace session is verified before access is granted.</div>
       <div class="security-badge">HTTPS transport · server-side password hashing · revocable sessions/API keys</div>
-      <div class="auth-foot">By continuing, you agree to use the platform for authorized robotics research, development and evaluation.</div>
+      <div class="auth-foot">By continuing, you agree to use the platform for authorized robotics research, development and evaluation. <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a></div>
     </section>
   </div>
 </main>
@@ -80,7 +79,6 @@ const statusEl=document.getElementById("status");
 const authForm=document.getElementById("authForm");
 const signupButton=document.getElementById("signup");
 const loginButton=document.getElementById("login");
-const demoButton=document.getElementById("demo");
 const togglePassword=document.getElementById("togglePassword");
 const meter=[...document.querySelectorAll("#passwordMeter span")];
 const count=document.getElementById("passwordCount");
@@ -170,11 +168,6 @@ async function authenticate(path){
 authForm.addEventListener("submit",e=>{e.preventDefault();if(mode==="login")authenticate("/api/auth/login");else authenticate("/api/auth/signup");});
 signupButton.onclick=()=>{if(mode==="login")setMode("signup");else setMode("login");};
 demoButton.onclick=async()=>{
-  setBusy(true);showStatus("Opening demo workspace…");
-  try{await finishAuth(await requestJson("/api/auth/demo",{method:"POST"}));}
-  catch(e){showStatus("✕ "+(e.message||"Demo sign-in failed."),"error");}
-  finally{setBusy(false);}
-};
 updateMeter();
 </script>
 </body>
