@@ -1267,3 +1267,12 @@ a{
 @media(prefers-reduced-motion:reduce){
  .hero-product:before,.hero-product:after,.hero-product-card,.hero-product-card:before,.hero-product-card:after,.product-card-top .status-pill,.product-demo:before,.terminal-product:after,.auth-page:after,.auth-showcase:before,.auth-showcase:after,.auth-card,.auth-card .primary{animation:none!important}
 }
+
+.hero-ambient,.auth-ambient{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.hero-ambient span,.auth-ambient span{position:absolute;display:block;border-radius:50%;mix-blend-mode:screen}
+.hero-ambient span:nth-child(1),.auth-ambient span:nth-child(1){width:9px;height:9px;left:18%;top:24%;background:var(--hb-cyan);box-shadow:0 0 24px 7px rgba(34,211,238,.28);animation:hb-float 4.5s ease-in-out infinite}
+.hero-ambient span:nth-child(2),.auth-ambient span:nth-child(2){width:7px;height:7px;left:67%;top:30%;background:var(--hb-violet);box-shadow:0 0 24px 7px rgba(109,93,252,.28);animation:hb-float 5.5s 1s ease-in-out infinite reverse}
+.hero-ambient span:nth-child(3),.auth-ambient span:nth-child(3){width:6px;height:6px;left:83%;top:76%;background:var(--hb-emerald);box-shadow:0 0 22px 6px rgba(24,201,133,.25);animation:hb-float 6s 1.5s ease-in-out infinite}
+.hero-ambient{z-index:0}.hero-product>*:not(.hero-ambient){position:relative;z-index:1}
+.auth-ambient{z-index:0}.auth-shell{z-index:2}
+.auth-ambient span:nth-child(1){left:8%;top:18%}.auth-ambient span:nth-child(2){left:88%;top:36%}.auth-ambient span:nth-child(3){left:74%;top:84%}
