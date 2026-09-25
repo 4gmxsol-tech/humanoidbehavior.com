@@ -140,6 +140,10 @@ The repository is intentionally centered on a narrow technical vocabulary: **rob
 
 The project is also available as a public static technical showcase on Hugging Face: **[DomainZax/humanoidbehavior](https://huggingface.co/spaces/DomainZax/humanoidbehavior)**. The Space is intentionally lightweight and browser-based; it does not claim to provide independent benchmark measurements.
 
+## Production transfer
+
+See **[TRANSFER_CHECKLIST.md](TRANSFER_CHECKLIST.md)** for the production ownership-transfer and buyer verification checklist.
+
 ## Buyer handoff
 
 See **[BUYER_HANDOFF.md](BUYER_HANDOFF.md)** for the current acquisition-oriented technical handoff, verification checklist, commercial status, known limitations, and transfer checklist.
