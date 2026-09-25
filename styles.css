@@ -1359,3 +1359,16 @@ a{
   .nav-cta{padding-left:12px;padding-right:12px}.nav nav{gap:16px}
 }
 @media(prefers-reduced-motion:reduce){.nav nav,.nav-actions{scroll-behavior:auto}}
+
+/* Acquisition contact — responsive WhatsApp presentation */
+.acquisition-contact{display:flex!important;align-items:center;gap:8px;flex:0 0 auto}
+.acquisition-whatsapp-label{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#98a2b3}
+.acquisition-whatsapp{
+ display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:34px;padding:0 10px;
+ border:1px solid rgba(18,183,106,.18);border-radius:9px;background:rgba(18,183,106,.07);
+ color:#087443;text-decoration:none;font-size:11px;font-weight:800;white-space:nowrap;
+ transition:transform .2s ease,background .2s ease,border-color .2s ease;
+}
+.acquisition-whatsapp:hover{transform:translateY(-1px);background:rgba(18,183,106,.11);border-color:rgba(18,183,106,.3)}
+@media(max-width:900px){.acquisition-contact{align-self:flex-start}.acquisition-whatsapp-label{display:none}}
+@media(max-width:700px){.acquisition-contact{width:100%}.acquisition-whatsapp{width:auto;min-height:36px}}
