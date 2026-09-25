@@ -16,7 +16,8 @@ function build(){
  document.body.appendChild(p);p.querySelector(".hb-settings-close").onclick=()=>p.classList.remove("is-open");p.addEventListener("click",e=>{const b=e.target.closest("[data-value]");if(!b)return;prefs[b.closest("[data-setting]").dataset.setting]=b.dataset.value;save()});document.addEventListener("click",e=>{if(!p.contains(e.target)&&!e.target.closest(".hb-settings-trigger"))p.classList.remove("is-open")})
 }
 function render(){document.querySelectorAll("[data-setting]").forEach(g=>g.querySelectorAll("[data-value]").forEach(b=>b.classList.toggle("selected",b.dataset.value===prefs[g.dataset.setting])))}
-function init(){apply();build();render()}
+function loadDesignSystem(){if(document.querySelector("link[data-hb-design-system]"))return;const l=document.createElement("link");l.rel="stylesheet";l.href="design-system.css";l.dataset.hbDesignSystem="true";document.head.appendChild(l)}
+function init(){loadDesignSystem();apply();build();render()}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if(prefs.theme==="system")apply()});
 })();
