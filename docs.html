@@ -42,7 +42,11 @@ Isaac Lab
 Gazebo
 ROS 2
 HTTP robot gateway</pre><p>These are planned execution contracts. The current public measured path is the supported MuJoCo worker; robot-specific adapters are not enabled yet.</p></article><article><h2>Robot models</h2><pre>GET /api/robots
-GET /api/robots/:id</pre><p>Discover catalog metadata. A catalog entry does not imply that robot-specific evaluation is currently enabled.</p></article><article><h2>Version comparison</h2><pre>POST /api/behaviors/compare/benchmark
+GET /api/robots/:id</pre><p>Discover catalog metadata. A catalog entry does not imply that robot-specific evaluation is currently enabled.</p></article><article><h2>Public experiment reports</h2><pre>POST /api/experiments/:id/share
+GET  /api/share?token=...</pre><p>Completed experiments can be shared as public read-only reports with reproducibility metadata and raw artifacts.</p></article><article><h2>Reproducibility</h2><pre>behavior + version
+engine + engine version
+seeds + policies + duration
+compute build + worker</pre><p>Reports expose the exact evaluation configuration used to produce measured results and provide a one-click reproduction path.</p></article><article><h2>Version comparison</h2><pre>POST /api/behaviors/compare/benchmark
 
 {"behaviorId":"pick-place","versions":["1.0.0","1.1.0"],"seeds":[42,1337],"policies":["policy-a","policy-b"],"seconds":10}</pre><p>Version comparison is currently disabled while the comparison worker is being hardened. Single-version MuJoCo evaluations are the supported measured path today.</p></article></div><section class="page"><div class="eyebrow">QUICKSTART</div><h2>Run your first benchmark</h2><p class="lead">Create an API key in Workspace, then call the benchmark endpoint.</p><pre class="code-block">curl -X POST https://your-domain.example/api/benchmark \
   -H "Authorization: Bearer hb_live_YOUR_KEY" \
