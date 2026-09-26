@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Strategic Acquisition — HumanoidBehavior.com</title>
+<meta name="description" content="Strategic acquisition room for HumanoidBehavior.com — a robotics behavior evaluation infrastructure MVP with reproducible MuJoCo experiments, persistent results and developer workflows.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://humanoidbehavior.com/acquisition/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HumanoidBehavior.com — Strategic Acquisition">
+<meta property="og:description" content="An early-stage robotics evaluation infrastructure asset: domain, brand, working MVP, evaluation workflow and technical foundation.">
+<meta property="og:url" content="https://humanoidbehavior.com/acquisition/">
+<link rel="stylesheet" href="../styles.css">
+<script src="../api-base.js"></script><script src="../product-ui.js" defer></script><script src="../site-settings.js" defer></script>
+<style>
+:root{--acq-bg:#080a0e;--acq-panel:#10131a;--acq-panel2:#0d1016;--acq-line:rgba(255,255,255,.1);--acq-text:#f5f7fb;--acq-muted:#aab1c0;--acq-accent:#8b7cff;--acq-cyan:#4dd8ff}
+body{background:var(--acq-bg);color:var(--acq-text)}
+.acq-shell{max-width:1180px;margin:0 auto;padding:0 22px}
+.acq-hero{position:relative;overflow:hidden;padding:100px 0 72px;border-bottom:1px solid var(--acq-line)}
+.acq-hero:before{content:"";position:absolute;inset:-30% -10% auto;height:620px;background:radial-gradient(circle at 30% 35%,rgba(139,124,255,.20),transparent 35%),radial-gradient(circle at 75% 15%,rgba(77,216,255,.12),transparent 30%);pointer-events:none}
+.acq-kicker{display:inline-flex;gap:9px;align-items:center;padding:7px 11px;border:1px solid rgba(139,124,255,.35);border-radius:999px;color:#cfcaff;font-size:11px;font-weight:800;letter-spacing:.14em}
+.acq-dot{width:7px;height:7px;border-radius:50%;background:#7ff0b2;box-shadow:0 0 16px #7ff0b2}
+.acq-hero h1{font-size:clamp(46px,7vw,82px);line-height:.95;letter-spacing:-.055em;max-width:900px;margin:25px 0 25px}
+.acq-hero h1 span{color:#a69cff}
+.acq-lead{max-width:790px;color:#c4c9d5;font-size:19px;line-height:1.7;margin:0}
+.acq-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.acq-btn{display:inline-flex;align-items:center;justify-content:center;padding:13px 18px;border-radius:10px;text-decoration:none;font-weight:800;border:1px solid var(--acq-line);color:#fff;background:#151923}
+.acq-btn.primary{background:linear-gradient(135deg,#6d5dfc,#8b7cff);border-color:transparent}
+.acq-note{margin-top:20px;color:#858d9d;font-size:12px}
+.acq-section{padding:76px 0;border-bottom:1px solid var(--acq-line)}
+.acq-section h2{font-size:clamp(30px,4vw,48px);letter-spacing:-.04em;margin:8px 0 14px}
+.acq-section-lead{max-width:760px;color:var(--acq-muted);line-height:1.75;font-size:16px}
+.acq-eyebrow{color:#8f84ff;font-size:11px;font-weight:900;letter-spacing:.16em}
+.acq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}
+.acq-card{background:linear-gradient(180deg,var(--acq-panel),var(--acq-panel2));border:1px solid var(--acq-line);border-radius:16px;padding:24px}
+.acq-card h3{margin:0 0 9px;font-size:19px}.acq-card p{margin:0;color:var(--acq-muted);line-height:1.65;font-size:14px}
+.acq-number{color:#787f90;font-size:11px;font-weight:900;letter-spacing:.1em;margin-bottom:28px}
+.acq-architecture{margin-top:35px;padding:28px;border:1px solid var(--acq-line);border-radius:18px;background:#07090d;overflow:auto}
+.arch-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.arch-box{min-width:150px;padding:16px 18px;border:1px solid rgba(139,124,255,.28);border-radius:12px;background:#111521;text-align:center}
+.arch-box strong{display:block;font-size:13px}.arch-box span{display:block;color:#7f8797;font-size:11px;margin-top:4px}
+.arch-arrow{color:#777f90;font-size:18px}
+.cap-table{width:100%;border-collapse:collapse;margin-top:32px;border:1px solid var(--acq-line);border-radius:14px;overflow:hidden}
+.cap-table th,.cap-table td{padding:15px 16px;border-bottom:1px solid var(--acq-line);text-align:left;font-size:13px}
+.cap-table th{color:#8f96a6;font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:#0d1016}
+.cap-table td{color:#d8dce5}.cap-table tr:last-child td{border-bottom:0}.yes{color:#7ff0b2;font-weight:800}.next{color:#b4aaff;font-weight:800}.cap-table small{display:block;color:#737b8b;margin-top:4px}
+.proof{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-top:35px}
+.proof-main,.proof-side{border:1px solid var(--acq-line);border-radius:16px;padding:25px;background:var(--acq-panel)}
+.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:20px}.metric{padding:15px;border:1px solid var(--acq-line);border-radius:11px}.metric span{display:block;color:#737b8b;font-size:10px;text-transform:uppercase;letter-spacing:.1em}.metric strong{display:block;margin-top:5px;font-size:16px}
+pre{margin:0;color:#bfc6d3;white-space:pre-wrap;line-height:1.7;font-size:12px}
+.roadmap{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:35px}.road{padding:18px 12px;border:1px solid var(--acq-line);border-radius:12px;background:var(--acq-panel);min-height:125px}.road b{display:block;color:#858c9d;font-size:10px}.road strong{display:block;margin-top:14px;font-size:13px;line-height:1.3}.road span{display:block;color:#7f8797;font-size:11px;line-height:1.5;margin-top:8px}
+.scope{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:35px}.scope ul{margin:0;padding-left:19px;color:#bdc3cf;line-height:2}.scope-card{border:1px solid var(--acq-line);border-radius:16px;padding:24px;background:var(--acq-panel)}
+.disclaimer{font-size:12px;color:#737b8b;line-height:1.7;margin-top:25px}
+.acq-final{text-align:center;padding:90px 0}.acq-final h2{font-size:clamp(32px,5vw,58px);letter-spacing:-.04em;margin:10px auto 15px;max-width:800px}.acq-final p{color:var(--acq-muted);max-width:650px;margin:0 auto;line-height:1.7}
+@media(max-width:850px){.acq-grid,.proof,.scope{grid-template-columns:1fr}.roadmap{grid-template-columns:repeat(2,1fr)}.acq-hero{padding-top:65px}}
+@media(max-width:520px){.roadmap{grid-template-columns:1fr}.acq-hero h1{font-size:45px}.acq-section{padding:58px 0}}
+</style>
+</head>
+<body>
+<header class="nav">
+<a class="brand" href="../index.html">Humanoid<span>Behavior</span></a>
+<nav><a href="../behaviors.html">Behaviors</a><a href="../benchmark.html">Benchmark</a><a href="../demo.html">Demo</a><a href="../articles.html">Articles</a><a href="../docs.html">Docs</a><a href="../pricing.html">Plans</a><a href="../contact.html">Contact</a><a href="../dashboard.html">Workspace</a></nav>
+<div class="nav-actions"><a class="nav-contact-cta" href="../contact.html">Contact us</a><a class="nav-cta" href="../login.html">Start free <span aria-hidden="true">→</span></a></div>
+</header>
+
+<main>
+<section class="acq-hero"><div class="acq-shell">
+<div class="acq-kicker"><i class="acq-dot"></i> STRATEGIC ACQUISITION ROOM</div>
+<h1>Acquire the foundation for <span>robot behavior evaluation.</span></h1>
+<p class="acq-lead">HumanoidBehavior.com is an early-stage robotics infrastructure asset combining a memorable category-defining domain, a working evaluation MVP, reproducible MuJoCo execution, persistent experiment workflows and a clear path toward broader embodied-AI evaluation.</p>
+<div class="acq-actions"><a class="acq-btn primary" href="../contact.html">Request acquisition discussion →</a><a class="acq-btn" href="../demo.html">Inspect the live product</a><a class="acq-btn" href="https://github.com/4gmxsol-tech/humanoidbehavior.com" target="_blank" rel="noopener">Review GitHub ↗</a></div>
+<div class="acq-note">Founder-led strategic inquiries · No public asking price · Detailed transaction materials available during diligence</div>
+</div></section>
+
+<section class="acq-section"><div class="acq-shell">
+<div class="acq-eyebrow">01 · EXECUTIVE OVERVIEW</div><h2>Not a domain listing. A working technical asset.</h2>
+<p class="acq-section-lead">The acquisition case is the combination of brand, software, evaluation workflow and technical foundation. The current product is deliberately described as an MVP: measured simulation infrastructure is live; physical-robot execution, hardware adapters and several enterprise layers remain roadmap items.</p>
+<div class="acq-grid">
+<article class="acq-card"><div class="acq-number">DOMAIN + BRAND</div><h3>HumanoidBehavior.com</h3><p>A direct, descriptive identity for the humanoid-robot behavior layer. The brand is already connected to a functioning product rather than a parked domain.</p></article>
+<article class="acq-card"><div class="acq-number">WORKING MVP</div><h3>Behavior → Experiment → Evidence</h3><p>Versioned behavior specifications, experiment configuration, measured MuJoCo runs, persisted results and replay/report workflows form the core loop.</p></article>
+<article class="acq-card"><div class="acq-number">EXTENSIBLE FOUNDATION</div><h3>Built to expand</h3><p>API, Worker, D1 persistence, browser compute and documented handoff materials provide a base for model evaluation, leaderboards, hardware adapters and enterprise workflows.</p></article>
+</div>
+</div></section>
+
+<section class="acq-section"><div class="acq-shell">
+<div class="acq-eyebrow">02 · ARCHITECTURE</div><h2>A compact evaluation stack.</h2>
+<p class="acq-section-lead">The current architecture keeps specification, execution and evidence connected while separating deterministic validation from physics-based measurement.</p>
+<div class="acq-architecture">
+<div class="arch-row"><div class="arch-box"><strong>Behavior Registry</strong><span>versioned specifications</span></div><div class="arch-arrow">→</div><div class="arch-box"><strong>Experiment Lab</strong><span>seeds · policies · config</span></div><div class="arch-arrow">→</div><div class="arch-box"><strong>MuJoCo</strong><span>browser WASM execution</span></div></div>
+<div class="arch-row" style="margin:12px 0"><div class="arch-box"><strong>GitHub Pages</strong><span>frontend / docs</span></div><div class="arch-arrow">↔</div><div class="arch-box"><strong>Cloudflare Worker</strong><span>API / jobs</span></div><div class="arch-arrow">↔</div><div class="arch-box"><strong>D1</strong><span>accounts / experiments / artifacts</span></div></div>
+<div class="arch-row"><div class="arch-box"><strong>Reports</strong><span>metrics / validation / replay</span></div><div class="arch-arrow">←</div><div class="arch-box"><strong>Measured Artifact</strong><span>raw JSON / CSV</span></div></div>
+</div>
+</div></section>
+
+<section class="acq-section"><div class="acq-shell">
+<div class="acq-eyebrow">03 · PRODUCT CAPABILITIES</div><h2>What exists today — and what does not.</h2>
+<p class="acq-section-lead">The table is intentionally explicit. Buyers can distinguish production-ready foundations from planned expansion without relying on marketing language.</p>
+<table class="cap-table"><thead><tr><th>Capability</th><th>Current state</th><th>Acquisition relevance</th></tr></thead><tbody>
+<tr><td>Versioned behavior specifications</td><td class="yes">LIVE</td><td>Reusable task contract</td></tr>
+<tr><td>Public behavior registry</td><td class="yes">LIVE</td><td>Discovery + benchmark surface</td></tr>
+<tr><td>Authenticated workspace</td><td class="yes">LIVE</td><td>Product foundation</td></tr>
+<tr><td>Persistent experiments / job status</td><td class="yes">LIVE</td><td>Durable evaluation workflow</td></tr>
+<tr><td>Multi-seed evaluation configuration</td><td class="yes">LIVE</td><td>Reproducibility layer</td></tr>
+<tr><td>Measured MuJoCo browser execution</td><td class="yes">LIVE</td><td>Physics-based simulation evidence</td></tr>
+<tr><td>Experiment reports + JSON/CSV export</td><td class="yes">LIVE</td><td>Evidence portability</td></tr>
+<tr><td>API-key / usage foundation</td><td class="yes">LIVE</td><td>Integration path</td></tr>
+<tr><td>Physical-robot execution</td><td class="next">ROADMAP</td><td>Hardware expansion</td></tr>
+<tr><td>Robot-specific hardware adapters</td><td class="next">ROADMAP</td><td>Embodiment coverage</td></tr>
+<tr><td>Public model leaderboard</td><td class="next">ROADMAP</td><td>Benchmark distribution</td></tr>
+<tr><td>Live Stripe billing</td><td class="next">ROADMAP</td><td>Commercialization layer</td></tr>
+</tbody></table>
+</div></section>
+
+<section class="acq-section"><div class="acq-shell">
+<div class="acq-eyebrow">04 · BENCHMARK PROOF</div><h2>Measured execution, with provenance.</h2>
+<p class="acq-section-lead">A published MuJoCo sample demonstrates the measurement pipeline. It is evidence of the execution infrastructure, not a claim that every public behavior has verified metrics.</p>
+<div class="proof">
+<div class="proof-main"><pre>$ run humanoid-stand-v1 --engine mujoco
+  --seeds 42,1337,2026,7,99
+  --policies policy-a-stabilizer,policy-b-stabilizer
+
+benchmark       humanoid-stand-v1
+engine          MuJoCo
+runs            10
+status          measured
+validation      passed
+provenance      git SHA + GitHub Actions run
+artifact        persisted experiment result</pre>
+<div class="metric-grid"><div class="metric"><span>Policy A</span><strong>survival rate ≈ 0.3264</strong></div><div class="metric"><span>Policy B</span><strong>survival rate ≈ 0.3304</strong></div><div class="metric"><span>Requested runs</span><strong>10 / 10 evaluated</strong></div><div class="metric"><span>Execution</span><strong>Simulation · measured</strong></div></div></div>
+<div class="proof-side"><h3>Evidence principles</h3><p>• Fixed, explicit seeds<br>• Multiple policy configurations<br>• Measured physics execution<br>• Stored configuration + output<br>• Validation separated from measurement<br>• Raw artifact available for inspection</p><a class="acq-btn" style="margin-top:18px" href="../data/latest-mujoco-experiment.json">Open raw artifact →</a></div>
+</div>
+</div></section>
+
+<section class="acq-section"><div class="acq-shell">
+<div class="acq-eyebrow">05 · EXPANSION ROADMAP</div><h2>Where the asset can go next.</h2>
+<p class="acq-section-lead">The roadmap is intentionally modular: a strategic buyer can extend the existing evaluation loop rather than replace it.</p>
+<div class="roadmap">
+<div class="road"><b>NOW</b><strong>Behavior MVP</strong><span>Registry, experiments, MuJoCo, persistence</span></div>
+<div class="road"><b>PHASE 1</b><strong>Benchmark v1</strong><span>Curated behaviors, baselines, methodology</span></div>
+<div class="road"><b>PHASE 2</b><strong>Model evaluation</strong><span>Policy/model adapters and public results</span></div>
+<div class="road"><b>PHASE 3</b><strong>Leaderboard</strong><span>Comparable runs and failure analysis</span></div>
+<div class="road"><b>PHASE 4</b><strong>Hardware layer</strong><span>Robot-specific adapters and HIL</span></div>
+<div class="road"><b>PHASE 5</b><strong>Evaluation platform</strong><span>Enterprise workflows + multi-simulator coverage</span></div>
+</div>
+</div></section>
+
+<section class="acq-section"><div class="acq-shell">
+<div class="acq-eyebrow">06 · TRANSACTION SCOPE</div><h2>What a strategic transaction can include.</h2>
+<div class="scope">
+<div class="scope-card"><h3>Core assets</h3><ul><li>HumanoidBehavior.com domain</li><li>HumanoidBehavior brand / product identity</li><li>Application source code and frontend</li><li>Evaluation and benchmark infrastructure</li><li>Cloudflare Worker / D1 architecture</li><li>Documentation and buyer handoff materials</li></ul></div>
+<div class="scope-card"><h3>Due diligence notes</h3><ul><li>Current MVP boundaries are disclosed</li><li>Deployment architecture can be inspected</li><li>Benchmark artifacts can be reproduced</li><li>Production credentials transfer separately and securely</li><li>MIT-licensed source requires appropriate license-aware transaction language</li><li>Detailed materials available to qualified strategic parties</li></ul></div>
+</div>
+<p class="disclaimer">This page describes the current product and a potential transaction scope. It does not represent a claim of recurring revenue, a completed physical-robot benchmark, or an exclusive transfer of rights beyond the applicable licenses and assets agreed in a transaction.</p>
+</div></section>
+
+<section class="acq-final"><div class="acq-shell">
+<div class="acq-eyebrow">07 · STRATEGIC INQUIRIES</div>
+<h2>Interested in acquiring the infrastructure — not just the name?</h2>
+<p>Founder-led discussions are available for robotics, embodied-AI, simulation, evaluation and developer-platform teams exploring acquisition or strategic integration.</p>
+<div class="acq-actions" style="justify-content:center"><a class="acq-btn primary" href="../contact.html">Start an acquisition discussion →</a><a class="acq-btn" href="../SALE_PACKAGE.md">View sale package</a><a class="acq-btn" href="../BUYER_HANDOFF.md">View buyer handoff</a></div>
+</div></section>
+</main>
+<footer class="site-footer"><div class="footer-main"><div class="footer-brand"><a class="brand" href="../index.html">Humanoid<span>Behavior</span></a><p>Robotics behavior infrastructure for measured, reproducible simulation.</p></div><div class="footer-links"><div><strong>Acquisition</strong><a href="./">Acquisition Room</a><a href="../SALE_PACKAGE.md">Sale Package</a><a href="../BUYER_HANDOFF.md">Buyer Handoff</a></div><div><strong>Product</strong><a href="../behaviors.html">Behaviors</a><a href="../benchmark.html">Benchmark</a><a href="../docs.html">Docs</a></div><div><strong>Company</strong><a href="../contact.html">Contact</a><a href="https://github.com/4gmxsol-tech/humanoidbehavior.com">GitHub</a></div></div></div><div class="footer-bottom"><span>© 2026 HumanoidBehavior</span><span>Strategic acquisition inquiries · Founder-led</span></div></footer>
+</body></html>
