@@ -60,7 +60,7 @@ pre{margin:0;color:#bfc6d3;white-space:pre-wrap;line-height:1.7;font-size:12px}
 <style>
 .acq-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px}.acq-nav a{color:#aeb5c4;text-decoration:none;border:1px solid var(--acq-line);border-radius:999px;padding:7px 11px;font-size:11px}.acq-nav a:hover{color:#fff;border-color:rgba(139,124,255,.5)}
 .brief{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;margin-top:34px}.brief-card{border:1px solid var(--acq-line);border-radius:16px;background:var(--acq-panel);padding:25px}.brief-card h3{margin:0 0 14px}.brief-card p,.brief-card li{color:var(--acq-muted);line-height:1.7;font-size:14px}.brief-card ul{margin:0;padding-left:19px}.buyer-row{display:grid;grid-template-columns:1.1fr .8fr 1.4fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--acq-line);font-size:13px}.buyer-row:last-child{border-bottom:0}.buyer-row strong{color:#eef0f5}.buyer-row span{color:#9da5b5}.diligence{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:28px}.diligence div{border:1px solid var(--acq-line);border-radius:12px;padding:17px;background:#0c0f15}.diligence b{display:block;font-size:11px}.diligence span{display:block;color:#7f8797;font-size:11px;margin-top:7px;line-height:1.5}.founder-note{border-left:2px solid #8b7cff;padding:5px 0 5px 20px;margin-top:30px;color:#b9bfcc;line-height:1.8;font-size:14px}.signal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:28px}.signal{border:1px solid var(--acq-line);border-radius:12px;padding:17px;background:#0c0f15}.signal strong{display:block;font-size:22px}.signal span{display:block;color:#7f8797;font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-top:5px}.acq-quiet{color:#7f8797;font-size:11px;margin-top:20px}@media(max-width:850px){.brief{grid-template-columns:1fr}.diligence,.signal-grid{grid-template-columns:repeat(2,1fr)}.buyer-row{grid-template-columns:1fr;gap:4px}}@media(max-width:520px){.diligence,.signal-grid{grid-template-columns:1fr}}
-</style></style>
+</style>
 </head>
 <body>
 <header class="nav">
@@ -75,7 +75,7 @@ pre{margin:0;color:#bfc6d3;white-space:pre-wrap;line-height:1.7;font-size:12px}
 <h1>Acquire the foundation for <span>robot behavior evaluation.</span></h1>
 <p class="acq-lead">HumanoidBehavior.com is an early-stage robotics infrastructure asset combining a memorable category-defining domain, a working evaluation MVP, reproducible MuJoCo execution, persistent experiment workflows and a clear path toward broader embodied-AI evaluation.</p>
 <div class="acq-actions"><a class="acq-btn primary" href="../contact.html">Request acquisition discussion →</a><a class="acq-btn" href="../demo.html">Inspect the live product</a><a class="acq-btn" href="https://github.com/4gmxsol-tech/humanoidbehavior.com" target="_blank" rel="noopener">Review GitHub ↗</a></div>
-<div class="acq-note">Founder-led strategic inquiries · No public asking price · Detailed transaction materials available during diligence</div><div class="acq-nav"><a href="#brief">Buyer Brief</a><a href="#proof">Technical Proof</a><a href="#scope">Transaction Scope</a><a href="#diligence">Due Diligence</a></div>
+<div class="acq-note">Founder-led strategic inquiries · No public asking price · Detailed transaction materials available during diligence</div><div class="acq-nav"><a href="#brief">Buyer Brief</a><a href="#proof">Technical Proof</a><a href="#evidence-room">Evidence Room</a><a href="#buyer-demo">Buyer Demo</a><a href="#scope">Transaction Scope</a><a href="#diligence">Due Diligence</a></div>
 </div></section>
 
 <section class="acq-section"><div class="acq-shell">
@@ -152,6 +152,37 @@ artifact        persisted experiment result</pre>
 </div>
 </div></section>
 
+
+<section class="acq-section" id="evidence-room"><div class="acq-shell">
+<div class="acq-eyebrow">05A · EVIDENCE ROOM</div><h2>Inspect the proof, not the pitch.</h2>
+<p class="acq-section-lead">The evidence room connects the public product to a concrete measured artifact, provenance and reproducible run configuration.</p>
+<div class="signal-grid">
+<div class="signal"><strong>10</strong><span>Measured runs</span></div>
+<div class="signal"><strong>5</strong><span>Explicit seeds</span></div>
+<div class="signal"><strong>2</strong><span>Policy configurations</span></div>
+<div class="signal"><strong>1</strong><span>Persisted artifact</span></div>
+</div>
+<div class="diligence">
+<div><b>RAW ARTIFACT</b><span>Machine-readable experiment JSON with metrics and provenance.</span></div>
+<div><b>REPRODUCIBILITY</b><span>Seeds, policies, engine and requested run count are explicit.</span></div>
+<div><b>PROVENANCE</b><span>Git SHA and GitHub Actions run are attached to the sample.</span></div>
+<div><b>BOUNDARIES</b><span>Simulation evidence is clearly separated from physical-robot claims.</span></div>
+</div>
+<div class="acq-actions"><a class="acq-btn primary" href="../evidence.html">Open Evidence Room →</a><a class="acq-btn" href="../data/latest-mujoco-experiment.json">Raw JSON ↗</a><a class="acq-btn" href="../demo.html">Live Product Demo ↗</a></div>
+</div></section>
+<section class="acq-section" id="buyer-demo"><div class="acq-shell">
+<div class="acq-eyebrow">05B · BUYER DEMO</div><h2>Understand the product in under two minutes.</h2>
+<p class="acq-section-lead">A guided walkthrough shows the implemented core loop without requiring a sales call or a claim about capabilities that are still on the roadmap.</p>
+<div class="brief">
+<div class="brief-card"><h3>01 → Define</h3><p>Select a versioned behavior from the public registry and inspect its task contract, compatibility and success criteria.</p></div>
+<div class="brief-card"><h3>02 → Configure</h3><p>Choose engine, seeds and policy configuration, then create a durable experiment/job record.</p></div>
+<div class="brief-card"><h3>03 → Measure</h3><p>Run the supported browser-side MuJoCo execution path and distinguish measured physics output from deterministic validation.</p></div>
+<div class="brief-card"><h3>04 → Persist</h3><p>Keep the experiment configuration and measured output together in the application persistence layer.</p></div>
+<div class="brief-card"><h3>05 → Inspect</h3><p>Open the report/replay surface, inspect metrics and export the raw JSON/CSV evidence.</p></div>
+<div class="brief-card"><h3>06 → Extend</h3><p>Use the existing API, Worker, D1 and behavior layer as the foundation for adapters, leaderboards and hardware evaluation.</p></div>
+</div>
+<div class="acq-actions"><a class="acq-btn primary" href="../buyer-demo.html">Open Guided Buyer Demo →</a><a class="acq-btn" href="../simulation.html">Run Experiment Lab ↗</a></div>
+</div></section>
 <section class="acq-section"><div class="acq-shell">
 <div class="acq-eyebrow">06 · EXPANSION ROADMAP</div><h2>Where the asset can go next.</h2>
 <p class="acq-section-lead">The roadmap is intentionally modular: a strategic buyer can extend the existing evaluation loop rather than replace it.</p>
