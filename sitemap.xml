@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://humanoidbehavior.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://humanoidbehavior.com/acquisition/</loc><changefreq>weekly</changefreq><priority>0.95</priority></url>
   <url><loc>https://humanoidbehavior.com/demo.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://humanoidbehavior.com/articles.html</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
   <url><loc>https://humanoidbehavior.com/behaviors.html</loc><changefreq>weekly</changefreq><priority>0.85</priority></url>
