@@ -17,7 +17,8 @@ function build(){
 }
 function render(){document.querySelectorAll("[data-setting]").forEach(g=>g.querySelectorAll("[data-value]").forEach(b=>b.classList.toggle("selected",b.dataset.value===prefs[g.dataset.setting])))}
 function loadDesignSystem(){if(document.querySelector("link[data-hb-design-system]"))return;const l=document.createElement("link");l.rel="stylesheet";l.href="design-system.css";l.dataset.hbDesignSystem="true";document.head.appendChild(l)}
-function init(){loadDesignSystem();apply();build();render()}
+function installSiteIcon(){const href="/icon.svg?v=20260926";document.querySelectorAll('link[rel="icon"],link[rel="shortcut icon"],link[rel="apple-touch-icon"]').forEach(x=>x.remove());const icon=document.createElement("link");icon.rel="icon";icon.type="image/svg+xml";icon.href=href;document.head.appendChild(icon);const apple=document.createElement("link");apple.rel="apple-touch-icon";apple.href=href;document.head.appendChild(apple)}
+function init(){installSiteIcon();loadDesignSystem();apply();build();render()}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if(prefs.theme==="system")apply()});
 })();
