@@ -1,1 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0b0d10"/><path d="M145 175h222v74H145zM145 263h74v74h-74zM293 263h74v74h-74z" fill="#fff"/><circle cx="181" cy="212" r="14" fill="#65d5d2"/><circle cx="331" cy="212" r="14" fill="#65d5d2"/><path d="M205 390h102" stroke="#fff" stroke-width="22" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">HumanoidBehavior</title>
+<desc id="desc">A geometric humanoid robot mark with HB-inspired structure.</desc>
+<defs>
+  <linearGradient id="g" x1="80" y1="70" x2="430" y2="450" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#8b7cff"/>
+    <stop offset="1" stop-color="#4dd8ff"/>
+  </linearGradient>
+</defs>
+<rect width="512" height="512" rx="116" fill="#080a0e"/>
+<path d="M132 154c0-25 20-45 45-45h158c25 0 45 20 45 45v147c0 58-47 105-105 105h-38c-58 0-105-47-105-105V154Z" fill="#111722" stroke="url(#g)" stroke-width="16"/>
+<path d="M132 208h248" stroke="url(#g)" stroke-width="14" stroke-linecap="round"/>
+<circle cx="195" cy="181" r="18" fill="#4dd8ff"/>
+<circle cx="317" cy="181" r="18" fill="#8b7cff"/>
+<path d="M178 270h58v58h-58zM276 270h58v58h-58z" fill="#f5f7fb"/>
+<path d="M218 364h76" stroke="#f5f7fb" stroke-width="16" stroke-linecap="round"/>
+<path d="M256 92v17" stroke="url(#g)" stroke-width="14" stroke-linecap="round"/>
+<circle cx="256" cy="73" r="12" fill="#4dd8ff"/>
+</svg>
