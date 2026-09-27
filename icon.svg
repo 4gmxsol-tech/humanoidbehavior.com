@@ -1,19 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
 <title id="title">HumanoidBehavior</title>
-<desc id="desc">A geometric humanoid robot mark with HB-inspired structure.</desc>
+<desc id="desc">A refined humanoid robot icon for HumanoidBehavior.</desc>
 <defs>
-  <linearGradient id="g" x1="80" y1="70" x2="430" y2="450" gradientUnits="userSpaceOnUse">
-    <stop stop-color="#8b7cff"/>
-    <stop offset="1" stop-color="#4dd8ff"/>
+  <linearGradient id="accent" x1="96" y1="64" x2="416" y2="448" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#58e6ff"/>
+    <stop offset=".52" stop-color="#7b8cff"/>
+    <stop offset="1" stop-color="#b36cff"/>
   </linearGradient>
 </defs>
-<rect width="512" height="512" rx="116" fill="#080a0e"/>
-<path d="M132 154c0-25 20-45 45-45h158c25 0 45 20 45 45v147c0 58-47 105-105 105h-38c-58 0-105-47-105-105V154Z" fill="#111722" stroke="url(#g)" stroke-width="16"/>
-<path d="M132 208h248" stroke="url(#g)" stroke-width="14" stroke-linecap="round"/>
-<circle cx="195" cy="181" r="18" fill="#4dd8ff"/>
-<circle cx="317" cy="181" r="18" fill="#8b7cff"/>
-<path d="M178 270h58v58h-58zM276 270h58v58h-58z" fill="#f5f7fb"/>
-<path d="M218 364h76" stroke="#f5f7fb" stroke-width="16" stroke-linecap="round"/>
-<path d="M256 92v17" stroke="url(#g)" stroke-width="14" stroke-linecap="round"/>
-<circle cx="256" cy="73" r="12" fill="#4dd8ff"/>
+<rect width="512" height="512" rx="128" fill="#07090d"/>
+<path d="M256 54v30" stroke="url(#accent)" stroke-width="14" stroke-linecap="round"/>
+<circle cx="256" cy="42" r="13" fill="#58e6ff"/>
+<rect x="105" y="105" width="302" height="302" rx="88" fill="#10151d" stroke="url(#accent)" stroke-width="14"/>
+<path d="M105 194h302" stroke="url(#accent)" stroke-width="12"/>
+<path d="M162 244h68v68h-68zM282 244h68v68h-68z" fill="#f5f8ff"/>
+<circle cx="196" cy="278" r="12" fill="#58e6ff"/>
+<circle cx="316" cy="278" r="12" fill="#7b8cff"/>
+<path d="M197 350h118" stroke="#f5f8ff" stroke-width="15" stroke-linecap="round"/>
+<path d="M154 155h204" stroke="#58e6ff" stroke-width="8" stroke-linecap="round" opacity=".7"/>
 </svg>
