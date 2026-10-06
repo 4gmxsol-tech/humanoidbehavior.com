@@ -1,0 +1,72 @@
+/* HumanoidBehavior — Global Design System 3.0
+   Shared visual layer. No product logic, API, simulation or data behavior is changed. */
+:root{
+  --hb-bg:#060811;--hb-bg-2:#090d17;--hb-panel:rgba(14,19,31,.78);
+  --hb-panel-solid:#0d1320;--hb-line:rgba(148,163,184,.16);--hb-line-strong:rgba(148,163,184,.26);
+  --hb-text:#f5f7ff;--hb-muted:#98a3b6;--hb-dim:#69758a;
+  --hb-purple:#8b7cff;--hb-purple-2:#6f61ff;--hb-cyan:#55d9ef;--hb-green:#47e0ad;
+  --hb-radius:18px;--hb-shadow:0 24px 80px rgba(0,0,0,.28);
+  --hb-max:1240px;
+}
+html{background:var(--hb-bg);scroll-behavior:smooth}
+body{background:
+ radial-gradient(900px 500px at 80% -10%,rgba(111,97,255,.10),transparent 65%),
+ radial-gradient(700px 420px at 10% 15%,rgba(85,217,239,.045),transparent 65%),
+ var(--hb-bg)!important;color:var(--hb-text)!important}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.22;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(#000,transparent 75%)}
+.nav{height:72px!important;padding:0 max(18px,4vw)!important;background:rgba(6,8,17,.78)!important;border-bottom:1px solid var(--hb-line)!important;backdrop-filter:blur(22px) saturate(140%);box-shadow:0 8px 30px rgba(0,0,0,.12)}
+.nav .brand{font-weight:850!important;letter-spacing:-.035em!important;color:#fff!important}.nav .brand span{color:var(--hb-purple)!important}
+.nav nav{gap:4px!important}.nav nav a{color:#8995a9!important;border-radius:9px;padding:9px 10px!important;font-size:12px!important;font-weight:650!important;transition:.2s ease}
+.nav nav a:hover,.nav nav a.active{color:#fff!important;background:rgba(139,124,255,.09)}
+.nav-actions{gap:8px!important}.nav-cta,.nav-contact-cta{border-radius:10px!important;font-weight:750!important;transition:.2s ease}
+.nav-cta{background:linear-gradient(135deg,var(--hb-purple-2),var(--hb-purple))!important;color:#fff!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:0 10px 30px rgba(111,97,255,.22)}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 14px 36px rgba(111,97,255,.32)}
+.nav-contact-cta{color:#b4bfd0!important;background:rgba(255,255,255,.025)!important;border:1px solid var(--hb-line)!important}
+.acquisition-banner{border-bottom:1px solid rgba(139,124,255,.12)!important;background:rgba(9,12,22,.72)!important;backdrop-filter:blur(12px)}
+.acquisition-banner-inner{max-width:var(--hb-max)!important;margin:auto!important}
+.page{max-width:var(--hb-max)!important;margin:auto!important}
+.page h1,.page h2,.page h3{letter-spacing:-.035em}
+.eyebrow,.acq-eyebrow{color:#9b91ff!important;letter-spacing:.16em!important;font-weight:850!important}
+.button,.acq-btn{border-radius:11px!important;font-weight:750!important;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease!important}
+.button:hover,.acq-btn:hover{transform:translateY(-2px)}
+.button.primary,.acq-btn.primary{background:linear-gradient(135deg,var(--hb-purple-2),var(--hb-purple))!important;box-shadow:0 14px 38px rgba(111,97,255,.22)!important}
+.button.secondary{background:rgba(255,255,255,.025)!important;border-color:var(--hb-line-strong)!important;color:#dbe3ef!important}
+.section{position:relative}
+.section-head{max-width:var(--hb-max);margin-left:auto;margin-right:auto}
+.feature-card,.library-card,.behavior-card,.platform-card,.registry-summary,.registry-note,.toolbar,.hbp-analytics,.hbp-builder{
+ background:linear-gradient(145deg,rgba(16,22,35,.82),rgba(9,13,23,.72))!important;
+ border:1px solid var(--hb-line)!important;box-shadow:0 18px 55px rgba(0,0,0,.16);backdrop-filter:blur(14px)}
+.feature-card,.library-card,.behavior-card{border-radius:18px!important;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}
+.feature-card:hover,.library-card:hover,.behavior-card:hover{transform:translateY(-4px);border-color:rgba(139,124,255,.34)!important;box-shadow:0 25px 65px rgba(0,0,0,.25)}
+.registry-hero{position:relative;overflow:hidden;border-bottom:1px solid var(--hb-line)!important;padding-top:78px!important;padding-bottom:50px!important}
+.registry-hero:after{content:"";position:absolute;width:520px;height:520px;right:-180px;top:-160px;border-radius:50%;background:radial-gradient(circle,rgba(139,124,255,.14),transparent 68%);pointer-events:none}
+.registry-trust span,.status-pill,.hbp-badge{border-color:rgba(139,124,255,.2)!important;background:rgba(139,124,255,.055)!important}
+.toolbar{padding:10px!important;border-radius:14px!important}
+.toolbar input,.toolbar select,.hbp-builder textarea,.hbp-builder input{background:rgba(4,7,14,.72)!important;color:#edf2ff!important;border:1px solid var(--hb-line)!important;border-radius:10px!important}
+.hero-product{border-bottom:1px solid var(--hb-line)}
+.hero-product-card,.terminal-product,.product-demo{border-color:var(--hb-line)!important}
+.hbp-analytics,.hbp-builder{box-shadow:var(--hb-shadow)!important}
+.hbp-kpi,.hbp-platform-card,.hbp-diff-col{background:rgba(255,255,255,.025)!important;border-color:var(--hb-line)!important}
+.acq-shell{max-width:var(--hb-max)!important}.acq-card,.proof-main,.proof-side,.scope-card,.road,.brief-card{background:linear-gradient(145deg,rgba(14,19,31,.9),rgba(8,12,20,.82))!important;border-color:var(--hb-line)!important;box-shadow:0 18px 60px rgba(0,0,0,.16)}
+.acq-hero{border-bottom-color:var(--hb-line)!important}
+.acq-hero:before{opacity:.75}
+.acq-btn{background:rgba(255,255,255,.025)!important;border-color:var(--hb-line)!important}
+.acq-btn.primary{background:linear-gradient(135deg,var(--hb-purple-2),var(--hb-purple))!important}
+table{border-color:var(--hb-line)!important}th,td{border-color:var(--hb-line)!important}
+footer{border-top:1px solid var(--hb-line)!important;background:rgba(5,8,14,.72)!important}
+.skip-link:focus{background:#fff;color:#05070d;z-index:9999}
+@media(max-width:980px){
+ .nav{height:auto!important;min-height:68px!important;flex-wrap:wrap;padding-top:10px!important;padding-bottom:10px!important}
+ .nav nav{order:3;width:100%;overflow:auto;padding-bottom:2px;scrollbar-width:none}
+ .nav nav::-webkit-scrollbar{display:none}
+ .nav-actions{margin-left:auto}
+}
+@media(max-width:600px){
+ .nav .brand{font-size:17px!important}.nav-actions .nav-contact-cta{display:none}
+ .nav nav a{font-size:11px!important;padding:8px 9px!important}
+ body:before{background-size:42px 42px;opacity:.16}
+ .acquisition-copy span{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
