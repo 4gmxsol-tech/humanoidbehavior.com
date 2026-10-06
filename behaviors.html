@@ -12,7 +12,7 @@
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Robot Behaviors — HumanoidBehavior">
 <meta name="twitter:description" content="Explore reusable humanoid robot behavior specifications and measured evaluation entry points.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="styles.css"><script src="api-base.js"></script><script src="product-ui.js" defer></script><script src="site-settings.js" defer></script>
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="hb-atlas.css"><script src="api-base.js"></script><script src="product-ui.js" defer></script><script src="site-settings.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -33,7 +33,7 @@
 <div id="registry-status" class="registry-status" role="status">Loading registry…</div>
 <div id="behavior-list" class="library-grid"></div>
 </main>
-<script src="app.js"></script>
+<script src="app.js"></script><script src="hb-atlas.js"></script>
 <script>
 (()=>{const list=document.getElementById("behavior-list");if(!list)return;const obs=new MutationObserver(()=>{list.querySelectorAll(".feature-card,.library-card,.behavior-card").forEach(card=>{const text=card.textContent||"";if(/illustrative|baseline/i.test(text)&&!/not measured/i.test(text)){card.setAttribute("data-evidence-warning","true");}})});obs.observe(list,{childList:true,subtree:true});})();
 </script>
