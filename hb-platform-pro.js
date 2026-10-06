@@ -1,0 +1,58 @@
+(()=>{"use strict";
+const API=()=>window.HB_API_ORIGIN||"https://humanoidbehavior-com.4gmxsol.workers.dev";
+const token=()=>localStorage.getItem("hb_token");
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;","'":"&#39;"}[c]));
+async function api(path,opt={}){const r=await fetch(API()+path,{...opt,headers:{Accept:"application/json",...(token()?{Authorization:"Bearer "+token()}:{}),...(opt.headers||{})},cache:"no-store"});const t=await r.text();let x={};try{x=t?JSON.parse(t):{}}catch{throw Error("Invalid API response")};if(!r.ok)throw Error(x.error||x.message||("HTTP "+r.status));return x}
+function accountUX(){
+ const actions=document.querySelector(".nav-actions");if(!actions||document.querySelector(".hbp-auth-nav"))return;
+ if(!token())return;
+ const raw=localStorage.getItem("hb_user");let user={};try{user=raw?JSON.parse(raw):{}}catch{}
+ const email=user.email||"Developer";const initial=(email[0]||"D").toUpperCase();
+ const wrap=document.createElement("div");wrap.className="hbp-auth-nav";wrap.innerHTML='<button class="hbp-account" type="button" aria-expanded="false"><span class="hbp-avatar">'+initial+'</span><span>Workspace</span><span aria-hidden="true">⌄</span></button><div class="hbp-account-menu" hidden><a href="dashboard.html">Workspace</a><a href="simulation.html">New evaluation</a><a href="docs.html">Developer API</a><button class="danger" type="button">Sign out</button></div>';
+ actions.querySelector(".nav-cta")?.remove();actions.appendChild(wrap);
+ const b=wrap.querySelector(".hbp-account"),menu=wrap.querySelector(".hbp-account-menu");
+ b.onclick=()=>{const open=menu.hidden;menu.hidden=!open;b.setAttribute("aria-expanded",String(open))};
+ menu.querySelector(".danger").onclick=()=>{localStorage.removeItem("hb_token");localStorage.removeItem("hb_user");location.href="login.html?signed_out=1"};
+ document.addEventListener("click",e=>{if(!wrap.contains(e.target)){menu.hidden=true;b.setAttribute("aria-expanded","false")}});
+}
+function loginEnhance(){
+ const form=document.getElementById("authForm");if(!form)return;
+ if(token()){const status=document.getElementById("status");if(status){status.textContent="You are already signed in. Redirecting to your workspace…";status.className="auth-status ok"}setTimeout(()=>location.href="dashboard.html",500);return}
+ const q=new URLSearchParams(location.search);if(q.get("signed_out")==="1"){const s=document.getElementById("status");if(s){s.textContent="✓ You have been signed out securely.";s.className="auth-status ok"}}
+ const card=document.querySelector(".auth-card");if(card&&!card.querySelector(".hbp-auth-enhance")){const x=document.createElement("div");x.className="hbp-auth-enhance";x.textContent="Session security: token-based workspace access · explicit sign-out · API keys remain independently revocable.";card.appendChild(x)}
+}
+function metric(result,key){const m=result?.metrics||result?.summary?.metrics||{};return m[key]??result?.[key]??null}
+function normalizeExp(x){
+ const r=x.result||{};const raw=r.rawResults||r.results||[];const measured=Boolean(r.provenance?.measured||r.measured||raw.some(y=>y?.metrics?.measured));
+ const metrics=raw.flatMap(y=>y?.metrics?[y.metrics]:[]);const avg=k=>{const a=metrics.map(m=>Number(m[k])).filter(Number.isFinite);return a.length?a.reduce((s,v)=>s+v,0)/a.length:null};
+ return {id:x.id,behavior:x.benchmark||r.behaviorId||x.behaviorId||"—",version:r.behaviorVersion||x.behaviorVersion||"—",engine:x.engine||r.engine||"—",status:x.status||"—",created:x.createdAt,measured,success:avg("taskSuccess")??avg("success"),time:avg("completionTime"),cost:avg("controlCost"),collisions:avg("collisionCount"),grasp:avg("graspDurationS"),runs:r.runCount??raw.length};
+}
+async function dashboardPro(){
+ const page=document.querySelector(".dashboard-page");if(!page||!token()||document.querySelector(".hbp-analytics"))return;
+ try{
+  const x=await api("/api/experiments");const rows=(x.data||[]).map(normalizeExp);
+  const measured=rows.filter(r=>r.measured);const success=measured.map(r=>Number(r.success)).filter(Number.isFinite);
+  const avg=(a)=>a.length?(a.reduce((s,v)=>s+v,0)/a.length):null;
+  const panel=document.createElement("section");panel.className="hbp-analytics";panel.innerHTML='<div class="hbp-analytics-head"><div><span class="hbp-badge">RUN ANALYTICS</span><h2>Evidence overview</h2><div class="hbp-analytics-note">Computed only from persisted experiment result data. Missing metrics stay unreported.</div></div><a class="button secondary" href="compare.html">Compare experiments →</a></div><div class="hbp-kpis"><div class="hbp-kpi"><span>MEASURED EXPERIMENTS</span><strong>'+measured.length+'</strong><small>persisted in workspace</small></div><div class="hbp-kpi"><span>AVG SUCCESS</span><strong>'+(avg(success)==null?"—":avg(success).toFixed(1)+"%")+'</strong><small>reported measured runs</small></div><div class="hbp-kpi"><span>AVG COMPLETION</span><strong>'+(avg(measured.map(r=>r.time).filter(Number.isFinite))==null?"—":avg(measured.map(r=>r.time).filter(Number.isFinite)).toFixed(2)+"s")+'</strong><small>when available</small></div><div class="hbp-kpi"><span>VERIFIED RUNS</span><strong>'+measured.reduce((s,r)=>s+(r.runs||0),0)+'</strong><small>under measured provenance</small></div></div><div class="hbp-analysis-table"><table><thead><tr><th>BEHAVIOR</th><th>VERSION</th><th>SUCCESS</th><th>TIME</th><th>COST</th><th>COLLISIONS</th><th>EVIDENCE</th></tr></thead><tbody>'+rows.slice(0,12).map(r=>'<tr><td>'+esc(r.behavior)+'</td><td>'+esc(r.version)+'</td><td>'+(r.success==null?"—":Number(r.success).toFixed(1)+"%")+'</td><td>'+(r.time==null?"—":Number(r.time).toFixed(2)+"s")+'</td><td>'+(r.cost==null?"—":Number(r.cost).toFixed(2))+'</td><td>'+(r.collisions==null?"—":Number(r.collisions).toFixed(2))+'</td><td>'+(r.measured?'<span class="hbp-positive">MEASURED</span>':'<span class="hbp-muted">NOT MEASURED</span>')+'</td></tr>').join("")+'</tbody></table></div><div class="hbp-verified">'+measured.slice(0,8).map(r=>'<span class="hbp-verified-chip">✓ '+esc(r.behavior)+' · '+esc(r.version)+'</span>').join("")+'</div>';
+  const anchor=page.querySelector(".builder-result");page.insertBefore(panel,anchor||null);
+ }catch(e){console.warn("Platform analytics:",e)}
+}
+async function verifiedLeaderboard(){
+ const host=document.querySelector("#behavior-list");if(!host||document.querySelector(".hbp-analytics"))return;
+ const shell=document.createElement("section");shell.className="hbp-analytics";shell.innerHTML='<div class="hbp-analytics-head"><div><span class="hbp-badge">VERIFIED RUNS</span><h2>Measured results</h2><div class="hbp-analytics-note">Only persisted results carrying measured provenance are included.</div></div><a class="button secondary" href="dashboard.html">Workspace →</a></div><div id="hbp-leaderboard" class="hbp-analysis-table">Loading verified runs…</div>';
+ host.parentNode.insertBefore(shell,host);
+ try{const x=await api("/api/experiments");const rows=(x.data||[]).map(normalizeExp).filter(r=>r.measured).sort((a,b)=>(Number(b.success)||-1)-(Number(a.success)||-1));document.getElementById("hbp-leaderboard").innerHTML=rows.length?'<table><thead><tr><th>#</th><th>BEHAVIOR</th><th>VERSION</th><th>SUCCESS</th><th>TIME</th><th>ENGINE</th></tr></thead><tbody>'+rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(r.behavior)+'</td><td>'+esc(r.version)+'</td><td>'+(r.success==null?"—":Number(r.success).toFixed(1)+"%")+'</td><td>'+(r.time==null?"—":Number(r.time).toFixed(2)+"s")+'</td><td>'+esc(r.engine)+'</td></tr>').join("")+'</tbody></table>':'<div class="hbp-muted">No verified measured runs are available yet.</div>'}catch(e){document.getElementById("hbp-leaderboard").textContent="Verified runs unavailable · "+e.message}
+}
+function platformCards(){
+ const main=document.querySelector(".page:not(.dashboard-page)");if(!main||main.querySelector(".hbp-platform-grid"))return;
+ const h=document.createElement("section");h.className="hbp-platform-grid";h.innerHTML='<article class="hbp-platform-card"><span class="hbp-badge">REGISTRY</span><h3>Behavior packages</h3><p>Versioned specifications, compatibility metadata and reproducibility context travel together as the behavior contract.</p></article><article class="hbp-platform-card"><span class="hbp-badge">ADAPTER BOUNDARY</span><h3>Robot execution layer</h3><p>MuJoCo is the current measured path. Robot-specific adapters remain explicitly marked unavailable until implemented.</p></article><article class="hbp-platform-card"><span class="hbp-badge">DEVELOPER API</span><h3>Programmatic workflow</h3><p>Use behavior discovery, experiments, usage and API-key endpoints from the documented platform contract.</p></article>';main.appendChild(h)
+}
+function builder(){
+ const host=document.querySelector(".dashboard-page");if(!host||document.querySelector(".hbp-builder"))return;
+ const s=document.createElement("section");s.className="hbp-builder";s.innerHTML='<span class="hbp-badge">BEHAVIOR BUILDER 2.0</span><h2>Draft a behavior contract</h2><p class="hbp-analytics-note">Generate a structured draft from your task description, then review it before using it in an experiment.</p><div class="hbp-builder-grid"><textarea id="hbp-task" placeholder="Example: pick up a cup, move it to a tray, verify placement."></textarea><div><input id="hbp-name" placeholder="Behavior name"><div class="toolbar" style="margin-top:10px"><button class="button primary" id="hbp-generate">Generate draft</button></div><div id="hbp-output" class="hbp-builder-output"></div></div></div>';host.appendChild(s);
+ s.querySelector("#hbp-generate").onclick=()=>{const task=s.querySelector("#hbp-task").value.trim(),name=s.querySelector("#hbp-name").value.trim()||"Custom Behavior";if(!task){s.querySelector("#hbp-output").textContent="Describe the task first.";return}const steps=task.split(/[,.;]|\band\b|\bthen\b/i).map(x=>x.trim()).filter(x=>x.length>2).slice(0,8);const spec={id:name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"custom-behavior",name,description:task,steps,metricsStatus:"not-measured",evidence:"draft"};s.querySelector("#hbp-output").innerHTML='<pre class="hbp-json">'+esc(JSON.stringify(spec,null,2))+'</pre>'}
+}
+function compareLink(){if(document.querySelector(".dashboard-page")&&!document.querySelector(".hbp-compare-note")){const bar=document.querySelector(".dashboard-page .toolbar");if(bar){const a=document.createElement("a");a.className="button secondary hbp-compare-note";a.href="compare.html";a.textContent="Open comparison studio";bar.appendChild(a)}}}
+function init(){accountUX();loginEnhance();dashboardPro();verifiedLeaderboard();builder();platformCards();compareLink()}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
