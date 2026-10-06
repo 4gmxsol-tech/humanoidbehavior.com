@@ -1,0 +1,22 @@
+(()=>{"use strict";
+const catalog=[
+{id:"pick-place",name:"Pick & Place",category:"Manipulation",level:"Core",description:"Pick a specified object and place it at a target location.",steps:["Perceive target object","Navigate to workspace","Reach and grasp","Transport object","Release at target","Verify placement"]},
+{id:"open-door",name:"Open a Door",category:"Whole-body",level:"Interaction",description:"Approach a door, operate its handle and pass through safely.",steps:["Detect door and handle","Align body","Grasp handle","Apply force","Rotate/pull","Pass through and verify"]},
+{id:"follow-person",name:"Follow a Person",category:"Navigation",level:"Social",description:"Track a moving person while maintaining a safe distance.",steps:["Detect person","Estimate motion","Set following distance","Plan collision-free path","Track and adapt","Recover if target is lost"]},
+{id:"handover",name:"Hand Object to Person",category:"Interaction",level:"Bimanual",description:"Move an object into a human's reachable handover zone.",steps:["Detect object","Grasp securely","Detect recipient","Predict handover pose","Transfer object","Confirm release"]}
+];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function graph(steps){return '<div class="hb-graph">'+steps.map((s,i)=>'<div class="hb-graph-step"><div class="hb-graph-dot">0'+(i+1)+'</div><b>'+esc(s)+'</b><span>state '+(i+1)+'</span></div>').join("")+'</div>'}
+function atlas(){
+ const list=document.querySelector("#behavior-list");if(!list)return;
+ const host=document.createElement("section");host.className="hb-atlas";host.innerHTML='<div class="hb-atlas-head"><div><div class="hb-atlas-kicker">BEHAVIOR ATLAS · v1</div><h2>From task spec to executable evaluation.</h2><p>Each card is derived from the published behavior registry. Open the technical asset to inspect its state graph and launch the real Experiment Lab.</p></div><div class="hb-atlas-kicker">EVIDENCE-FIRST</div></div><div class="hb-atlas-grid">'+catalog.map(b=>'<a class="hb-atlas-card" href="behavior.html?id='+b.id+'"><div class="hb-atlas-top"><span>'+esc(b.level)+'</span><span class="hb-atlas-pill">'+esc(b.category)+'</span></div><h3>'+esc(b.name)+'</h3><p>'+esc(b.description)+'</p><div class="hb-atlas-graph">'+b.steps.map((s,i)=>(i?'<i class="hb-atlas-line"></i>':"")+'<i class="hb-atlas-node" title="'+esc(s)+'"></i>').join("")+'</div><div class="hb-atlas-foot"><span>v1.0.0 · Not measured</span><span class="hb-atlas-action">Open graph →</span></div></a>').join("")+'</div>';
+ list.parentNode.insertBefore(host,list);
+}
+function detail(){
+ const root=document.querySelector("#behavior-detail");if(!root)return;
+ const id=new URLSearchParams(location.search).get("id")||"pick-place",b=catalog.find(x=>x.id===id)||catalog[0];
+ root.innerHTML='<div class="hb-detail-shell"><div class="hb-detail-hero"><section class="hb-detail-card"><div class="hb-atlas-kicker">BEHAVIOR GRAPH · '+esc(b.category.toUpperCase())+'</div><h1>'+esc(b.name)+'</h1><p class="lead">'+esc(b.description)+'</p><div class="registry-meta"><span>v1.0.0</span><span>MuJoCo</span><span>Simulation harness</span><span>Not measured</span></div><a class="hb-run-cta" href="simulation.html?behavior='+encodeURIComponent(b.id)+'">Run in Experiment Lab →</a></section><aside class="hb-contract"><div class="hb-contract-label">BEHAVIOR CONTRACT</div><div class="hb-contract-row"><b>Category</b><span>'+esc(b.category)+'</span></div><div class="hb-contract-row"><b>Level</b><span>'+esc(b.level)+'</span></div><div class="hb-contract-row"><b>Version</b><span>1.0.0</span></div><div class="hb-contract-row"><b>Evidence</b><span>Not measured</span></div><div class="hb-contract-row"><b>Engine</b><span>MuJoCo / reference harness</span></div></aside></div><section class="hb-graph-panel"><div class="hb-graph-head"><div><h2>State graph</h2><p>Published task sequence represented as an explicit execution path. Runtime metrics are attached only to verified runs.</p></div><span class="hb-atlas-kicker">'+b.steps.length+' STATES</span></div>'+graph(b.steps)+'</section></div>';
+}
+function init(){if(document.querySelector("#behavior-list")){const obs=new MutationObserver(()=>{if(!document.querySelector(".hb-atlas"))atlas()});obs.observe(document.querySelector("#behavior-list"),{childList:true});setTimeout(atlas,250)}detail()}
+document.addEventListener("DOMContentLoaded",init);
+})();
