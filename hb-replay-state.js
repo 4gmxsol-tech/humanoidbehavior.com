@@ -11,11 +11,12 @@ const STATES=[
 ];
 function dist(a,b){if(!a||!b)return Infinity;return Math.hypot((a[0]||0)-(b[0]||0),(a[1]||0)-(b[1]||0),(a[2]||0)-(b[2]||0))}
 function classify(frames){
- const out=[]; let previous=null;
+ const out=[]; let previous=null; let releasedSeen=false;
  frames.forEach((f,i)=>{
    let id="approach";
    if(i===0)id="perceive";
-   else if(f.released)id="release";
+   else if(releasedSeen)id="verify";
+   else if(f.released){id="release";releasedSeen=true}
    else if(f.grabbed){
      const targetDistance=dist(f.object,f.target);
      id=targetDistance>.055?"transport":"verify";
@@ -23,7 +24,6 @@ function classify(frames){
      const handObject=dist(f.hand,f.object);
      id=handObject<.055?"grasp":"approach";
    }
-   if(id==="verify"&&!f.released)id="transport";
    if(id!==previous){out.push({state:id,index:i,t:Number(f.t||0)});previous=id}
  });
  if(out.length&&!out.some(x=>x.state==="verify"))out.push({state:"verify",index:frames.length-1,t:Number(frames[frames.length-1]?.t||0)});
