@@ -4,7 +4,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Experiment Lab — Robot Behavior Simulation & Evaluation | HumanoidBehavior">
 <meta property="og:description" content="Run supported robot behavior evaluations with explicit seeds and policies, browser MuJoCo compute and persisted experiment reports.">
-<meta property="og:url" content="https://humanoidbehavior.com/simulation.html"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="styles.css"><script src="api-base.js"></script><script src="product-ui.js" defer></script><script src="site-settings.js" defer></script></head><body><a class="skip-link" href="#main-content">Skip to content</a><header class="nav">
+<meta property="og:url" content="https://humanoidbehavior.com/simulation.html"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="sim-atlas.css"><script src="api-base.js"></script><script src="product-ui.js" defer></script><script src="site-settings.js" defer></script></head><body><a class="skip-link" href="#main-content">Skip to content</a><header class="nav">
   <a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
   <nav>
     <a href="behaviors.html">Behaviors</a>
@@ -22,7 +22,7 @@
 <div><div class="eyebrow">LIVE REPLAY</div><h2 style="margin:0">MuJoCo Simulation</h2><p style="margin:6px 0;color:#666">Recorded from the browser physics run that produced the measured result.</p></div>
 <div style="display:flex;gap:8px"><button class="button secondary" id="sim-play">▶ Play</button><button class="button secondary" id="sim-reset">↺ Reset</button><select id="sim-speed" class="hb-form-control hb-speed-control"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></div>
 </div>
-<canvas id="sim-canvas" style="display:block;width:100%;height:460px;margin-top:16px;border-radius:12px;background:#f4f5f7"></canvas>
+<div class="hb-replay-stage"><div class="hb-replay-badge">● LIVE REPLAY · BROWSER MUJOCO</div><canvas id="sim-canvas" style="display:block;width:100%;height:460px;border-radius:12px;background:#f4f5f7"></canvas></div><div class="hb-replay-controls"><input id="sim-timeline" type="range" min="0" max="100" value="0" step="1" aria-label="Replay timeline"><div class="hb-replay-scale"><span>0.0s</span><span id="sim-progress-label">Frame 1</span><span id="sim-duration-label">—</span></div></div>
 <div id="sim-time" style="margin-top:8px;color:#666;font-size:14px"></div>
 </section>
 <pre id="out" style="margin-top:25px;background:#111318;color:#e5e7ea;padding:22px;border-radius:10px;overflow:auto">Ready.</pre><p id="link"></p></div></main><script>
@@ -119,7 +119,7 @@ function initLiveSimulation(result){
  if(!section||!canvas)return;
  if(!frames?.length){section.style.display="block";$("sim-time").textContent="Replay unavailable: this result contains no motion frames.";return;}
  section.style.display="block";
- const ctx=canvas.getContext("2d");let i=0,playing=false,last=0,speed=1,raf=0;
+ const ctx=canvas.getContext("2d");let i=0,playing=false,last=0,speed=1,raf=0;const timeline=$("sim-timeline"),progressLabel=$("sim-progress-label"),durationLabel=$("sim-duration-label");if(timeline){timeline.max=String(Math.max(0,frames.length-1));durationLabel.textContent=Number(frames[frames.length-1]?.t||0).toFixed(1)+"s";timeline.oninput=e=>{i=Number(e.target.value);playing=false;last=0;$("sim-play").textContent="▶ Play";draw()}}
  const resize=()=>{const dpr=Math.min(2,window.devicePixelRatio||1),w=canvas.clientWidth||900,h=canvas.clientHeight||460;canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);draw()};
  const project=(p,w,h)=>{const minX=.0,maxX=1.05,minZ=.70,maxZ=1.55;return[55+(p[0]-minX)/(maxX-minX)*(w-105),h-55-(p[2]-minZ)/(maxZ-minZ)*(h-95)]};
  const line=(a,b,w,h,l)=>{const A=project(a,w,h),B=project(b,w,h);ctx.lineWidth=l;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke()};
@@ -134,7 +134,7 @@ function initLiveSimulation(result){
   ctx.fillStyle="#111827";dot([.20,0,1.17],w,h,8,"shoulder");dot(f.upper,w,h,6);dot(f.fore,w,h,7,"elbow");dot(f.hand,w,h,9,"hand");
   ctx.fillStyle="#2563eb";dot(f.object,w,h,9,"object");ctx.fillStyle="#16a34a";dot(f.target,w,h,9,"target");
   ctx.fillStyle="#6b7280";ctx.fillText("Object",project(f.object,w,h)[0]+10,project(f.object,w,h)[1]+18);ctx.fillText("Target",project(f.target,w,h)[0]+10,project(f.target,w,h)[1]+18);
-  $("sim-time").textContent="Simulation time: "+Number(f.t).toFixed(3)+" s · frame "+(i+1)+"/"+frames.length+(f.grabbed?" · grasped":"")+(f.released?" · released":"");
+  $("sim-time").textContent="Simulation time: "+Number(f.t).toFixed(3)+" s · frame "+(i+1)+"/"+frames.length+(f.grabbed?" · grasped":"")+(f.released?" · released":"");if(timeline)timeline.value=String(i);if(progressLabel)progressLabel.textContent="Frame "+(i+1)+" / "+frames.length;
  }
  function tick(ts){if(!playing)return;if(!last)last=ts;if(ts-last>=33){i=Math.min(frames.length-1,i+Math.max(1,Math.round(speed)));last=ts;draw();if(i===frames.length-1){playing=false;$("sim-play").textContent="▶ Play"}}raf=requestAnimationFrame(tick)}
  $("sim-play").onclick=()=>{if(i>=frames.length-1)i=0;playing=!playing;last=0;$("sim-play").textContent=playing?"⏸ Pause":"▶ Play";if(playing)raf=requestAnimationFrame(tick)};
