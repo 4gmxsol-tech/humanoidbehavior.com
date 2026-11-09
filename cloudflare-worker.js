@@ -1,3 +1,5 @@
+import { canReadBehavior } from "./cloudflare-behavior-access.mjs";
+
 const VERSION = "cloudflare-d1-api-4-local-worker";
 const ALLOWED_ORIGIN = "https://humanoidbehavior.com";
 const encoder = new TextEncoder();
@@ -121,7 +123,6 @@ async function body(request) {
 function planFor(user) { return PLANS[user?.plan] || PLANS.free; }
 function publicUser(u) { return { id:u.id, email:u.email, name:u.name, plan:u.plan }; }
 function validEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254; }
-function behaviorSpec(id, version) { return BEHAVIORS.find(b => b.id === id && b.version === version) || null; }
 function sanitizeName(value, fallback="Untitled") { const s=String(value||"").trim().replace(/\s+/g," "); return s.slice(0,160)||fallback; }
 function sanitizeSteps(value) { return Array.isArray(value) ? value.map(v=>String(v||"").trim().slice(0,300)).filter(Boolean).slice(0,20) : []; }
 
@@ -223,15 +224,17 @@ export default {
 
       const versionMatch = path.match(/^\/api\/behaviors\/([^/]+)\/versions$/);
       if (versionMatch && request.method === "GET") {
-        const rows = await env.DB.prepare("SELECT * FROM behaviors WHERE id=? AND visibility='public' AND status='published' ORDER BY updated_at DESC").bind(decodeURIComponent(versionMatch[1])).all();
-        const data = rows.results.map(cleanBehavior);
+        const user=await requireUser(request,env);
+        const rows=await env.DB.prepare("SELECT * FROM behaviors WHERE id=? AND ((visibility='public' AND status='published') OR user_id=?) ORDER BY updated_at DESC").bind(decodeURIComponent(versionMatch[1]),user?.id||"").all();
+        const data=rows.results.filter(row=>canReadBehavior(row,user?.id)).map(cleanBehavior);
         return json({ data, count:data.length });
       }
 
       const behaviorMatch = path.match(/^\/api\/behaviors\/([^/]+)\/([^/]+)$/);
       if (behaviorMatch && request.method === "GET") {
-        const row = await env.DB.prepare("SELECT * FROM behaviors WHERE id=? AND version=? AND visibility='public' AND status='published'").bind(decodeURIComponent(behaviorMatch[1]),decodeURIComponent(behaviorMatch[2])).first();
-        return row ? json(cleanBehavior(row)) : json({error:"Behavior not found"},404);
+        const user=await requireUser(request,env);
+        const row=await env.DB.prepare("SELECT * FROM behaviors WHERE id=? AND version=? AND ((visibility='public' AND status='published') OR user_id=?)").bind(decodeURIComponent(behaviorMatch[1]),decodeURIComponent(behaviorMatch[2]),user?.id||"").first();
+        return canReadBehavior(row,user?.id) ? json(cleanBehavior(row)) : json({error:"Behavior not found"},404);
       }
 
       if (path === "/api/auth/signup" && request.method === "POST") {
@@ -414,9 +417,10 @@ export default {
         if(requestedRuns>20)return json({error:"Maximum 20 runs per evaluation"},400);
         const behaviorId=String(x.behaviorId||"pick-place"),behaviorVersion=String(x.behaviorVersion||"1.1.0"),engine=String(x.engine||"MuJoCo");
         if(!["MuJoCo","simulation-harness"].includes(engine))return json({error:"Unsupported engine"},400);
-        const spec=behaviorSpec(behaviorId,behaviorVersion);
-        if(!spec)return json({error:"Published behavior version not found: "+behaviorId+"@"+behaviorVersion},404);
-        if(!spec.compatibleEngines.includes(engine))return json({error:"Behavior version is not compatible with "+engine},400);
+        const behaviorRow=await env.DB.prepare("SELECT * FROM behaviors WHERE id=? AND version=? AND ((visibility='public' AND status='published') OR user_id=?)").bind(behaviorId,behaviorVersion,user.id).first();
+        if(!canReadBehavior(behaviorRow,user.id))return json({error:"Behavior not found"},404);
+        const spec=cleanBehavior(behaviorRow);
+        if(!Array.isArray(spec.compatibleEngines)||!spec.compatibleEngines.includes(engine))return json({error:"Behavior version is not compatible with "+engine},400);
         const requested=requestedRuns,plan=planFor(user),used=await usage(user.id,env);
         const active=await env.DB.prepare("SELECT COUNT(*) AS n FROM jobs WHERE user_id=? AND status IN ('queued','running')").bind(user.id).first();
         if(Number(active?.n||0)>=3)return json({error:"Too many evaluations already queued or running. Wait for one to finish."},429);
