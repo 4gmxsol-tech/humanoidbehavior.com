@@ -40,6 +40,8 @@ jobs:
           }
           console.log('SEO validation passed for ' + urls.length + ' sitemap pages.');
           NODE
+      - name: Guard public sale availability claims
+        run: node public-availability-policy.test.js
       - run: node --check api.js
       - run: node --check app.js
       - run: node --check benchmark-runner.js
