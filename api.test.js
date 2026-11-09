@@ -69,8 +69,7 @@ console.log("private behavior API authorization regression checks passed");
 
 // API-route regression guards: private behavior data must be authorized before
 // an experiment is persisted, queued, evaluated, or returned to another account.
-const fs = require("fs");
-const path = require("path");
+
 const apiSource = fs.readFileSync(path.join(__dirname, "api.js"), "utf8");
 
 function extractApiRoute(startMarker, endMarker, label) {
