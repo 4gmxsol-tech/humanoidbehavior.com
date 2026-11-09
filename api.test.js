@@ -47,31 +47,6 @@ const fs = require("fs");
 const path = require("path");
 const apiSource = fs.readFileSync(path.join(__dirname, "api.js"), "utf8");
 
-const experimentStart = apiSource.indexOf('if(u.pathname==="/api/experiments/run"&&req.method==="POST")');
-const experimentEnd = apiSource.indexOf('if(u.pathname==="/api/experiments"&&req.method==="GET")', experimentStart);
-assert.ok(experimentStart >= 0 && experimentEnd > experimentStart, "experiment-run route must be present");
-const experimentRoute = apiSource.slice(experimentStart, experimentEnd);
-const experimentGuard = experimentRoute.indexOf("behaviorAccess.canReadBehavior(selectedBehavior,u)");
-const experimentQueue = experimentRoute.indexOf("await db.enqueueJob");
-assert.ok(experimentGuard >= 0 && experimentGuard < experimentQueue, "experiment route must authorize behavior access before queuing a run");
-assert.ok(experimentRoute.includes('return send(res,404,{error:"Behavior not found"})'), "private behavior access must fail closed with a non-disclosing 404");
-
-const benchmarkStart = apiSource.indexOf('if(u.pathname==="/api/benchmark"&&req.method==="POST")');
-const benchmarkEnd = apiSource.indexOf('if(u.pathname==="/api/billing/status"&&req.method==="GET")', benchmarkStart);
-assert.ok(benchmarkStart >= 0 && benchmarkEnd > benchmarkStart, "benchmark route must be present");
-const benchmarkRoute = apiSource.slice(benchmarkStart, benchmarkEnd);
-const benchmarkGuard = benchmarkRoute.indexOf("behaviorAccess.canReadBehavior(b,u)");
-const benchmarkExecution = benchmarkRoute.indexOf("runner.evaluate");
-assert.ok(benchmarkGuard >= 0 && benchmarkGuard < benchmarkExecution, "benchmark route must authorize behavior access before execution");
-assert.ok(benchmarkRoute.includes('return send(res,404,{error:"Behavior not found"})'), "benchmark route must not disclose private behavior existence");
-console.log("private behavior API authorization regression checks passed");
-
-
-// API-route regression guards: private behavior data must be authorized before
-// an experiment is persisted, queued, evaluated, or returned to another account.
-
-const apiSource = fs.readFileSync(path.join(__dirname, "api.js"), "utf8");
-
 function extractApiRoute(startMarker, endMarker, label) {
   const start = apiSource.indexOf(startMarker);
   const end = apiSource.indexOf(endMarker, start);
