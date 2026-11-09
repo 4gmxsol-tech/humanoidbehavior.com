@@ -1,5 +1,8 @@
 # HumanoidBehavior.com — Acquisition Asset Inventory
 
+> **Status: HOLD — not currently offered for sale.** Reference material only; this document is not a current offer, listing, or authorization to sell or transfer any domain, code, account, data, or infrastructure. Any future transaction requires separate written approval and a precisely defined transfer scope.
+
+
 ## Included core assets
 | Asset | Status | Notes |
 |---|---|---|
