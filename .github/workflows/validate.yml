@@ -5,11 +5,15 @@ on:
     branches: [main]
     paths:
       - "cloudflare-worker.js"
+      - "cloudflare-behavior-access.mjs"
+      - ".github/scripts/test_cloudflare_behavior_access.mjs"
       - "simulation/**/*.py"
       - ".github/workflows/**"
   pull_request:
     paths:
       - "cloudflare-worker.js"
+      - "cloudflare-behavior-access.mjs"
+      - ".github/scripts/test_cloudflare_behavior_access.mjs"
       - "simulation/**/*.py"
       - ".github/workflows/**"
   workflow_dispatch:
@@ -29,3 +33,7 @@ jobs:
         run: python -m compileall -q simulation
       - name: Validate Worker JavaScript
         run: node --check cloudflare-worker.js
+      - name: Validate imported behavior access module
+        run: node --check cloudflare-behavior-access.mjs
+      - name: Test Worker behavior read authorization
+        run: node .github/scripts/test_cloudflare_behavior_access.mjs
