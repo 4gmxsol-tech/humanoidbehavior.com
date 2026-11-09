@@ -1,5 +1,8 @@
 # HumanoidBehavior.com — Sale Package
 
+> **Status: HOLD — not currently offered for sale.** Reference material only; this document is not a current offer, listing, or authorization to sell or transfer any domain, code, account, data, or infrastructure. Any future transaction requires separate written approval and a precisely defined transfer scope.
+
+
 ## Asset Overview
 
 **HumanoidBehavior.com** is an early-stage robotics infrastructure MVP built around a browser-first, measured MuJoCo workflow.
