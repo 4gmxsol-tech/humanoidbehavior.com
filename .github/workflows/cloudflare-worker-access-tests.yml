@@ -6,14 +6,18 @@ on:
       - "cloudflare-worker.js"
       - "cloudflare-behavior-access.mjs"
       - "cloudflare-behavior-access.test.mjs"
+      - "cloudflare-worker-deploy-paths.test.mjs"
       - ".github/workflows/cloudflare-worker-access-tests.yml"
+      - ".github/workflows/cloudflare-worker-deploy.yml"
   push:
     branches: [main]
     paths:
       - "cloudflare-worker.js"
       - "cloudflare-behavior-access.mjs"
       - "cloudflare-behavior-access.test.mjs"
+      - "cloudflare-worker-deploy-paths.test.mjs"
       - ".github/workflows/cloudflare-worker-access-tests.yml"
+      - ".github/workflows/cloudflare-worker-deploy.yml"
 
 permissions:
   contents: read
@@ -29,3 +33,5 @@ jobs:
           node-version: "22"
       - name: Test Cloudflare behavior read and evaluation authorization
         run: node cloudflare-behavior-access.test.mjs
+      - name: Test Worker deployment path coverage
+        run: node cloudflare-worker-deploy-paths.test.mjs
