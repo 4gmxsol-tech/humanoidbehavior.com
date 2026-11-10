@@ -1,13 +1,15 @@
 const HB={behaviors:[
-{id:"pick-place",name:"Pick & Place",category:"Manipulation",level:"Core",description:"Pick a specified object and place it at a target location.",steps:["Perceive target object","Navigate to workspace","Reach and grasp","Transport object","Release at target","Verify placement"],metrics:null},
+{id:"pick-place",version:"1.1.0",name:"Pick & Place",category:"Manipulation",level:"Core",description:"Pick a specified object and place it at a target location with explicit post-placement verification.",steps:["Perceive target object","Navigate to workspace","Reach and grasp","Transport object","Release at target","Verify placement","Verify object settled"],metrics:null},
 {id:"open-door",name:"Open a Door",category:"Whole-body",level:"Interaction",description:"Approach a door, operate its handle and pass through safely.",steps:["Detect door and handle","Align body","Grasp handle","Apply force","Rotate/pull","Pass through and verify"],metrics:null},
 {id:"follow-person",name:"Follow a Person",category:"Navigation",level:"Social",description:"Track a moving person while maintaining a safe distance.",steps:["Detect person","Estimate motion","Set following distance","Plan collision-free path","Track and adapt","Recover if target is lost"],metrics:null},
-{id:"handover",name:"Hand Object to Person",category:"Interaction",level:"Bimanual",description:"Move an object into a human's reachable handover zone.",steps:["Detect object","Grasp securely","Detect recipient","Predict handover pose","Transfer object","Confirm release"],metrics:null}
+{id:"handover",version:"1.0.0",name:"Hand Object to Person",category:"Interaction",level:"Bimanual",description:"Move an object into a human's reachable handover zone.",steps:["Detect object","Grasp securely","Detect recipient","Predict handover pose","Transfer object","Confirm release"],metrics:null}
+],history:[
+{id:"pick-place",version:"1.0.0",name:"Pick & Place",category:"Manipulation",level:"Core",description:"Pick a specified object and place it at a target location.",steps:["Perceive target object","Navigate to workspace","Reach and grasp","Transport object","Release at target","Verify placement"],metrics:null}
 ]};
 
 function escText(v){return String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function evidenceState(b){return String(b.metricsStatus||b.evidence||b.measurementStatus||"unmeasured").toLowerCase().includes("measur")&&!String(b.metricsStatus||b.evidence||"").toLowerCase().includes("not")?"measured":"unmeasured";}
-function localRegistry(){return HB.behaviors.map(b=>({...b,version:"1.0.0",status:"published",visibility:"public",compatibleEngines:["MuJoCo","simulation-harness"],compatibleRobots:["generic-humanoid"],metricsStatus:"not-measured"}));}
+function localRegistry(){return [...HB.behaviors,...HB.history].map(b=>({...b,version:b.version||"1.0.0",status:"published",visibility:"public",compatibleEngines:["MuJoCo","simulation-harness"],compatibleRobots:["generic-humanoid"],metrics:null,metricsStatus:"not-measured"}));}
 function registryLibrary(){
  const root=document.querySelector("#behavior-list");if(!root)return;
  const status=document.querySelector("#registry-status");
@@ -35,7 +37,7 @@ function registryLibrary(){
  };
  const load=async()=>{
    try{const r=await fetch("/api/behaviors",{headers:{Accept:"application/json"}});if(!r.ok)throw Error();const x=await r.json();data=x.data||x.behaviors||[];status.textContent="Live registry · published specifications";status.dataset.state="live";}
-   catch{data=localRegistry();status.textContent="Live registry unavailable · local catalog shown";status.dataset.state="fallback";}
+   catch{data=localRegistry();status.textContent="Live registry unavailable · local built-in version snapshot shown";status.dataset.state="fallback";}
    render();
  };
  ["search","category","evidence"].forEach(id=>document.getElementById(id)?.addEventListener(id==="search"?"input":"change",render));
