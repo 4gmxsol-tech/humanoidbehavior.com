@@ -14,7 +14,7 @@ const fallback = sandbox.__localRegistry();
 const unique = new Map();
 for (const item of fallback) if (!unique.has(item.id)) unique.set(item.id, item);
 
-const cards = [...html.matchAll(/<a\\b([^>]*data-static-behavior="([^"]+)"[^>]*)>([\\s\\S]*?)<\\/a>/g)];
+const cards = [...html.matchAll(/<a\b([^>]*data-static-behavior="([^"]+)"[^>]*)>([\s\S]*?)<\/a>/g)];
 assert.equal(cards.length, unique.size, "Static HTML must contain one card per published behavior");
 assert.equal(cards.length, 4, "The public registry must expose four behavior specifications");
 
@@ -34,15 +34,16 @@ for (const [id, item] of unique) {
   assert.ok(body.includes(escapeHtml(item.category)), "Static card category differs from local fallback for " + id);
   assert.ok(body.includes(escapeHtml(item.level)), "Static card level differs from local fallback for " + id);
   assert.ok(body.includes("Not measured"), "Static card must disclose unmeasured evidence for " + id);
-  assert.ok(!/●\\s*Measured/.test(body), "Static card must not imply measured results for " + id);
+  assert.ok(!/●\s*Measured/.test(body), "Static card must not imply measured results for " + id);
 }
-assert.match(html, /id="registry-count">4<\\/strong>/, "Initial behavior count must match the public catalog");
-assert.match(html, /id="registry-versions">5<\\/strong>/, "Initial version count must match local fallback history");
+assert.match(html, /id="registry-count">4<\/strong>/, "Initial behavior count must match the public catalog");
+assert.match(html, /id="registry-versions">5<\/strong>/, "Initial version count must match local fallback history");
 assert.match(html, /role="status">Public behavior specifications are shown below/, "Initial status must not be a blank loading placeholder");
-assert.match(html, /rel="canonical" href="https:\\/\\/humanoidbehavior\\.com\\/behaviors\\.html"/, "Canonical URL must remain unchanged");
+assert.match(html, /rel="canonical" href="https:\/\/humanoidbehavior\.com\/behaviors\.html"/, "Canonical URL must remain unchanged");
 assert.match(html, /name="robots" content="index,follow/, "Registry page must remain indexable");
+assert.match(html, /<h1>Reusable humanoid robot behaviors\.<\/h1>/, "H1 must identify humanoid robot behaviors");
 
-const jsonLdScripts = [...html.matchAll(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/g)];
+const jsonLdScripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
 const collection = jsonLdScripts.map(match => JSON.parse(match[1])).find(value => value["@type"] === "CollectionPage");
 assert.ok(collection, "CollectionPage JSON-LD is required");
 assert.equal(collection.url, "https://humanoidbehavior.com/behaviors.html");
