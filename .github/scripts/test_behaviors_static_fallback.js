@@ -18,8 +18,8 @@ const cards = [...html.matchAll(/<a\b([^>]*data-static-behavior="([^"]+)"[^>]*)>
 assert.equal(cards.length, unique.size, "Static HTML must contain one card per published behavior");
 assert.equal(cards.length, 4, "The public registry must expose four behavior specifications");
 
-const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
-  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+const escapeHtml = value => String(value).replace(/[&<>]/g, char => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;"
 }[char]));
 
 for (const [id, item] of unique) {
