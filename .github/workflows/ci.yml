@@ -44,6 +44,8 @@ jobs:
         run: node public-availability-policy.test.js
       - run: node --check api.js
       - run: node --check app.js
+      - name: Validate local registry fallback version parity
+        run: node .github/scripts/test_registry_fallback.js
       - run: node --check benchmark-runner.js
       - run: node --check db.js
       - run: node --check worker.js
