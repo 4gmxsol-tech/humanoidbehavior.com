@@ -46,6 +46,8 @@ jobs:
       - run: node --check app.js
       - name: Validate local registry fallback version parity
         run: node .github/scripts/test_registry_fallback.js
+      - name: Validate static behavior registry fallback and CollectionPage metadata
+        run: node .github/scripts/test_behaviors_static_fallback.js
       - run: node --check benchmark-runner.js
       - run: node --check db.js
       - run: node --check worker.js
