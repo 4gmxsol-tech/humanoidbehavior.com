@@ -47,11 +47,11 @@ const jsonLdScripts = [...html.matchAll(/<script type="application\/ld\+json">([
 const collection = jsonLdScripts.map(match => JSON.parse(match[1])).find(value => value["@type"] === "CollectionPage");
 assert.ok(collection, "CollectionPage JSON-LD is required");
 assert.equal(collection.url, "https://humanoidbehavior.com/behaviors.html");
-assert.match(collection.dateModified, /^\\d{4}-\\d{2}-\\d{2}$/, "CollectionPage dateModified must be an ISO date");
+assert.match(collection.dateModified, /^\d{4}-\d{2}-\d{2}$/, "CollectionPage dateModified must be an ISO date");
 const sitemap = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8");
-const behaviorEntry = [...sitemap.matchAll(/<url>([\\s\\S]*?)<\\/url>/g)].map(match => match[1]).find(entry => entry.includes("<loc>https://humanoidbehavior.com/behaviors.html</loc>"));
+const behaviorEntry = [...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(match => match[1]).find(entry => entry.includes("<loc>https://humanoidbehavior.com/behaviors.html</loc>"));
 assert.ok(behaviorEntry, "Behaviors page must remain in the sitemap");
-const sitemapLastmod = behaviorEntry.match(/<lastmod>(\\d{4}-\\d{2}-\\d{2})<\\/lastmod>/);
+const sitemapLastmod = behaviorEntry.match(/<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/);
 assert.ok(sitemapLastmod, "Behaviors sitemap entry must include lastmod");
 assert.equal(sitemapLastmod[1], collection.dateModified, "Sitemap lastmod must match CollectionPage dateModified");
 assert.equal(collection.mainEntity["@type"], "ItemList");
