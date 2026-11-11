@@ -42,6 +42,8 @@ jobs:
           NODE
       - name: Guard public sale availability claims
         run: node public-availability-policy.test.js
+      - name: Validate pricing plan intent and free-signup clarity
+        run: node .github/scripts/test_pricing_plan_intent.js
       - run: node --check api.js
       - run: node --check app.js
       - name: Validate local registry fallback version parity
