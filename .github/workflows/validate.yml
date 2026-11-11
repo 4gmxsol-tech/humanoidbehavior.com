@@ -6,6 +6,8 @@ on:
     paths:
       - "cloudflare-worker.js"
       - "cloudflare-behavior-access.mjs"
+      - "demo.html"
+      - ".github/scripts/test_demo_replay_disclosure.mjs"
       - ".github/scripts/test_cloudflare_behavior_access.mjs"
       - "simulation/**/*.py"
       - ".github/workflows/**"
@@ -13,6 +15,8 @@ on:
     paths:
       - "cloudflare-worker.js"
       - "cloudflare-behavior-access.mjs"
+      - "demo.html"
+      - ".github/scripts/test_demo_replay_disclosure.mjs"
       - ".github/scripts/test_cloudflare_behavior_access.mjs"
       - "simulation/**/*.py"
       - ".github/workflows/**"
@@ -37,3 +41,5 @@ jobs:
         run: node --check cloudflare-behavior-access.mjs
       - name: Test Worker behavior read authorization
         run: node .github/scripts/test_cloudflare_behavior_access.mjs
+      - name: Validate demo replay disclosure and non-interactive preview
+        run: node .github/scripts/test_demo_replay_disclosure.mjs
