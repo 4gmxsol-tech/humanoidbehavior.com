@@ -9,6 +9,21 @@ const HB={behaviors:[
 
 function escText(v){return String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function evidenceState(b){return String(b.metricsStatus||b.evidence||b.measurementStatus||"unmeasured").toLowerCase().includes("measur")&&!String(b.metricsStatus||b.evidence||"").toLowerCase().includes("not")?"measured":"unmeasured";}
+function latestPublishedBehaviors(versions){
+ const compareVersion=(left,right)=>{
+   const a=String(left||"0.0.0").split(".").map(part=>Number.parseInt(part,10)||0);
+   const b=String(right||"0.0.0").split(".").map(part=>Number.parseInt(part,10)||0);
+   for(let i=0;i<3;i++){const delta=(a[i]||0)-(b[i]||0);if(delta)return delta}
+   return 0;
+ };
+ const latest=new Map();
+ for(const behavior of versions){
+   if(!behavior?.id)continue;
+   const current=latest.get(behavior.id);
+   if(!current||compareVersion(behavior.version,current.version)>0)latest.set(behavior.id,behavior);
+ }
+ return [...latest.values()];
+}
 function localRegistry(){return [...HB.behaviors,...HB.history].map(b=>({...b,version:b.version||"1.0.0",status:"published",visibility:"public",compatibleEngines:["MuJoCo","simulation-harness"],compatibleRobots:["generic-humanoid"],metrics:null,metricsStatus:"not-measured"}));}
 function registryLibrary(){
  const root=document.querySelector("#behavior-list");if(!root)return;
@@ -18,7 +33,8 @@ function registryLibrary(){
  const category=()=>document.querySelector("#category")?.value||"all";
  const evidence=()=>document.querySelector("#evidence")?.value||"all";
  const render=()=>{
-   const filtered=data.filter(b=>{
+   const publishedBehaviors=latestPublishedBehaviors(data);
+   const filtered=publishedBehaviors.filter(b=>{
      const hay=(b.name+" "+b.description+" "+(b.tags||[]).join(" ")+" "+(b.id||"")).toLowerCase();
      const ev=evidenceState(b);
      return (category()==="all"||b.category===category())&&hay.includes(search())&&(evidence()==="all"||(evidence()==="measured"&&ev==="measured")||(evidence()==="unmeasured"&&ev==="unmeasured"));
