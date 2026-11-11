@@ -84,6 +84,7 @@ const togglePassword=document.getElementById("togglePassword");
 const meter=[...document.querySelectorAll("#passwordMeter span")];
 const count=document.getElementById("passwordCount");
 let mode="login";
+/* PRICING_PLAN_NOTICE_START */
 const planNotice=document.getElementById("planNotice");
 const requestedPlan=new URLSearchParams(window.location.search).get("plan");
 const planLabels={pro:"Pro",team:"Team"};
@@ -91,6 +92,7 @@ if(planLabels[requestedPlan]){
   planNotice.hidden=false;
   planNotice.textContent=planLabels[requestedPlan]+" is not available for paid checkout yet. You can create a free workspace now; no payment or subscription will start.";
 }
+/* PRICING_PLAN_NOTICE_END */
 
 function showStatus(message,type=""){
   statusEl.textContent=message;
