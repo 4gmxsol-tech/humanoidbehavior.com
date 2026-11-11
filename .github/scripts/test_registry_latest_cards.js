@@ -5,7 +5,7 @@ const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "../..");
 const appSource = fs.readFileSync(path.join(root, "app.js"), "utf8")
-  + "\\n;globalThis.__latestPublishedBehaviors = latestPublishedBehaviors;";
+  + "\n;globalThis.__latestPublishedBehaviors = latestPublishedBehaviors;";
 const sandbox = { document: { addEventListener() {} } };
 vm.runInNewContext(appSource, sandbox);
 
