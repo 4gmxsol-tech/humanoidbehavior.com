@@ -7,7 +7,7 @@ const replayEnd = html.indexOf('<div class="demo-list">', replayStart);
 assert(replayStart >= 0 && replayEnd > replayStart, "Replay preview section must exist");
 const replay = html.slice(replayStart, replayEnd);
 
-assert.match(replay, /role="img"/, "Illustrative scene must expose an image role");
+assert.match(replay, /role="group"/, "Illustrative scene must expose an image role");
 assert.match(replay, /aria-label="Illustrative MuJoCo scene diagram, not a recorded replay"/, "Accessible label must disclose that the scene is illustrative");
 assert.match(replay, /ILLUSTRATIVE SCENE · NOT A RECORDED RUN/, "Visible caption must disclose the scene is not a recorded run");
 assert.match(replay, /Illustrative scene diagram only\./, "Visible explanatory note must be present");
