@@ -16,8 +16,8 @@ assert.match(html, /href="simulation\.html"/, "The real Experiment Lab route mus
 assert.match(html, /not a recorded or interactive replay/i, "Section copy must distinguish the illustration from real replay");
 
 const sitemap = readFileSync("sitemap.xml", "utf8");
-const demoEntry = sitemap.split("\\n").find((line) => line.includes("<loc>https://humanoidbehavior.com/demo.html</loc>"));
+const demoEntry = sitemap.split("\n").find((line) => line.includes("<loc>https://humanoidbehavior.com/demo.html</loc>"));
 assert(demoEntry, "Demo page must remain in the sitemap");
-assert.match(demoEntry, /<lastmod>2026-11-11<\\/lastmod>/, "Demo sitemap lastmod must match the latest content update");
+assert(demoEntry.includes("<lastmod>2026-11-11</lastmod>"), "Demo sitemap lastmod must match the latest content update");
 
 console.log("Demo replay disclosure and non-interactive preview checks passed.");
