@@ -19,7 +19,7 @@ jobs:
           node <<'NODE'
           const fs = require('fs');
           const xml = fs.readFileSync('sitemap.xml', 'utf8');
-          const urls = [...xml.matchAll(/<loc>(.*?)<\\/loc>/g)].map(match => match[1].trim());
+          const urls = [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(match => match[1].trim());
           if (!urls.length) throw new Error('Sitemap contains no URLs');
           for (const value of urls) {
             const url = new URL(value);
@@ -27,13 +27,13 @@ jobs:
             const file = pathname.endsWith('/') ? (pathname.slice(1) + 'index.html') : pathname.slice(1);
             if (!fs.existsSync(file)) throw new Error('Sitemap target missing: ' + value + ' -> ' + file);
             const html = fs.readFileSync(file, 'utf8');
-            const title = (html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i) || [])[1]?.trim();
-            const tags = html.match(/<link\\b[^>]*>/gi) || [];
-            const canonicalTag = tags.find(tag => /\\brel=["']canonical["']/i.test(tag));
-            const canonical = canonicalTag?.match(/\\bhref=["']([^"']+)["']/i)?.[1];
-            const metas = html.match(/<meta\\b[^>]*>/gi) || [];
-            const descriptionTag = metas.find(tag => /\\bname=["']description["']/i.test(tag));
-            const description = descriptionTag?.match(/\\bcontent=["']([^"']*)["']/i)?.[1] || '';
+            const title = (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1]?.trim();
+            const tags = html.match(/<link\b[^>]*>/gi) || [];
+            const canonicalTag = tags.find(tag => /\brel=["']canonical["']/i.test(tag));
+            const canonical = canonicalTag?.match(/\bhref=["']([^"']+)["']/i)?.[1];
+            const metas = html.match(/<meta\b[^>]*>/gi) || [];
+            const descriptionTag = metas.find(tag => /\bname=["']description["']/i.test(tag));
+            const description = descriptionTag?.match(/\bcontent=["']([^"']*)["']/i)?.[1] || '';
             if (!title) throw new Error('Missing title: ' + value);
             if (canonical !== value) throw new Error('Canonical mismatch: ' + value + ' -> ' + canonical);
             if (description.trim().length < 70) throw new Error('Missing/short meta description (' + description.length + '): ' + value);
