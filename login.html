@@ -29,6 +29,7 @@
       <div class="eyebrow" id="auth-eyebrow">DEVELOPER ACCESS</div>
       <h1 id="auth-title">Welcome back.</h1>
       <p id="auth-copy">Sign in to continue to your robotics workspace.</p>
+      <p id="planNotice" class="auth-status" role="status" aria-live="polite" hidden></p>
 
       <form id="authForm" class="auth-form" novalidate>
         <div class="auth-field">
@@ -83,6 +84,15 @@ const togglePassword=document.getElementById("togglePassword");
 const meter=[...document.querySelectorAll("#passwordMeter span")];
 const count=document.getElementById("passwordCount");
 let mode="login";
+/* PRICING_PLAN_NOTICE_START */
+const planNotice=document.getElementById("planNotice");
+const requestedPlan=new URLSearchParams(window.location.search).get("plan");
+const planLabels={pro:"Pro",team:"Team"};
+if(planLabels[requestedPlan]){
+  planNotice.hidden=false;
+  planNotice.textContent=planLabels[requestedPlan]+" is not available for paid checkout yet. You can create a free workspace now; no payment or subscription will start.";
+}
+/* PRICING_PLAN_NOTICE_END */
 
 function showStatus(message,type=""){
   statusEl.textContent=message;
