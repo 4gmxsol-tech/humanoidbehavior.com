@@ -24,6 +24,17 @@ function latestPublishedBehaviors(versions){
  }
  return [...latest.values()];
 }
+function renderPublicRegistryCards(versions){
+ const latest=latestPublishedBehaviors(Array.isArray(versions)?versions:[]);
+ return latest.map(b=>{
+   const category=escText(b.package?.category||b.category||"Behavior");
+   const version=escText(b.version||"—");
+   const name=escText(b.name||"Untitled behavior");
+   const description=escText(b.description||"");
+   const status=escText(b.status||"published");
+   return '<article class="behavior-card"><div class="card-top"><span class="pill">'+category+'</span><span class="pill">v'+version+'</span></div><h3>'+name+'</h3><p>'+description+'</p><div class="card-bottom"><span>'+status+'</span><a href="behavior.html?id='+encodeURIComponent(b.id)+'&version='+encodeURIComponent(b.version||"")+'">View</a></div></article>';
+ }).join("")||'<div class="empty">No published behaviors found.</div>';
+}
 function localRegistry(){return [...HB.behaviors,...HB.history].map(b=>({...b,version:b.version||"1.0.0",status:"published",visibility:"public",compatibleEngines:["MuJoCo","simulation-harness"],compatibleRobots:["generic-humanoid"],metrics:null,metricsStatus:"not-measured"}));}
 function registryLibrary(){
  const root=document.querySelector("#behavior-list");if(!root)return;
