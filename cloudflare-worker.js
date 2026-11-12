@@ -1,4 +1,5 @@
 import { canReadBehavior } from "./cloudflare-behavior-access.mjs";
+import { validateBrowserResult } from "./cloudflare-browser-result.mjs";
 
 const VERSION = "cloudflare-d1-api-4-local-worker";
 const ALLOWED_ORIGIN = "https://humanoidbehavior.com";
@@ -434,22 +435,34 @@ export default {
         result.jobId=jobId;
         result.computeDispatch = "browser-wasm";
         result.result.validation = {passed:false,message:"Evaluation queued; browser MuJoCo WASM will attempt to process it on this device."};
-        await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
-        return json(result,202);
-      }
-
-      const browserMatch = path.match(/^\/api\/experiments\/([^/]+)\/browser-result$/);
+        await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.s      const browserMatch = path.match(/^\\/api\\/experiments\\/([^/]+)\\/browser-result$/);
       if (browserMatch && request.method === "POST") {
-        const user = await requireUser(request, env); if (!user) return json({error:"Authentication required"},401);
+        const user = await requireUser(request, env);
+        if (!user) return json({error:"Authentication required"},401);
         const experimentId = browserMatch[1];
         const x = await body(request);
         const result = x && x.result && typeof x.result === "object" ? x.result : null;
         if (!result || result.engine !== "MuJoCo" || !Array.isArray(result.rawResults)) return json({error:"Invalid browser evaluation result"},400);
-        if (result.rawResults.length < 1 || result.rawResults.length > 20) return json({error:"Invalid run count"},400);
-        const exp = await env.DB.prepare("SELECT id,user_id,status,engine FROM experiments WHERE id=? AND user_id=?").bind(experimentId,user.id).first();
+
+        const exp = await env.DB.prepare("SELECT id,user_id,status,engine,behavior_id,behavior_version,result_json FROM experiments WHERE id=? AND user_id=?")
+          .bind(experimentId,user.id).first();
         if (!exp) return json({error:"Experiment not found"},404);
-        if (exp.status === "completed") return json({id:experimentId,status:"completed",result});
-        const job = await env.DB.prepare("SELECT id,status FROM jobs WHERE experiment_id=? AND user_id=? ORDER BY created_at DESC LIMIT 1").bind(experimentId,user.id).first();
+        if (exp.status === "completed") return json(JSON.parse(exp.result_json),200);
+        if (!["queued","running"].includes(exp.status)) return json({error:"Experiment is not accepting browser results"},409);
+
+        let queued;
+        try { queued = JSON.parse(exp.result_json); }
+        catch { return json({error:"Stored experiment request is invalid"},409); }
+        const validation = validateBrowserResult({
+          engine: exp.engine,
+          behaviorId: exp.behavior_id,
+          behaviorVersion: exp.behavior_version,
+          request: queued.result
+        }, result);
+        if (!validation.ok) return json({error:validation.error},400);
+
+        const job = await env.DB.prepare("SELECT id,status FROM jobs WHERE experiment_id=? AND user_id=? ORDER BY created_at DESC LIMIT 1")
+          .bind(experimentId,user.id).first();
         const stored = {
           ...result,
           id: experimentId,
@@ -459,17 +472,22 @@ export default {
           measured: true,
           reproducible: true,
           completedAt: result.completedAt || new Date().toISOString(),
-          provenance: {...(result.provenance || {}), worker:"browser-mujoco-wasm"}
+          provenance: {...(result.provenance || {}),worker:"browser-mujoco-wasm"}
         };
-        await env.DB.prepare("UPDATE experiments SET status='completed',result_json=? WHERE id=? AND user_id=?")
+        const saved = await env.DB.prepare("UPDATE experiments SET status='completed',result_json=? WHERE id=? AND user_id=? AND status IN ('queued','running')")
           .bind(JSON.stringify({...stored,result:stored}),experimentId,user.id).run();
+        if (Number(saved.meta?.changes || 0) !== 1) return json({error:"Experiment state changed before the browser result could be saved"},409);
+
         if (job) {
           await env.DB.prepare("UPDATE jobs SET status='completed',result_json=?,progress_json=?,finished_at=datetime('now'),error=NULL WHERE id=? AND user_id=?")
-            .bind(JSON.stringify(stored),JSON.stringify({completed:stored.runCount||result.rawResults.length,total:stored.expectedRunCount||result.rawResults.length,percentage:100}),job.id,user.id).run();
+            .bind(JSON.stringify(stored),JSON.stringify({completed:stored.runCount,total:stored.expectedRunCount,percentage:100}),job.id,user.id).run();
         }
         await env.DB.prepare("INSERT INTO artifacts(id,experiment_id,user_id,name,content_type,storage,payload_json) VALUES(?,?,?,?,?,?,?)")
           .bind(id(),experimentId,user.id,"experiment.json","application/json","database",JSON.stringify(stored)).run();
         return json({id:experimentId,status:"completed",result:stored},200);
+      }
+
+n json({id:experimentId,status:"completed",result:stored},200);
       }
 
       if (path === "/api/behaviors/compare/benchmark" && request.method === "POST") {
