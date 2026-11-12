@@ -435,7 +435,11 @@ export default {
         result.jobId=jobId;
         result.computeDispatch = "browser-wasm";
         result.result.validation = {passed:false,message:"Evaluation queued; browser MuJoCo WASM will attempt to process it on this device."};
-        await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.s      const browserMatch = path.match(/^\\/api\\/experiments\\/([^/]+)\\/browser-result$/);
+        await env.DB.prepare("UPDATE experiments SET result_json=? WHERE id=?").bind(JSON.stringify(result),expId).run();
+        return json(result,202);
+      }
+
+      const browserMatch = path.match(/^\/api\/experiments\/([^/]+)\/browser-result$/);
       if (browserMatch && request.method === "POST") {
         const user = await requireUser(request, env);
         if (!user) return json({error:"Authentication required"},401);
@@ -485,9 +489,6 @@ export default {
         await env.DB.prepare("INSERT INTO artifacts(id,experiment_id,user_id,name,content_type,storage,payload_json) VALUES(?,?,?,?,?,?,?)")
           .bind(id(),experimentId,user.id,"experiment.json","application/json","database",JSON.stringify(stored)).run();
         return json({id:experimentId,status:"completed",result:stored},200);
-      }
-
-n json({id:experimentId,status:"completed",result:stored},200);
       }
 
       if (path === "/api/behaviors/compare/benchmark" && request.method === "POST") {
