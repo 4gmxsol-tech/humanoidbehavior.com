@@ -35,4 +35,29 @@ assert.ok(
   "The free-workspace CTA must appear before the benchmark controls."
 );
 
+
+const plans = JSON.parse(fs.readFileSync("data/plans.json", "utf8"));
+const freePlan = plans.find((plan) => plan.id === "free");
+assert.ok(freePlan, "A published free plan must exist.");
+const freeNoteStart = benchmark.indexOf('<p class="benchmark-free-note muted">');
+const freeNoteEnd = benchmark.indexOf("</p>", freeNoteStart);
+assert.ok(freeNoteStart >= 0 && freeNoteEnd > freeNoteStart, "Benchmark visitors must see the free-workspace limits before using the builder.");
+const freeNote = benchmark.slice(freeNoteStart, freeNoteEnd + 4);
+assert.ok(
+  freeNote.includes(freePlan.limits.benchmarksPerMonth + " benchmark runs per month"),
+  "Benchmark free-tier run allowance must match data/plans.json."
+);
+assert.ok(
+  freeNote.includes(freePlan.limits.privateBehaviors + " private behaviors"),
+  "Benchmark free-tier private-behavior allowance must match data/plans.json."
+);
+assert.ok(freeNote.includes('href="pricing.html"'), "The free-tier note must link to full plan limits.");
+assert.ok(freeNote.includes("Paid plans are being prepared for secure checkout"));
+assert.ok(freeNote.includes("selecting Pro or Team does not start a paid subscription"));
+assert.ok(
+  freeNoteStart > benchmark.indexOf(staticCta)
+    && freeNoteStart < benchmark.indexOf('<section class="builder-result">'),
+  "Free-tier details must appear after the signup CTA and before the benchmark controls."
+);
+
 console.log("Benchmark unauthenticated sign-in CTA regression: PASS");
