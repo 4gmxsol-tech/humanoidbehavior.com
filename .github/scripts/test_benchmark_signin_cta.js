@@ -25,10 +25,13 @@ assert.match(
   "The sign-in destination must expose the free-account path."
 );
 
-const staticCta = benchmark.match(/<p class="benchmark-signup-cta"><a class="button primary" href="login\\.html">Sign in or create a free workspace<\\/a><\\/p>/);
-assert.ok(staticCta, "The benchmark page must show a visible free-workspace CTA before visitors interact with Run benchmark.");
+const staticCta = '<p class="benchmark-signup-cta"><a class="button primary" href="login.html">Sign in or create a free workspace</a></p>';
 assert.ok(
-  benchmark.indexOf(staticCta[0]) < benchmark.indexOf('<section class="builder-result">'),
+  benchmark.includes(staticCta),
+  "The benchmark page must show a visible free-workspace CTA before visitors interact with Run benchmark."
+);
+assert.ok(
+  benchmark.indexOf(staticCta) < benchmark.indexOf('<section class="builder-result">'),
   "The free-workspace CTA must appear before the benchmark controls."
 );
 
