@@ -69,6 +69,15 @@ const doorResult = {
 };
 assert.equal(validateBrowserResult(doorQueued, doorResult).ok, true, "supported behaviors without row-level version metadata remain valid");
 
+const repeatedSeedQueued = {
+  engine: "MuJoCo",
+  behaviorId: "pick-place",
+  behaviorVersion: "1.1.0",
+  request: { expectedRunCount: 2, seeds: ["42", "42"], policies: ["policy-a"] }
+};
+const repeatedSeedResult = { ...valid, rawResults: [row("42"), row("42")] };
+assert.equal(validateBrowserResult(repeatedSeedQueued, repeatedSeedResult).ok, true, "intentionally repeated seeds remain valid when every requested run is present");
+
 const worker = fs.readFileSync("cloudflare-worker.js", "utf8");
 const routeStart = worker.indexOf("const browserMatch = path.match(");
 const routeEnd = worker.indexOf('if (path === "/api/behaviors/compare/benchmark"', routeStart);
