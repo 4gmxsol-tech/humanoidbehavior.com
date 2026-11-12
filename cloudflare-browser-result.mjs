@@ -1,6 +1,6 @@
 export function validateBrowserResult(queued, submitted) {
   const fail = error => ({ ok: false, error });
-  if (!queued || !submitted || typeof submitted !== "object") return fail("Invalid browser evaluation result");
+  if (!queued || !submitted || typeof submitted !== "object" || Array.isArray(submitted)) return fail("Invalid browser evaluation result");
 
   const request = queued.request || {};
   const expected = Number(request.expectedRunCount);
@@ -22,8 +22,12 @@ export function validateBrowserResult(queued, submitted) {
     return fail("Browser result run counts do not match the queued experiment");
   }
 
-  const expectedPairs = new Set(seeds.flatMap(seed => policies.map(policy => JSON.stringify([seed, policy]))));
-  const seenPairs = new Set();
+  const expectedPairs = new Map();
+  for (const seed of seeds) for (const policy of policies) {
+    const pair = JSON.stringify([seed, policy]);
+    expectedPairs.set(pair, (expectedPairs.get(pair) || 0) + 1);
+  }
+  const seenPairs = new Map();
   for (const row of submitted.rawResults) {
     if (!row || typeof row !== "object" || Array.isArray(row)) return fail("Browser result contains an invalid run row");
     const seed = String(row.seed ?? "");
@@ -41,9 +45,12 @@ export function validateBrowserResult(queued, submitted) {
       return fail("Browser result contains incomplete run metrics");
     }
     const pair = JSON.stringify([seed, policy]);
-    if (seenPairs.has(pair)) return fail("Browser result contains a duplicate seed/policy run");
-    seenPairs.add(pair);
+    const count = (seenPairs.get(pair) || 0) + 1;
+    if (count > (expectedPairs.get(pair) || 0)) return fail("Browser result contains a duplicate seed/policy run");
+    seenPairs.set(pair, count);
   }
-  if (seenPairs.size !== expectedPairs.size) return fail("Browser result is missing a requested seed/policy run");
+  for (const [pair, count] of expectedPairs) {
+    if (seenPairs.get(pair) !== count) return fail("Browser result is missing a requested seed/policy run");
+  }
   return { ok: true, error: null };
 }
