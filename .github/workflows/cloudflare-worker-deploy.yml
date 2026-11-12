@@ -7,6 +7,7 @@ on:
     paths:
       - "cloudflare-worker.js"
       - "cloudflare-behavior-access.mjs"
+      - "cloudflare-browser-result.mjs"
       - "wrangler.jsonc"
       - ".github/workflows/cloudflare-worker-deploy.yml"
       - "migrations/**"
