@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "cloudflare-worker.js"
+      - "cloudflare-browser-result.mjs"
+      - "cloudflare-browser-result.test.mjs"
       - "cloudflare-behavior-access.mjs"
       - "cloudflare-behavior-access.test.mjs"
       - "cloudflare-worker-deploy-paths.test.mjs"
@@ -33,5 +35,7 @@ jobs:
           node-version: "22"
       - name: Test Cloudflare behavior read and evaluation authorization
         run: node cloudflare-behavior-access.test.mjs
+      - name: Test browser benchmark result integrity and quota matrix
+        run: node cloudflare-browser-result.test.mjs
       - name: Test Worker deployment path coverage
         run: node cloudflare-worker-deploy-paths.test.mjs
