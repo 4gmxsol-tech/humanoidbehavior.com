@@ -39,22 +39,24 @@ assert.ok(
 const plans = JSON.parse(fs.readFileSync("data/plans.json", "utf8"));
 const freePlan = plans.find((plan) => plan.id === "free");
 assert.ok(freePlan, "A published free plan must exist.");
-const freeNote = benchmark.match(/<p class="benchmark-free-note muted">([\\s\\S]*?)<\\/p>/);
-assert.ok(freeNote, "Benchmark visitors must see the free-workspace limits before using the builder.");
+const freeNoteStart = benchmark.indexOf('<p class="benchmark-free-note muted">');
+const freeNoteEnd = benchmark.indexOf("</p>", freeNoteStart);
+assert.ok(freeNoteStart >= 0 && freeNoteEnd > freeNoteStart, "Benchmark visitors must see the free-workspace limits before using the builder.");
+const freeNote = benchmark.slice(freeNoteStart, freeNoteEnd + 4);
 assert.ok(
-  freeNote[1].includes(freePlan.limits.benchmarksPerMonth + " benchmark runs per month"),
+  freeNote.includes(freePlan.limits.benchmarksPerMonth + " benchmark runs per month"),
   "Benchmark free-tier run allowance must match data/plans.json."
 );
 assert.ok(
-  freeNote[1].includes(freePlan.limits.privateBehaviors + " private behaviors"),
+  freeNote.includes(freePlan.limits.privateBehaviors + " private behaviors"),
   "Benchmark free-tier private-behavior allowance must match data/plans.json."
 );
-assert.match(freeNote[1], /href="pricing\\.html"/, "The free-tier note must link to full plan limits.");
-assert.match(freeNote[1], /Paid plans are being prepared for secure checkout/);
-assert.match(freeNote[1], /selecting Pro or Team does not start a paid subscription/);
+assert.ok(freeNote.includes('href="pricing.html"'), "The free-tier note must link to full plan limits.");
+assert.ok(freeNote.includes("Paid plans are being prepared for secure checkout"));
+assert.ok(freeNote.includes("selecting Pro or Team does not start a paid subscription"));
 assert.ok(
-  benchmark.indexOf(freeNote[0]) > benchmark.indexOf(staticCta)
-    && benchmark.indexOf(freeNote[0]) < benchmark.indexOf('<section class="builder-result">'),
+  freeNoteStart > benchmark.indexOf(staticCta)
+    && freeNoteStart < benchmark.indexOf('<section class="builder-result">'),
   "Free-tier details must appear after the signup CTA and before the benchmark controls."
 );
 
