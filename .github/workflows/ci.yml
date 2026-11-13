@@ -46,6 +46,8 @@ jobs:
         run: node .github/scripts/test_pricing_plan_intent.js
       - name: Keep unauthenticated benchmark visitors on a clear sign-in path
         run: node .github/scripts/test_benchmark_signin_cta.js
+      - name: Disclose browser-computed benchmark verification scope
+        run: node .github/scripts/test_benchmark_verification_disclosure.js
       - name: Validate homepage conversion focus and community-link placement
         run: node .github/scripts/test-homepage-community-link.js
       - run: node --check api.js
