@@ -20,4 +20,10 @@ assert.ok(html.includes('<select id="viewer-speed" aria-label="Simulation replay
 assert.ok(html.includes('<canvas id="simulation-canvas" role="img" aria-label="Recorded MuJoCo simulation replay showing the robot, object and target" aria-describedby="viewer-time"'), "Simulation replay canvas must expose its purpose and text description.");
 assert.match(html, /<div id="viewer-time"/, "The canvas description target must remain available.");
 
+const csvJoin = html.match(/const csv=\[[\s\S]*?\]\.join\((["'])(.*?)\1\)/);
+assert.ok(csvJoin, "CSV export must assemble rows with a record separator.");
+assert.equal(csvJoin[2], "\\n", "CSV records must use a real newline separator.");
+const sampleCsv = ["id,name", "1,Ada"].join(csvJoin[2] === "\\n" ? "\n" : csvJoin[2]);
+assert.equal(sampleCsv, "id,name\n1,Ada", "CSV export must produce separate spreadsheet rows.");
+
 console.log("Experiment report inline JavaScript syntax and verification disclosure checks passed.");
