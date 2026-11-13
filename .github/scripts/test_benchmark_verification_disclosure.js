@@ -20,6 +20,14 @@ assert.ok(
   !reportSource.includes("<b>Reproducible</b>"),
   "Experiment reports must not present the client-provided flag as independently verified reproducibility."
 );
+assert.ok(
+  reportSource.includes("<b>Client-reported reproducibility:</b>"),
+  "Comparison reports must label the browser-provided reproducibility flag as a client-reported claim."
+);
+assert.ok(
+  !reportSource.includes('<b>Reproducibility:</b> \' + (r.reproducible?"verified":"—")'),
+  "Comparison reports must not describe a client-provided flag as verified."
+);
 
 assert.ok(
   reportSource.includes('const verificationNote=prov.worker==="browser-mujoco-wasm"'),
