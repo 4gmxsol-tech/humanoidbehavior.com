@@ -13,6 +13,15 @@ assert.ok(
   "Behavior detail must describe the actual browser-result validation scope."
 );
 assert.ok(
+  reportSource.includes("<b>Client-reported reproducibility</b>"),
+  "Experiment reports must label browser-provided reproducibility as a client-reported claim."
+);
+assert.ok(
+  !reportSource.includes("<b>Reproducible</b>"),
+  "Experiment reports must not present the client-provided flag as independently verified reproducibility."
+);
+
+assert.ok(
   reportSource.includes('const verificationNote=prov.worker==="browser-mujoco-wasm"'),
   "Experiment reports must identify browser-computed runs."
 );
