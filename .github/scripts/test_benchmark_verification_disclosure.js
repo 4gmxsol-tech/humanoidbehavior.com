@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 const behaviorSource = fs.readFileSync("app.js", "utf8");
 const reportSource = fs.readFileSync("experiment.html", "utf8");
+const sharedReportSource = fs.readFileSync("share.html", "utf8");
 
 assert.ok(
   !behaviorSource.includes("verified Experiment Lab executions"),
@@ -44,6 +45,31 @@ assert.ok(
 assert.ok(
   reportSource.includes('esc(verificationNote)'),
   "The verification disclosure must be HTML-escaped before rendering."
+);
+
+assert.ok(
+  sharedReportSource.includes("<b>Client-reported reproducibility:</b>"),
+  "Shared reports must label reproducibility as a client-reported claim."
+);
+assert.ok(
+  !sharedReportSource.includes("<b>Reproducible:</b>"),
+  "Shared reports must not present a client-provided flag as independently verified reproducibility."
+);
+assert.ok(
+  sharedReportSource.includes('const verificationNote=p.worker==="browser-mujoco-wasm"'),
+  "Shared reports must identify browser-computed MuJoCo results."
+);
+assert.ok(
+  sharedReportSource.includes("does not independently rerun or cryptographically attest the simulation"),
+  "Shared reports must disclose the lack of independent server recomputation or attestation."
+);
+assert.ok(
+  sharedReportSource.includes("Verification scope is not recorded for this result."),
+  "Legacy shared reports without provenance must be treated as unverified."
+);
+assert.ok(
+  sharedReportSource.includes("esc(verificationNote)"),
+  "The shared-report verification disclosure must be HTML-escaped."
 );
 
 console.log("Benchmark verification-scope disclosure checks passed.");
