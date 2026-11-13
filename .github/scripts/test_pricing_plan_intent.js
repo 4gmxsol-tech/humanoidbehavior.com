@@ -16,6 +16,10 @@ for (const plan of ["pro", "team"]) {
 assert.doesNotMatch(pricing, /Join (?:Pro|Team) waitlist/i, "Pricing must not promise a waitlist that has no submission endpoint");
 assert.match(pricing, /Monthly plans with clearly stated included limits/i, "Pricing must describe the fixed monthly tiers and their included limits accurately");
 assert.doesNotMatch(pricing, /Usage-based plans/i, "Pricing must not imply variable metered billing when the displayed tiers are fixed monthly prices");
+const checkoutNoteIndex = pricing.indexOf('class="pricing-status-note"');
+const pricingGridIndex = pricing.indexOf('<div class="pricing-grid">');
+assert.ok(checkoutNoteIndex >= 0 && checkoutNoteIndex < pricingGridIndex, "Paid-checkout status must be visible before users compare plan cards");
+assert.match(pricing, /class="pricing-status-note" role="note"/, "Checkout status must be exposed as a semantic note");
 assert.match(pricing, /selecting Pro or Team does not start a paid subscription/i, "Pricing must disclose that paid billing is not active");
 
 assert.match(login, /id="planNotice"[^>]*role="status"[^>]*aria-live="polite"[^>]*hidden/i, "Login must provide an accessible plan-intent notice");
