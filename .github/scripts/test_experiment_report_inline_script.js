@@ -16,8 +16,8 @@ for (const [index, source] of inlineScripts.entries()) {
 }
 assert.ok(html.includes("Verification scope:"), "Experiment report must display the verification-scope disclosure.");
 assert.ok(html.includes("does not independently rerun or cryptographically attest the simulation"), "The disclosure must describe the actual verification limit.");
-assert.match(html, /<select\\b[^>]*id="viewer-speed"[^>]*aria-label="Simulation replay speed"/, "Replay speed control must have an accessible name.");
-assert.match(html, /<canvas\\b[^>]*id="simulation-canvas"[^>]*role="img"[^>]*aria-label="Recorded MuJoCo simulation replay showing the robot, object and target"[^>]*aria-describedby="viewer-time"/, "Simulation replay canvas must expose its purpose and text description.");
+assert.ok(html.includes('<select id="viewer-speed" aria-label="Simulation replay speed"'), "Replay speed control must have an accessible name.");
+assert.ok(html.includes('<canvas id="simulation-canvas" role="img" aria-label="Recorded MuJoCo simulation replay showing the robot, object and target" aria-describedby="viewer-time"'), "Simulation replay canvas must expose its purpose and text description.");
 assert.match(html, /<div id="viewer-time"/, "The canvas description target must remain available.");
 
 console.log("Experiment report inline JavaScript syntax and verification disclosure checks passed.");
