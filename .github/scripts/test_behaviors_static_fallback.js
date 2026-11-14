@@ -47,6 +47,14 @@ assert.match(html, /<meta name="description" content="Browse versioned humanoid 
 assert.match(html, /<meta property="og:title" content="Robot Behavior Registry for Humanoids \| HumanoidBehavior">/, "Open Graph title must match the document title");
 assert.match(html, /<meta name="twitter:title" content="Robot Behavior Registry for Humanoids \| HumanoidBehavior">/, "Twitter title must match the document title");
 
+
+assert.equal((html.match(/<section class="cta cta-product registry-next-step" aria-labelledby="registry-next-step-title">/g) || []).length, 1, "Registry page must expose one contextual benchmark next-step CTA");
+assert.ok(html.includes('<h2 id="registry-next-step-title">Evaluate a compatible behavior.</h2>'), "Registry CTA must have a clear accessible heading");
+assert.ok(html.includes('href="benchmark.html">Explore the benchmark workspace</a>'), "Registry CTA must link to the benchmark workspace");
+assert.ok(html.includes('href="login.html">Create a free workspace</a>'), "Registry CTA must link to free signup");
+assert.match(html, /25 benchmark runs per month and 5 private behaviors/, "Free workspace limits must remain accurate");
+assert.match(html, /Paid checkout is not yet available/, "CTA must preserve the current paid-checkout disclosure");
+assert.ok(html.includes("Only verified simulation runs are labeled as measured; simulation comparisons do not replace validation on the target robot."), "CTA must preserve the simulation verification caveat");
 const jsonLdScripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
 const collection = jsonLdScripts.map(match => JSON.parse(match[1])).find(value => value["@type"] === "CollectionPage");
 assert.ok(collection, "CollectionPage JSON-LD is required");
