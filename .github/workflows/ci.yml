@@ -46,6 +46,8 @@ jobs:
         run: node .github/scripts/test_pricing_plan_intent.js
       - name: Persist auth sessions only after server verification
         run: node .github/scripts/test_login_session_persistence.js
+      - name: Preserve responsive lamp scale during drag interactions
+        run: node .github/scripts/test_auth_lamp_controls.js
       - name: Keep unauthenticated benchmark visitors on a clear sign-in path
         run: node .github/scripts/test_benchmark_signin_cta.js
       - name: Disclose browser-computed benchmark verification scope
