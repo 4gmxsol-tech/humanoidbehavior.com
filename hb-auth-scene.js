@@ -1,0 +1,1 @@
+(()=>{const root=document.documentElement;const colors=["#f5b85e","#55d9e8","#d77bff","#73e5a2","#f3f4ed"];let i=0;const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;function cycle(){root.style.setProperty("--lamp-color",colors[i%colors.length]);i++;}cycle();if(!reduce)setInterval(cycle,2100);})();
