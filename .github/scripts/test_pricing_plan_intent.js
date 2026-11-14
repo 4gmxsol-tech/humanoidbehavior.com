@@ -7,6 +7,18 @@ const root = path.resolve(__dirname, "../..");
 const pricing = fs.readFileSync(path.join(root, "pricing.html"), "utf8");
 const login = fs.readFileSync(path.join(root, "login.html"), "utf8");
 
+const expectedTitle = "Robot Behavior Benchmark Plans | HumanoidBehavior";
+const expectedDescription = "Compare the free workspace with displayed Pro and Team limits for robot behavior benchmarks. Start free today; paid checkout is not yet available.";
+assert.ok(pricing.includes("<title>" + expectedTitle + "</title>"), "Document title must describe benchmark plans");
+assert.ok(pricing.includes('<meta property="og:title" content="' + expectedTitle + '">'), "Open Graph title must match the document title");
+assert.ok(pricing.includes('<meta name="twitter:title" content="' + expectedTitle + '">'), "Twitter title must match the document title");
+assert.ok(pricing.includes('<meta name="description" content="' + expectedDescription + '">'), "Meta description must accurately describe the free workspace and unavailable paid checkout");
+assert.ok(pricing.includes('<meta property="og:description" content="' + expectedDescription + '">'), "Open Graph description must match the meta description");
+assert.ok(pricing.includes('<meta name="twitter:description" content="' + expectedDescription + '">'), "Twitter description must match the meta description");
+assert.doesNotMatch(pricing, /Compare HumanoidBehavior plans for reproducible robot behavior benchmarks, private behavior libraries, API access and collaborative robotics team workflows/i, "Stale metadata must not imply that paid API/team checkout is currently available");
+const sitemap = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8");
+assert.match(sitemap, /<loc>https:\/\/humanoidbehavior\.com\/pricing\.html<\/loc><lastmod>2026-11-14<\/lastmod>/, "Pricing sitemap lastmod must match the metadata update");
+
 for (const plan of ["pro", "team"]) {
   assert.ok(
     pricing.includes('href="login.html?plan=' + plan + '">Create free workspace</a>'),
