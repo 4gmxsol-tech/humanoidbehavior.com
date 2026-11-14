@@ -5,7 +5,7 @@ function csvCell(value){
  const text=value==null?"":(typeof value==="object"?JSON.stringify(value):String(value));
  // Spreadsheet applications may execute cells that begin with formula markers.
  // Prefix risky string values with an apostrophe; keep actual numeric values unchanged.
- const safeText=typeof value==="string" && /^[\\s]*[=+\\-@]/.test(text)?"'"+text:text;
+ const safeText=typeof value==="string" && /^[\s]*[=+\-@]/.test(text)?"'"+text:text;
  return /[",\r\n]/.test(safeText)?'"'+safeText.replace(/"/g,'""')+'"':safeText;
 }
 function initSimulationViewer(r){
