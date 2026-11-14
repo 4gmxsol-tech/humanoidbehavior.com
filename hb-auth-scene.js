@@ -25,13 +25,13 @@
     if(pointerId!==e.pointerId)return;
     lastY=e.clientY;
     if(Math.abs(lastY-startY)>7)dragged=true;
-    if(dragged){const delta=Math.max(-45,Math.min(65,lastY-startY));lamp.style.transform="translateY("+delta*.18+"px)";}
+    if(dragged){const delta=Math.max(-45,Math.min(65,lastY-startY));lamp.style.setProperty("translate","0 "+delta*.18+"px");}
   });
   const finishDrag=e=>{
     if(pointerId!==e.pointerId)return;
     const delta=lastY-startY;
     if(dragged&&Math.abs(delta)>35)setPower(delta>0);
-    pointerId=null;lamp.classList.remove("is-dragging");lamp.style.transform="";
+    pointerId=null;lamp.classList.remove("is-dragging");lamp.style.removeProperty("translate");
   };
   lamp.addEventListener("pointerup",finishDrag);
   lamp.addEventListener("pointercancel",finishDrag);
