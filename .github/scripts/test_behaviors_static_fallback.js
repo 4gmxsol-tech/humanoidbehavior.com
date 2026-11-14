@@ -42,11 +42,18 @@ assert.match(html, /role="status">Public behavior specifications are shown below
 assert.match(html, /rel="canonical" href="https:\/\/humanoidbehavior\.com\/behaviors\.html"/, "Canonical URL must remain unchanged");
 assert.match(html, /name="robots" content="index,follow/, "Registry page must remain indexable");
 assert.match(html, /<h1>Reusable humanoid robot behaviors\.<\/h1>/, "H1 must identify humanoid robot behaviors");
+assert.match(html, /<title>Robot Behavior Registry for Humanoids \| HumanoidBehavior<\/title>/, "Title must align with robot behavior registry intent");
+assert.match(html, /<meta name="description" content="Browse versioned humanoid robot behavior specs for manipulation, navigation and handovers\. Compare task definitions and labeled evaluation evidence\."/, "Meta description must explain the registry's contents and evidence labels");
+assert.match(html, /<meta property="og:title" content="Robot Behavior Registry for Humanoids \| HumanoidBehavior">/, "Open Graph title must match the document title");
+assert.match(html, /<meta name="twitter:title" content="Robot Behavior Registry for Humanoids \| HumanoidBehavior">/, "Twitter title must match the document title");
 
 const jsonLdScripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
 const collection = jsonLdScripts.map(match => JSON.parse(match[1])).find(value => value["@type"] === "CollectionPage");
 assert.ok(collection, "CollectionPage JSON-LD is required");
 assert.equal(collection.url, "https://humanoidbehavior.com/behaviors.html");
+assert.equal(collection.name, "Robot Behavior Registry for Humanoids");
+assert.equal(collection.description, "Browse versioned humanoid robot behavior specs for manipulation, navigation and handovers. Compare task definitions and labeled evaluation evidence.");
+assert.equal(collection.dateModified, "2026-11-14");
 assert.match(collection.dateModified, /^\d{4}-\d{2}-\d{2}$/, "CollectionPage dateModified must be an ISO date");
 const sitemap = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8");
 const behaviorEntry = [...sitemap.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(match => match[1]).find(entry => entry.includes("<loc>https://humanoidbehavior.com/behaviors.html</loc>"));
