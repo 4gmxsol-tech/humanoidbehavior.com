@@ -170,11 +170,11 @@ async function requestJson(path,options={}){
 }
 async function finishAuth(data){
   if(!data?.token)throw Error("No session token was returned.");
-  localStorage.setItem("hb_token",data.token);
-  if(data.user)localStorage.setItem("hb_user",JSON.stringify(data.user));
   showStatus("✓ Session created. Verifying access…","ok");
   const me=await requestJson("/api/me",{headers:{Authorization:"Bearer "+data.token}});
   if(!me?.user)throw Error("Session verification failed.");
+  localStorage.setItem("hb_token",data.token);
+  localStorage.setItem("hb_user",JSON.stringify(me.user));
   window.location.assign("dashboard.html");
 }
 async function authenticate(path){
