@@ -24,7 +24,7 @@ assert.match(pricing, /selecting Pro or Team does not start a paid subscription/
 const teamContactIndex = pricing.indexOf('class="pricing-contact-note"');
 assert.ok(teamContactIndex > checkoutNoteIndex && teamContactIndex < pricingGridIndex, "Team consultation contact path must appear after checkout status and before plan cards");
 assert.match(pricing, /Need to discuss a Team workflow, technical fit, or integration/i, "Pricing must offer a clear consultation path while paid checkout is unavailable");
-assert.match(pricing, /<a href="contact\\.html">Contact us<\\/a>/, "Team consultation CTA must lead to the existing contact page");
+assert.ok(pricing.includes('<a href="contact.html">Contact us</a>'), "Team consultation CTA must lead to the existing contact page");
 assert.match(pricing, /This link does not start a payment or subscription/i, "The consultation CTA must not imply an active paid checkout");
 
 assert.match(login, /id="planNotice"[^>]*role="status"[^>]*aria-live="polite"[^>]*hidden/i, "Login must provide an accessible plan-intent notice");
