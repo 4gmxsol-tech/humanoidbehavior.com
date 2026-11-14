@@ -27,9 +27,9 @@ assert.equal(csvCell("Ada, \"A\""), "\"Ada, \"\"A\"\"\"", "CSV fields with comma
 assert.equal(csvCell("line one\nline two"), "\"line one\nline two\"", "CSV fields containing line breaks must be quoted.");
 assert.equal(csvCell(42), "42", "Numeric CSV values must remain readable.");
 assert.equal(csvCell(null), "", "Null CSV values must export as empty cells.");
-assert.match(html, /keys\.map\(csvCell\)\.join\(",")/, "CSV header cells must use the serializer.");
-assert.match(html, /keys\.map\(k=>csvCell\(v\[k\]\)\)\.join\(",")/, "CSV data cells must use the serializer.");
-assert.match(html, /\.join\("\\r\\n"\)/, "CSV records must use CRLF separators.");
+assert.ok(html.includes('keys.map(csvCell).join(",")'), "CSV header cells must use the serializer.");
+assert.ok(html.includes('keys.map(k=>csvCell(v[k])).join(",")'), "CSV data cells must use the serializer.");
+assert.ok(html.includes(String.raw\`.join("\r\n")\`), "CSV records must use CRLF separators.");
 const sampleCsv = [csvCell("id"), csvCell("value")].join(",") + "\r\n" + [csvCell("1"), csvCell("Ada, \"A\"")].join(",");
 assert.equal(sampleCsv, "id,value\r\n1,\"Ada, \"\"A\"\"\"", "CSV export must produce valid separate spreadsheet rows.");
 
