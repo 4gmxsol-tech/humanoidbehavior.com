@@ -43,3 +43,17 @@ body.hb-auth.hb-animation-page{--lamp-color:#f5b85e;margin:0;min-height:100vh;ba
 @media(max-width:820px){.hb-animation-page.auth-page{padding-bottom:14px}.hb-animation-page .auth-shell{width:calc(100% - 32px);min-height:unset;grid-template-columns:1fr;gap:14px;padding:20px 0 24px}.hb-animation-page .auth-showcase{min-height:230px;padding:45px 0 10px 4%}.hb-animation-page .auth-showcase .brand{top:0;left:4%}.hb-animation-page .auth-showcase h2{font-size:37px;max-width:310px}.hb-animation-page .auth-showcase>p{max-width:300px;font-size:11px}.hb-animation-page .auth-points{display:none}.hb-animation-page .auth-lamp{left:auto;right:-12px;bottom:-5px;transform:scale(.57);transform-origin:bottom right;opacity:.68}.hb-animation-page .auth-card{max-width:440px;margin:0 auto;padding:23px 20px}.hb-animation-page .code-console{width:calc(100% - 32px)}.code-console pre{font-size:9px;line-height:1.55}.anim-topbar{padding:0 16px}.anim-topbar-tag{font-size:7px}}
 @media(max-width:420px){.anim-topbar-tag{display:none}.hb-animation-page .auth-showcase{min-height:200px}.hb-animation-page .auth-showcase h2{font-size:32px}.hb-animation-page .auth-showcase>p{max-width:230px}.hb-animation-page .auth-lamp{transform:scale(.43)}.code-status-right{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.hb-animation-page .auth-card{animation:none}.hb-animation-page *{transition:none!important}}
+
+/* Interactive physical lamp controls */
+.hb-animation-page .scene-lamp{pointer-events:auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.hb-animation-page .scene-lamp.is-dragging{cursor:grabbing}
+.hb-animation-page .lamp-switch{position:absolute;left:92px;bottom:3px;z-index:5;width:34px;height:34px;border:2px solid #aeb8b5;border-radius:50%;padding:0;background:radial-gradient(circle at 35% 30%,#fff,#778487 42%,#263237 75%);box-shadow:0 2px 8px #000b,inset 0 1px 2px #fff9;cursor:pointer;display:grid;place-items:center;touch-action:manipulation}
+.hb-animation-page .lamp-switch span{width:9px;height:9px;border-radius:50%;background:var(--lamp-color);box-shadow:0 0 9px 3px var(--lamp-color);transition:background .3s,box-shadow .3s}
+.hb-animation-page .lamp-switch:focus-visible{outline:3px solid var(--lamp-color);outline-offset:4px}
+.hb-animation-page .scene-lamp:after{content:"DRAG DOWN · OFF / UP · ON";position:absolute;left:12px;bottom:-7px;color:#879398;font:8px ui-monospace,monospace;letter-spacing:.1em;white-space:nowrap}
+.hb-animation-page.lamp-is-off .lamp-beam,.hb-animation-page.lamp-is-off .lamp-glow{opacity:0!important}
+.hb-animation-page.lamp-is-off .lamp-shade:after{background:#3b4447!important;box-shadow:none!important}
+.hb-animation-page.lamp-is-off .lamp-switch span{background:#657075!important;box-shadow:none!important}
+.hb-animation-page.lamp-is-off .auth-card{border-color:#ffffff22;box-shadow:0 25px 90px #000b}
+.hb-animation-page.lamp-is-off .anim-dot{background:#596367;box-shadow:none}
+@media(max-width:820px){.hb-animation-page .scene-lamp:after{font-size:7px}.hb-animation-page .lamp-switch{width:42px;height:42px;left:86px;bottom:0}}
