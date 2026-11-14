@@ -10,8 +10,8 @@ const authSceneCss = fs.readFileSync(path.join(root, "hb-auth-scene.css"), "utf8
 assert.match(login, /<body class="hb-auth hb-animation-page">/, "Login must activate the scoped reference-matched auth scene styles");
 assert.ok(login.includes('href="hb-auth-scene.css"'), "Login must load the auth scene stylesheet");
 assert.ok(login.includes('<script src="hb-auth-scene.js" defer></script>'), "Login must load the synchronized lamp scene controller");
-assert.match(authSceneCss, /body\\.hb-auth\\.hb-animation-page/, "Auth scene styles must target the activated body class");
-assert.match(authSceneCss, /prefers-reduced-motion:\\s*reduce/, "Auth scene must preserve reduced-motion preferences");
+assert.match(authSceneCss, /body\.hb-auth\.hb-animation-page/, "Auth scene styles must target the activated body class");
+assert.match(authSceneCss, /prefers-reduced-motion:\s*reduce/, "Auth scene must preserve reduced-motion preferences");
 
 
 const expectedTitle = "Robot Behavior Benchmark Plans | HumanoidBehavior";
