@@ -20,10 +20,17 @@ assert.ok(html.includes('<select id="viewer-speed" aria-label="Simulation replay
 assert.ok(html.includes('<canvas id="simulation-canvas" role="img" aria-label="Recorded MuJoCo simulation replay showing the robot, object and target" aria-describedby="viewer-time"'), "Simulation replay canvas must expose its purpose and text description.");
 assert.match(html, /<div id="viewer-time"/, "The canvas description target must remain available.");
 
-const csvJoin = html.match(/const csv=\[[\s\S]*?\]\.join\((["'])(.*?)\1\)/);
-assert.ok(csvJoin, "CSV export must assemble rows with a record separator.");
-assert.equal(csvJoin[2], "\\n", "CSV records must use a real newline separator.");
-const sampleCsv = ["id,name", "1,Ada"].join(csvJoin[2] === "\\n" ? "\n" : csvJoin[2]);
-assert.equal(sampleCsv, "id,name\n1,Ada", "CSV export must produce separate spreadsheet rows.");
+const csvCellMatch = html.match(/function csvCell\(value\)\s*\{[\s\S]*?\n\}/);
+assert.ok(csvCellMatch, "CSV export must use a dedicated cell serializer.");
+const csvCell = vm.runInNewContext("(" + csvCellMatch[0] + ")");
+assert.equal(csvCell("Ada, \"A\""), "\"Ada, \"\"A\"\"\"", "CSV fields with commas and quotes must be escaped using doubled quotes.");
+assert.equal(csvCell("line one\nline two"), "\"line one\nline two\"", "CSV fields containing line breaks must be quoted.");
+assert.equal(csvCell(42), "42", "Numeric CSV values must remain readable.");
+assert.equal(csvCell(null), "", "Null CSV values must export as empty cells.");
+assert.ok(html.includes('keys.map(csvCell).join(",")'), "CSV header cells must use the serializer.");
+assert.ok(html.includes('keys.map(k=>csvCell(v[k])).join(",")'), "CSV data cells must use the serializer.");
+assert.ok(html.includes('.join("\\r\\n")'), "CSV records must use CRLF separators.");
+const sampleCsv = [csvCell("id"), csvCell("value")].join(",") + "\r\n" + [csvCell("1"), csvCell("Ada, \"A\"")].join(",");
+assert.equal(sampleCsv, "id,value\r\n1,\"Ada, \"\"A\"\"\"", "CSV export must produce valid separate spreadsheet rows.");
 
 console.log("Experiment report inline JavaScript syntax and verification disclosure checks passed.");
