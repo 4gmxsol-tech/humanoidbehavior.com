@@ -3,7 +3,10 @@
 const token=localStorage.getItem("hb_token"),id=new URLSearchParams(location.search).get("id");const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));const api=async u=>{const r=await fetch(u,{headers:token?{Authorization:"Bearer "+token}:{}});const x=await r.json();if(!r.ok)throw Error(x.error||"Request failed");return x};const n=v=>typeof v==="number"?v.toFixed(4):"—";
 function csvCell(value){
  const text=value==null?"":(typeof value==="object"?JSON.stringify(value):String(value));
- return /[",\r\n]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text;
+ // Spreadsheet applications may execute cells that begin with formula markers.
+ // Prefix risky string values with an apostrophe; keep actual numeric values unchanged.
+ const safeText=typeof value==="string" && /^[\\s]*[=+\\-@]/.test(text)?"'"+text:text;
+ return /[",\r\n]/.test(safeText)?'"'+safeText.replace(/"/g,'""')+'"':safeText;
 }
 function initSimulationViewer(r){
  const frames=r?.rawResults?.[0]?.metrics?.motionFrames || r?.rawResults?.[0]?.motionFrames || r?.metrics?.motionFrames || [];
