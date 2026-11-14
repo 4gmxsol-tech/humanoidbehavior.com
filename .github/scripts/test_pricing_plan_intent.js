@@ -21,6 +21,11 @@ const pricingGridIndex = pricing.indexOf('<div class="pricing-grid">');
 assert.ok(checkoutNoteIndex >= 0 && checkoutNoteIndex < pricingGridIndex, "Paid-checkout status must be visible before users compare plan cards");
 assert.match(pricing, /class="pricing-status-note" role="note"/, "Checkout status must be exposed as a semantic note");
 assert.match(pricing, /selecting Pro or Team does not start a paid subscription/i, "Pricing must disclose that paid billing is not active");
+const teamContactIndex = pricing.indexOf('class="pricing-contact-note"');
+assert.ok(teamContactIndex > checkoutNoteIndex && teamContactIndex < pricingGridIndex, "Team consultation contact path must appear after checkout status and before plan cards");
+assert.match(pricing, /Need to discuss a Team workflow, technical fit, or integration/i, "Pricing must offer a clear consultation path while paid checkout is unavailable");
+assert.ok(pricing.includes('<a href="contact.html">Contact us</a>'), "Team consultation CTA must lead to the existing contact page");
+assert.match(pricing, /This link does not start a payment or subscription/i, "The consultation CTA must not imply an active paid checkout");
 
 assert.match(login, /id="planNotice"[^>]*role="status"[^>]*aria-live="polite"[^>]*hidden/i, "Login must provide an accessible plan-intent notice");
 assert.ok(login.includes('new URLSearchParams(window.location.search).get("plan")'), "Login must read the selected plan from the query string");
