@@ -10,13 +10,14 @@
 <script src="api-base.js"></script><script src="product-ui.js" defer></script><script src="site-settings.js" defer></script><script src="hb-platform-pro.js" defer></script>
 </head>
 <body class="hb-auth">
-<main class="auth-page"><div class="auth-ambient" aria-hidden="true"><span></span><span></span><span></span></div>
-  <div class="auth-shell">
+<main class="auth-page hb-animation-page">
+  <header class="anim-topbar"><span class="anim-dot"></span><strong>JavaScript Animation</strong><span class="anim-topbar-tag">HUMANOIDBEHAVIOR / AUTH EXPERIENCE</span></header>
+  <div class="auth-shell anim-stage">
     <section class="auth-showcase" aria-label="HumanoidBehavior platform">
       <a class="brand" href="index.html">Humanoid<span>Behavior</span></a>
       <h2>Run evidence.<br>Not guesses.</h2>
       <p>Access your robotics workspace, launch reproducible MuJoCo evaluations, inspect experiment reports and manage developer API keys.</p>
-      <div class="auth-lamp" aria-hidden="true"><div class="lamp-base"></div><div class="lamp-stem"></div><div class="lamp-arm"></div><div class="lamp-shade"></div></div>
+      <div class="auth-lamp scene-lamp" aria-hidden="true"><div class="lamp-glow"></div><div class="lamp-beam"></div><div class="lamp-base"></div><div class="lamp-stem"></div><div class="lamp-joint"></div><div class="lamp-arm"></div><div class="lamp-head"></div><div class="lamp-shade"><i></i></div></div>
       <div class="auth-points">
         <div class="auth-point"><i>✓</i><span>Versioned behavior specifications</span></div>
         <div class="auth-point"><i>✓</i><span>Measured browser-based MuJoCo execution</span></div>
@@ -69,6 +70,20 @@
       <div class="auth-foot">By continuing, you agree to use the platform for authorized robotics research, development and evaluation. <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a></div>
     </section>
   </div>
+  <section class="code-console" aria-label="Animation source preview">
+    <div class="code-title"><span class="code-lights"><i></i><i></i><i></i></span><b>lamp-login-animation.js</b><span class="code-live">● LIVE PREVIEW</span></div>
+    <pre><code><span class="code-muted">01</span> <span class="code-purple">const</span> palette = [<span class="code-string">"#f5b85e"</span>, <span class="code-string">"#54d9e8"</span>, <span class="code-string">"#d77bff"</span>, <span class="code-string">"#73e5a2"</span>];
+<span class="code-muted">02</span> <span class="code-purple">let</span> frame = <span class="code-number">0</span>;
+<span class="code-muted">03</span>
+<span class="code-muted">04</span> <span class="code-purple">function</span> <span class="code-function">animateScene</span>() {
+<span class="code-muted">05</span>   <span class="code-purple">const</span> tint = palette[frame % palette.length];
+<span class="code-muted">06</span>   document.documentElement.style.setProperty(<span class="code-string">"--lamp-color"</span>, tint);
+<span class="code-muted">07</span>   lampBeam.classList.add(<span class="code-string">"illuminated"</span>);
+<span class="code-muted">08</span>   loginCard.classList.add(<span class="code-string">"visible"</span>);
+<span class="code-muted">09</span>   frame++;
+<span class="code-muted">10</span> }</code></pre>
+    <div class="code-status"><span>●</span> Animation running <span class="code-status-right">60 FPS&nbsp; · &nbsp;CSS + JavaScript</span></div>
+  </section>
 </main>
 
 <script>
@@ -180,5 +195,6 @@ authForm.addEventListener("submit",e=>{e.preventDefault();if(mode==="login")auth
 signupButton.onclick=()=>{if(mode==="login")setMode("signup");else setMode("login");};
 updateMeter();
 </script>
+<script src="hb-auth-scene.js" defer></script>
 </body>
 </html>
