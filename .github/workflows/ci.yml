@@ -40,6 +40,8 @@ jobs:
           }
           console.log('SEO validation passed for ' + urls.length + ' sitemap pages.');
           NODE
+      - name: Validate homepage search intent
+        run: node .github/scripts/test_homepage_search_intent.js
       - name: Guard public sale availability claims
         run: node public-availability-policy.test.js
       - name: Validate pricing plan intent and free-signup clarity
