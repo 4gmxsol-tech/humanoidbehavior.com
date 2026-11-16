@@ -3,11 +3,11 @@ const fs = require("node:fs");
 
 const html = fs.readFileSync("index.html", "utf8");
 const sitemap = fs.readFileSync("sitemap.xml", "utf8");
-const title = (html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i) || [])[1] || "";
-const description = (html.match(/<meta\\s+name=["']description["']\\s+content=["']([^"']*)["']/i) || [])[1] || "";
-const canonical = (html.match(/<link\\s+rel=["']canonical["']\\s+href=["']([^"']*)["']/i) || [])[1] || "";
-const h1 = (html.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/i) || [])[1] || "";
-const visibleH1 = h1.replace(/<[^>]*>/g, " ").replace(/\\s+/g, " ").trim();
+const title = (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || "";
+const description = (html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i) || [])[1] || "";
+const canonical = (html.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i) || [])[1] || "";
+const h1 = (html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [])[1] || "";
+const visibleH1 = h1.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 
 assert.ok(title.includes("Humanoid Robot Behavior"), "Homepage title must retain the primary topic");
 assert.ok(description.toLowerCase().includes("humanoid robot behaviors"), "Meta description must retain the primary topic");
