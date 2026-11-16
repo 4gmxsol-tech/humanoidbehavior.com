@@ -16,7 +16,7 @@ assert.equal(visibleH1, "Humanoid Robot Behavior. Define, measure and benchmark.
   "Visible H1 must state the primary topic and the platform's core actions");
 assert.ok(sitemap.includes("<loc>https://humanoidbehavior.com/</loc>"),
   "Homepage must remain discoverable in the sitemap");
-const homepageEntry = (sitemap.match(/<url><loc>https:\/\/humanoidbehavior\.com<\/\/><[\s\S]*?<\/url>/i) || [])[0] || "";
+const homepageEntry = sitemap.split("<url><loc>https://humanoidbehavior.com/</loc>")[1]?.split("</url>")[0] || "";
 assert.ok(homepageEntry.includes("<lastmod>2026-11-15</lastmod>"),
   "Homepage sitemap lastmod must reflect the November 15 search-intent update");
 
