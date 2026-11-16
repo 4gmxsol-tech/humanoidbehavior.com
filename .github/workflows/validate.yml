@@ -7,6 +7,8 @@ on:
       - "cloudflare-worker.js"
       - "cloudflare-behavior-access.mjs"
       - "demo.html"
+      - "index.html"
+      - ".github/scripts/test_homepage_script_loading.mjs"
       - "sitemap.xml"
       - ".github/scripts/test_demo_replay_disclosure.mjs"
       - ".github/scripts/test_cloudflare_behavior_access.mjs"
@@ -45,3 +47,5 @@ jobs:
         run: node .github/scripts/test_cloudflare_behavior_access.mjs
       - name: Validate demo replay disclosure and non-interactive preview
         run: node .github/scripts/test_demo_replay_disclosure.mjs
+      - name: Validate non-blocking homepage API bootstrap
+        run: node .github/scripts/test_homepage_script_loading.mjs
