@@ -17,7 +17,7 @@ assert.equal(visibleH1, "Humanoid Robot Behavior. Define, measure and benchmark.
 assert.ok(sitemap.includes("<loc>https://humanoidbehavior.com/</loc>"),
   "Homepage must remain discoverable in the sitemap");
 const homepageEntry = sitemap.split("<url><loc>https://humanoidbehavior.com/</loc>")[1]?.split("</url>")[0] || "";
-assert.ok(homepageEntry.includes("<lastmod>2026-11-15</lastmod>"),
-  "Homepage sitemap lastmod must reflect the November 15 search-intent update");
+assert.ok(homepageEntry.includes("<lastmod>2026-11-16</lastmod>"),
+  "Homepage sitemap lastmod must reflect the November 16 script-loading update");
 
 console.log("Humanoid Robot Behavior homepage search-intent validation passed.");
