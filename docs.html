@@ -55,4 +55,12 @@ compute build + worker</pre><p>Reports expose the exact evaluation configuration
   "status": "passed",
   "behaviorId": "pick-place",
   "adapter": "spec-validator"
-}</pre></section></main></body></html>
+}</pre></section><section class="page"><div class="eyebrow">REFERENCE</div><h2>Behavior schema</h2><p class="lead">A behavior is a versioned task specification. The example below shows the fields an evaluation record keeps together.</p><pre class="code-block">{
+  "behaviorId": "pick-place",
+  "version": "1.0.0",
+  "engine": "mujoco",
+  "engineVersion": "3.x",
+  "seeds": [42, 1337],
+  "policies": ["my-policy"],
+  "completedSteps": ["Perceive target object", "Reach and grasp", "Release at target"]
+}</pre><h2>Error responses</h2><p>Failed requests return a JSON error with a stable code and a human-readable message. A <code>400</code> means the request was malformed — check the behavior identifier, version and required fields. A <code>401</code> means the API key is missing or invalid. A <code>429</code> means the workspace has reached its monthly benchmark allowance; check usage in Workspace before retrying. A <code>5xx</code> means the evaluation worker could not complete the run; retry once, then contact support with the returned request identifier.</p><h2>Reproducibility checklist</h2><p>Before sharing a result, confirm that the report records the behavior identifier and version, the engine and engine version, the exact seeds, the policy identifier and version, the duration and the measured metrics. If any field is missing, the run cannot be reproduced exactly. Reports expose the full evaluation configuration and provide a one-click reproduction path.</p><h2>Docs FAQ</h2><p><strong>Which engines are supported?</strong> The current public measured path is the supported MuJoCo worker. Isaac Lab, Gazebo, ROS 2 and HTTP robot gateway adapters are planned execution contracts and are not enabled yet.</p><p><strong>Can I compare two behavior versions?</strong> Version comparison is currently disabled while the comparison worker is being hardened. Single-version MuJoCo evaluations are the supported measured path today.</p><p><strong>Where do I manage API keys?</strong> Create and revoke keys from Workspace. Use account sessions or API keys for authenticated endpoints.</p><p>Last updated November 18, 2026.</p></section></main></body></html>
