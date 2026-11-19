@@ -1,6 +1,6 @@
 # HumanoidBehavior.com — Acquisition Asset Inventory
 
-> **Status: HOLD — not currently offered for sale.** Reference material only; this document is not a current offer, listing, or authorization to sell or transfer any domain, code, account, data, or infrastructure. Any future transaction requires separate written approval and a precisely defined transfer scope.
+> **Status: AVAILABLE FOR ACQUISITION.** HumanoidBehavior.com — including the domain, platform, software, repositories, brand and data listed in this document — is available for acquisition. Acquisition inquiries: domainzax@gmail.com. Transfer scope is defined in writing as part of the acquisition agreement.
 
 
 ## Included core assets

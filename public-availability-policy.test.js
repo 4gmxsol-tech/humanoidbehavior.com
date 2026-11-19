@@ -4,21 +4,14 @@ const path = require("node:path");
 
 const root = process.cwd();
 const sitemap = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8");
-if (/https:\/\/humanoidbehavior\.com\/acquisition\//i.test(sitemap)) {
-  throw new Error("The acquisition status endpoint must not be listed in the public sitemap.");
+if (!/https:\/\/humanoidbehavior\.com\/acquisition\//i.test(sitemap)) {
+  throw new Error("The acquisition page must be listed in the public sitemap.");
 }
 
-const forbiddenPublicClaims = [
-  /available for acquisition/i,
-  /available for strategic acquisition/i,
-  /acquisition opportunity/i,
-  /request acquisition discussion/i,
-  /acquisition room/i,
-  /buyer room/i,
-  /open sale package/i,
-  /buyer handoff/i,
-  /sale package/i,
-  /see the acquisition path/i
+const forbiddenHoldClaims = [
+  /not currently being offered for sale/i,
+  /not for sale/i,
+  /Status: HOLD/i
 ];
 
 function walkHtml(dir, results = []) {
@@ -32,26 +25,30 @@ function walkHtml(dir, results = []) {
 }
 
 const htmlFiles = walkHtml(root);
+let homepageLinksToAcquisition = false;
 for (const file of htmlFiles) {
   const relative = path.relative(root, file).replaceAll(path.sep, "/");
   const html = fs.readFileSync(file, "utf8");
-  if (relative === "acquisition/index.html") {
-    if (!/<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(html)) {
-      throw new Error("Acquisition status endpoint must be noindex: " + relative);
+  for (const pattern of forbiddenHoldClaims) {
+    if (pattern.test(html)) {
+      throw new Error("Stale HOLD claim " + pattern + " found in " + relative);
     }
-    if (!/not currently being offered for sale/i.test(html)) {
-      throw new Error("Acquisition status endpoint must clearly state HOLD: " + relative);
+  }
+  if (relative === "acquisition/index.html") {
+    if (/<meta\s+name=["']robots["']\s+content=["'][^"']*noindex/i.test(html)) {
+      throw new Error("Acquisition page must be indexable, not noindex: " + relative);
+    }
+    if (!/available for acquisition/i.test(html)) {
+      throw new Error("Acquisition page must clearly state it is available for acquisition: " + relative);
     }
     continue;
   }
-  for (const pattern of forbiddenPublicClaims) {
-    if (pattern.test(html)) {
-      throw new Error("Unapproved public sale claim " + pattern + " found in " + relative);
-    }
+  if (relative === "index.html" && /href=["'][^"']*acquisition\//i.test(html)) {
+    homepageLinksToAcquisition = true;
   }
-  if (/href=["'][^"']*acquisition\//i.test(html)) {
-    throw new Error("Public page still links to acquisition endpoint: " + relative);
-  }
+}
+if (!homepageLinksToAcquisition) {
+  throw new Error("Homepage must link to the acquisition page.");
 }
 
 const referenceDocs = [
@@ -62,9 +59,9 @@ const referenceDocs = [
 ];
 for (const file of referenceDocs) {
   const content = fs.readFileSync(path.join(root, file), "utf8");
-  if (!content.startsWith("#") || !/Status: HOLD — not currently offered for sale/i.test(content)) {
-    throw new Error("Reference document is missing the HOLD notice: " + file);
+  if (!content.startsWith("#") || !/Status: AVAILABLE FOR ACQUISITION/i.test(content)) {
+    throw new Error("Reference document is missing the AVAILABLE FOR ACQUISITION notice: " + file);
   }
 }
 
-console.log("Public sale-status policy passed across " + htmlFiles.length + " HTML files and " + referenceDocs.length + " reference documents.");
+console.log("Public availability policy passed across " + htmlFiles.length + " HTML files and " + referenceDocs.length + " reference documents.");
