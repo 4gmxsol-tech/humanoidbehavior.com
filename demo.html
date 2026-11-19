@@ -42,6 +42,7 @@
 .demo-result{background:#0d1118;color:#fff;border-color:#202633}.demo-result .eyebrow{color:#9ca6b7}.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.result-kpi{padding:16px;border:1px solid #272e3b;border-radius:12px;background:#131822}.result-kpi strong{display:block;font-size:23px}.result-kpi span{font-size:10px;color:#8f99aa}
 .result-bars{margin-top:22px}.bar-row{display:grid;grid-template-columns:100px 1fr 50px;gap:10px;align-items:center;margin:11px 0;font-size:11px;color:#aeb6c3}.bar{height:8px;background:#252c38;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;width:var(--w);background:#8f88ff;border-radius:99px}
 .demo-replay{display:grid;grid-template-columns:1fr .9fr;gap:18px}.replay-window{border-radius:18px;background:#f0f2f5;border:1px solid var(--hb-line);min-height:300px;position:relative;overflow:hidden}.replay-window:before{content:"";position:absolute;left:8%;right:8%;bottom:55px;height:7px;background:#c6cad1;border-radius:4px}.replay-floor{position:absolute;left:13%;bottom:62px;width:150px;height:2px;background:#aeb4be;transform:rotate(-16deg);transform-origin:left}.robot-arm{position:absolute;left:31%;bottom:68px;width:145px;height:12px;background:#343a46;border-radius:9px;transform:rotate(-25deg);transform-origin:left center}.robot-arm:before{content:"";position:absolute;left:82px;top:3px;width:85px;height:10px;background:#565e6d;border-radius:8px;transform:rotate(48deg);transform-origin:left}.robot-hand{position:absolute;left:64%;bottom:110px;width:28px;height:22px;border:4px solid #1f2937;border-radius:9px;transform:rotate(-8deg)}.demo-object{position:absolute;left:72%;bottom:71px;width:22px;height:22px;border-radius:5px;background:#635bff}.demo-target{position:absolute;left:24%;bottom:69px;width:30px;height:26px;border:3px dashed #22a35a;border-radius:5px}.replay-caption{position:absolute;left:18px;top:18px;font-size:10px;font-weight:800;letter-spacing:1.4px;color:#6c7480}.replay-disclaimer{position:absolute;left:18px;right:18px;bottom:16px;padding:10px 12px;border:1px solid #cfd3da;border-radius:10px;background:rgba(255,255,255,.96);color:#343a46;font-size:11px;line-height:1.5}.demo-list{display:grid;gap:12px}.demo-list-item{display:flex;gap:12px;padding:15px;border:1px solid var(--hb-line);border-radius:13px}.demo-list-item b{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:#f0efff;color:#5b54cc;font-size:11px;flex:0 0 auto}.demo-list-item strong{display:block;font-size:13px}.demo-list-item span{display:block;color:var(--hb-muted);font-size:12px;margin-top:3px}
+.result-table{margin-top:22px;border:1px solid #272e3b;border-radius:12px;overflow:hidden}.result-row{display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr;gap:8px;padding:11px 14px;font-size:12px;border-top:1px solid #272e3b}.result-row:first-child{border-top:0}.result-head{color:#8f99aa;font-size:10px;letter-spacing:1px;text-transform:uppercase}.result-row span:nth-child(n+2){text-align:right;font-variant-numeric:tabular-nums}.result-note{margin-top:16px;font-size:12px;color:#aeb6c3;line-height:1.6}.result-note a{color:#fff;text-decoration:underline;text-underline-offset:3px}
 .demo-architecture{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.arch-card{padding:22px;border:1px solid var(--hb-line);border-radius:16px;background:#fff}.arch-card b{font-size:10px;letter-spacing:1.5px;color:#777e89}.arch-card strong{display:block;font-size:17px;margin:12px 0 5px}.arch-card span{color:var(--hb-muted);font-size:12px}
 .demo-cta{margin-top:80px;padding:54px 30px;border-radius:24px;background:#10131a;color:#fff;text-align:center}.demo-cta h2{font-size:40px;letter-spacing:-2px;margin:0 0 12px}.demo-cta p{color:#aeb6c3;max-width:600px;margin:0 auto 25px}
 @media(max-width:900px){.demo-hero,.demo-run,.demo-replay{grid-template-columns:1fr}.demo-steps{grid-template-columns:repeat(2,1fr)}.demo-architecture{grid-template-columns:repeat(2,1fr)}}
@@ -109,7 +110,7 @@
 <section class="demo-buyer-strip" id="product-review"><div><div class="eyebrow">TECHNICAL PRODUCT REVIEW</div><h2>Demo → Evidence → Evaluation</h2><p>Inspect the supported workflow, review a measured sample artifact, and verify the current product boundaries before integrating it into a robotics stack.</p></div><div class="buyer-path"><span><b>01</b>Inspect the workflow</span><i>→</i><span><b>02</b>Run the lab</span><i>→</i><span><b>03</b>Review evidence</span><i>→</i><span><b>04</b>Read the docs</span></div></section>
 
 <section class="demo-section">
-  <div class="demo-section-head"><div><div class="eyebrow">01 — THE RUN</div><h2>One configuration. One trace.</h2></div><p>The demo mirrors the product's actual evaluation model: explicit behavior version, engine and seeds are attached to the measured result.</p></div>
+  <div class="demo-section-head"><div><div class="eyebrow">01 — THE RUN</div><h2>One configuration. One trace.</h2></div><p>The demo mirrors the product's actual evaluation model: explicit behavior version, engine and seeds are attached to the measured result. The result card shows the published measured sample run (humanoid-stand-v1, 10 runs), not the Pick &amp; Place walkthrough on the left.</p></div>
   <div class="demo-run">
     <div class="demo-card">
       <div class="eyebrow">CONFIGURATION</div><h3>Pick &amp; Place</h3><p>Reference manipulation behavior used to demonstrate the measured execution path.</p>
@@ -118,17 +119,18 @@
       </div>
     </div>
     <div class="demo-card demo-result">
-      <div class="eyebrow">MEASURED RESULT · EXAMPLE VIEW</div>
+      <div class="eyebrow">MEASURED SAMPLE · HUMANOID-STAND-V1</div>
       <h3>Evidence, not a static claim.</h3>
-      <p>Each run keeps its configuration and measured output together. The values below are illustrative UI fields, not a claim of a live benchmark result.</p>
+      <p>Measured sample run from the published artifact: 10 measured MuJoCo runs — 5 seeds × 2 policies — against a 5.0 s target. Both policies fell before the target in every run (fall rate 1.0), so survival is reported as a mean fraction of the target time, not as a success claim. These numbers describe this simulator sample only.</p>
       <div class="result-grid">
-        <div class="result-kpi"><strong>5</strong><span>runs</span></div><div class="result-kpi"><strong>1.1.0</strong><span>behavior version</span></div><div class="result-kpi"><strong>MuJoCo</strong><span>engine</span></div><div class="result-kpi"><strong>Replay</strong><span>motion frames</span></div>
+        <div class="result-kpi"><strong>10</strong><span>measured runs</span></div><div class="result-kpi"><strong>5 × 2</strong><span>seeds × policies</span></div><div class="result-kpi"><strong>MuJoCo</strong><span>engine</span></div><div class="result-kpi"><strong>1.0</strong><span>fall rate, both policies</span></div>
       </div>
-      <div class="result-bars">
-        <div class="bar-row"><span>success</span><div class="bar"><i style="--w:86%"></i></div><b>metric</b></div>
-        <div class="bar-row"><span>stability</span><div class="bar"><i style="--w:74%"></i></div><b>metric</b></div>
-        <div class="bar-row"><span>validation</span><div class="bar"><i style="--w:100%"></i></div><b>schema</b></div>
+      <div class="result-table" role="table" aria-label="Measured sample means by policy">
+        <div class="result-row result-head" role="row"><span role="columnheader">Policy (mean of 5 runs)</span><span role="columnheader">Survival</span><span role="columnheader">Sim time</span><span role="columnheader">Control cost</span></div>
+        <div class="result-row" role="row"><span>policy-a-stabilizer</span><span>0.3264</span><span>1.632 s</span><span>0.163122</span></div>
+        <div class="result-row" role="row"><span>policy-b-stabilizer</span><span>0.3304</span><span>1.652 s</span><span>0.147768</span></div>
       </div>
+      <p class="result-note">Min torso height (mean): 0.61782 m (policy-a) · 0.6188 m (policy-b). Max tilt (mean): 0.52094 rad (policy-a) · 0.55918 rad (policy-b). Full per-run statistics, seeds and provenance: <a href="data/latest-mujoco-experiment.json">raw experiment artifact (JSON)</a> · <a href="evidence.html">evidence room</a>.</p>
     </div>
   </div>
 </section>
@@ -160,7 +162,7 @@
 
 <section class="demo-cta">
   <h2>Want to see the real run?</h2>
-  <p>Open the live Experiment Lab, launch a supported benchmark, and inspect the resulting report and replay.</p>
+  <p>Open the live Experiment Lab — no account needed for one guest run — launch a supported benchmark, and inspect the resulting report and replay.</p>
   <div class="demo-actions" style="justify-content:center"><a class="button primary" href="simulation.html">Open Experiment Lab →</a><a class="button secondary" href="contact.html">Talk about the asset</a></div>
 </section>
 </main>
