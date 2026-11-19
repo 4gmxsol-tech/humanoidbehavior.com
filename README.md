@@ -11,6 +11,7 @@ The current public MVP provides:
 - Persistent experiments and job status
 - Multi-seed evaluation configuration
 - Browser-first measured MuJoCo execution through WebAssembly, with a local compute fallback
+- One guest MuJoCo run in the Experiment Lab with no account (Pick & Place, default settings; the measured result is shown on the page only and is never saved)
 - Cloudflare D1 persistence for accounts, experiments, jobs and artifacts
 - Experiment reports with raw JSON/CSV export
 - API-key and usage foundations
@@ -68,7 +69,7 @@ A typical evaluation flow is:
 
 1. Select a published behavior.
 2. Choose a version, engine, seeds and policy.
-3. Create a durable experiment.
+3. Create a durable experiment (signed-in runs only).
 4. The experiment is stored as a queued job.
 5. The browser MuJoCo worker executes the requested runs on-device and submits the measured result to D1.
 6. If browser compute is unavailable, the optional local worker can claim the same queued job.
@@ -77,13 +78,16 @@ A typical evaluation flow is:
 
 A successful validation check is not presented as a physics success. Measured metrics are only shown for actual simulator execution.
 
+A guest run skips the persistence steps above: it runs the same browser MuJoCo path and displays the measured result on the page, without creating an account, an experiment record, or any server write. Guest runs are limited to one Pick & Place evaluation per browser session with the default settings, and are labelled "Guest run — not saved".
+
 ## Current limitations
 
 The following are deliberately not presented as enabled production capabilities:
 
 - Physical-robot execution
 - Robot-specific hardware adapters
-- Live Stripe checkout
+- Live Stripe checkout — not integrated. Paid checkout requires the buyer to create their own Stripe seller account; no Stripe account, keys, or seller onboarding are part of the sale.
+- Guest-run limits: one Pick & Place evaluation per browser session with default settings, never saved.
 - Behavior-version comparison worker
 - Unverified human handover evaluation
 - Browser-side fake benchmark execution
@@ -157,6 +161,8 @@ See repository files for the current project/license terms. The repository curre
 The primary MuJoCo path runs inside the visitor's browser using the official `@mujoco/mujoco` JavaScript/WebAssembly bindings. The single-threaded build is used so the site does not require COOP/COEP headers or SharedArrayBuffer.
 
 The browser submits only the measured result to the authenticated API; the Cloudflare Worker remains responsible for durable persistence and authorization. No GitHub token is required.
+
+A guest run makes no API call at all: no account, no experiment record, no D1 write. That is why the Worker needs no unauthenticated endpoint — there is deliberately no guest write path that could be abused to save data without an account.
 
 The optional local worker remains available as a fallback:
 

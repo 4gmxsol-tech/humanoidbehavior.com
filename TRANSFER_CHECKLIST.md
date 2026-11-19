@@ -27,6 +27,8 @@ Use this checklist for a buyer handoff or production ownership transfer.
 - [ ] Verify health/readiness endpoints after ownership changes.
 
 ## 4. Application
+- [ ] With no account, run the one guest evaluation in the Experiment Lab; confirm the measured result appears with the "Guest run — not saved" label.
+- [ ] Confirm a second guest run in the same browser session is refused with a sign-in prompt, and that no guest experiment appears in any workspace.
 - [ ] Create a new test account.
 - [ ] Sign in and verify session authentication.
 - [ ] Create/revoke an API key.
@@ -47,7 +49,9 @@ Use this checklist for a buyer handoff or production ownership transfer.
 
 ## 6. Commercial readiness (without Stripe)
 - [ ] Keep pricing clearly labeled as planned/current product definitions, not live recurring revenue.
+- [ ] Confirm Pro/Team are labeled "available on request" and no live payment is taken on the site.
 - [ ] Keep paid checkout disabled until a payment provider is configured.
+- [ ] Buyer creates their own Stripe seller account after transfer; no Stripe account or keys are included in the sale.
 - [ ] Confirm free-plan limits are enforced by the API.
 - [ ] Confirm usage counters reflect persisted benchmark activity.
 - [ ] Confirm dashboard plan/usage information matches API responses.
@@ -57,6 +61,7 @@ Use this checklist for a buyer handoff or production ownership transfer.
 - [ ] Review Privacy and Terms with counsel for the operating entity/jurisdiction.
 - [ ] Confirm open-source license inventory.
 - [ ] Document included/excluded domains, code, data, content and accounts.
+- [ ] Document the split between exclusively transferred assets (domain, brand, accounts, data, hosted service) and MIT-licensed code that is publicly available to everyone.
 - [ ] Document public-report data handling and deletion expectations.
 - [ ] Do not represent MIT-licensed source as exclusive IP without an appropriate legal structure.
 

@@ -22,6 +22,7 @@ The asset is positioned as a working foundation for robotics / Embodied AI evalu
 - Experiment Lab and benchmark launcher.
 - Persistent experiment records.
 - Browser-based measured MuJoCo execution using JavaScript/WASM.
+- One guest MuJoCo run in the Experiment Lab with no account (Pick & Place, default settings; shown on the page only, labelled "Guest run — not saved", never persisted).
 - Experiment replay and report-oriented views.
 - API documentation and API-key foundation.
 - Cloudflare Worker application/API layer.
@@ -43,7 +44,7 @@ The browser-first measured path is the canonical current production path.
 
 ## What a Buyer Can Verify
 
-1. Open the production site.
+1. Open the production site with no account and run the one guest evaluation; confirm the measured result appears with the "Guest run — not saved" label and nothing is persisted.
 2. Create or log into an account.
 3. Select a supported behavior.
 4. Launch an evaluation.
@@ -62,7 +63,8 @@ The following are not represented as completed production capabilities:
 - Physical robot execution.
 - Robot-specific hardware adapters.
 - Broad physical-robot benchmarking coverage.
-- Live paid checkout.
+- Live paid checkout. Pro/Team are available on request only; Stripe is not integrated and requires the buyer to create their own Stripe seller account.
+- Guest runs beyond one Pick & Place evaluation per browser session with default settings, or any saving of guest results.
 - Executable behavior-version comparison.
 - Fake browser benchmark execution as a substitute for measured compute.
 
@@ -70,7 +72,7 @@ Current simulator execution should be described as MuJoCo/reference-model execut
 
 ## Commercial Model
 
-The product includes a pricing model and plan definitions in the UI, but **paid checkout is not live and there is no claim of current recurring revenue**.
+The product includes a pricing model and plan definitions in the UI, but **paid checkout is not live and there is no claim of current recurring revenue**. Pro and Team are available on request — contact us to confirm availability and next steps.
 
 Any commercial terms, acquisition consideration, valuation or transaction structure should be discussed directly during a strategic acquisition process rather than treated as public pricing guidance.
 
@@ -87,6 +89,8 @@ The transaction should explicitly identify:
 - Any separately assigned rights expressly included in the agreement.
 
 Production credentials and secrets should be transferred securely and separately; plaintext secrets should not be placed in source control.
+
+**Included exclusively in a sale (as agreed in writing):** the HumanoidBehavior.com domain, the brand and its use as agreed, the Cloudflare Worker/D1 deployment and its data, GitHub repository/organization access as agreed, the hosted-service accounts, and the experiment/behavior data. **Not exclusive:** the source code itself is MIT-licensed and publicly available to anyone; the sale does not grant exclusive rights to that MIT code unless the agreement separately assigns rights or changes the license structure.
 
 ## License / IP Note
 

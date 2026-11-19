@@ -46,6 +46,7 @@ This repository should be presented as an **early-stage robotics infrastructure 
 - Persistent experiment records.
 - Browser-based measured MuJoCo execution.
 - Experiment replay.
+- One guest MuJoCo run in the Experiment Lab with no account (Pick & Place, default settings; shown on the page only, labelled "Guest run — not saved", never persisted).
 - Dashboard/workspace views.
 - API documentation.
 - API-key foundation.
@@ -60,7 +61,8 @@ The following should **not** be represented as completed production capabilities
 - Physical robot execution is not enabled.
 - Robot-specific hardware adapters are not enabled.
 - Current measured execution should be described as MuJoCo/reference-model execution.
-- Live Stripe checkout is not enabled.
+- Live Stripe checkout is not enabled. No Stripe integration exists: paid checkout requires the buyer to create their own Stripe seller account. No Stripe account or keys are part of the sale.
+- Guest runs are limited to one Pick & Place evaluation per browser session with default settings; guest results are shown on the page only and are never saved.
 - Behavior-version comparison execution is not enabled; the UI currently identifies this as coming soon.
 - Browser-side fake benchmark execution is not used as a substitute for measured execution.
 - The product does not currently claim broad physical-robot benchmarking coverage.
@@ -75,7 +77,7 @@ The pricing UI currently defines:
 | Pro | $49/month | 500 runs; unlimited private behaviors; API; reports |
 | Team | $299/month | 5,000 runs; team workspaces; shared datasets; priority support |
 
-**Important:** paid checkout is not live. These are product/pricing definitions, not evidence of current recurring revenue.
+**Important:** paid checkout is not live. Pro and Team are available on request — contact us to confirm availability and next steps. These are product/pricing definitions, not evidence of current recurring revenue.
 
 ## 6. Repository / IP Notes
 
@@ -89,6 +91,8 @@ A buyer handoff must distinguish between:
 
 Do not describe an acquisition as granting exclusive rights to MIT-licensed source code unless the licensing structure is changed or the transaction is otherwise legally structured to achieve that result.
 
+**Included exclusively in a sale (as agreed in writing):** the HumanoidBehavior.com domain, the brand and its use as agreed, the Cloudflare Worker/D1 deployment and its data, GitHub repository/organization access as agreed, the hosted-service accounts, and the experiment/behavior data. **Not exclusive:** the source code itself is MIT-licensed and publicly available to anyone; the sale does not grant exclusive rights to that MIT code unless the agreement separately assigns rights or changes the license structure.
+
 Before a transaction, the seller and buyer should document exactly which domains, repositories, accounts, data, credentials, trademarks, content, and other assets are transferred. Obtain appropriate legal advice for any exclusivity/IP assignment language.
 
 ## 7. Buyer Verification Checklist
@@ -96,7 +100,7 @@ Before a transaction, the seller and buyer should document exactly which domains
 A prospective buyer should verify:
 
 ### Product
-- Open the production site.
+- Open the production site with no account and run the one guest evaluation in the Experiment Lab; confirm the measured result appears with the "Guest run — not saved" label and that nothing is persisted.
 - Create/login to an account.
 - Select a behavior.
 - Launch an evaluation.
@@ -131,8 +135,8 @@ A prospective buyer should verify:
 
 The shortest buyer-facing product demonstration is:
 
-1. Open HumanoidBehavior.com.
-2. Choose **Pick & Place**.
+1. Open HumanoidBehavior.com with no account and run the one guest evaluation (Pick & Place, default settings) to see measured MuJoCo execution immediately.
+2. Sign in, choose **Pick & Place**.
 3. Run an evaluation.
 4. Show measured MuJoCo execution.
 5. Show the measured result and seed/policy metadata.
@@ -145,7 +149,8 @@ The demo should emphasize **measured, reproducible execution**, not feature coun
 ## 9. Current Known Limitations
 
 - Physical-robot control/adapters are not enabled.
-- Paid billing/checkout is not live.
+- Paid billing/checkout is not live; Pro/Team are available on request only, and Stripe requires the buyer to create their own seller account.
+- Guest runs are limited to one Pick & Place evaluation per browser session with default settings and are never saved.
 - Version-comparison execution is not live.
 - The codebase contains legacy/optional infrastructure that should be reviewed during a buyer technical due-diligence pass.
 - Current simulator execution is centered on MuJoCo/reference-model behavior rather than a production hardware fleet.
